@@ -1,3 +1,8 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Lab1_Kotlin</string>
+    <string name="email">Email</string>
+    <string name="gmail_com">gmail.com</string>
+    <string name="button" tools:ignore="DuplicateDefinition">Button</string>
+    <string name="e_g_sven_svensson_gmail_com">e.g. sven.svensson@gmail.com</string>
+    <string name="todo">TODO</string>
 </resources>
