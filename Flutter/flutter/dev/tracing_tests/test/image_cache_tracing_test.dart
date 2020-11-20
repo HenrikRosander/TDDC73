@@ -5,6 +5,8 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:isolate' as isolate;
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,7 +40,8 @@ void main() {
     );
     PaintingBinding.instance.imageCache.clear();
 
-    completer2.testSetImage(ImageInfo(image: await createTestImage()));
+    // ignore: invalid_use_of_protected_member
+    completer2.setImage(const ImageInfo(image: TestImage()));
     PaintingBinding.instance.imageCache.putIfAbsent(
       'Test2',
       () => completer2,
@@ -73,7 +76,7 @@ void main() {
         },
         <String, dynamic>{
           'name': 'ImageCache.evict',
-          'args': <String, dynamic>{'sizeInBytes': 4, 'isolateId': isolateId}
+          'args': <String, dynamic>{'sizeInBytes': 0, 'isolateId': isolateId}
         },
       ],
     );
@@ -107,8 +110,20 @@ bool _mapsEqual(Map<String, dynamic> expectedArgs, Map<String, dynamic> args) {
   return true;
 }
 
-class TestImageStreamCompleter extends ImageStreamCompleter {
-  void testSetImage(ImageInfo image) {
-    setImage(image);
+class TestImageStreamCompleter extends ImageStreamCompleter {}
+
+class TestImage implements ui.Image {
+  const TestImage({this.height = 0, this.width = 0});
+  @override
+  final int height;
+  @override
+  final int width;
+
+  @override
+  void dispose() { }
+
+  @override
+  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) {
+    throw UnimplementedError();
   }
 }

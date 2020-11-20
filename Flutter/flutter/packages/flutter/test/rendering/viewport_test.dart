@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 // This file is separate from viewport_caching_test.dart because we can't use
 // both testWidgets and rendering_tester in the same file - testWidgets will
 // initialize a binding, which rendering_tester will attempt to re-initialize
@@ -17,15 +19,15 @@ import 'package:flutter/widgets.dart';
 class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TestSliverPersistentHeaderDelegate({
     this.key,
-    required this.minExtent,
-    required this.maxExtent,
+    this.minExtent,
+    this.maxExtent,
     this.child,
     this.vsync = const TestVSync(),
     this.showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(),
   });
 
-  final Key? key;
-  final Widget? child;
+  final Key key;
+  final Widget child;
 
   @override
   final double maxExtent;
@@ -34,7 +36,7 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
   final double minExtent;
 
   @override
-  final TickerProvider? vsync;
+  final TickerProvider vsync;
 
   @override
   final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
@@ -535,19 +537,11 @@ void main() {
   });
 
   testWidgets('Nested Viewports showOnScreen', (WidgetTester tester) async {
+    final List<List<Widget>> children = List<List<Widget>>(10);
     final List<ScrollController> controllersX = List<ScrollController>.generate(10, (int i) => ScrollController(initialScrollOffset: 400.0));
     final ScrollController controllerY  = ScrollController(initialScrollOffset: 400.0);
-    final List<List<Widget>> children = List<List<Widget>>.generate(10, (int y) {
-      return List<Widget>.generate(10, (int x) {
-        return Container(
-          height: 100.0,
-          width: 100.0,
-          child: Text('$x,$y'),
-        );
-      });
-    });
 
-    /// Builds a grid:
+    /// Builds a gird:
     ///
     ///       <- x ->
     ///   0 1 2 3 4 5 6 7 8 9
@@ -580,7 +574,13 @@ void main() {
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     controller: controllersX[y],
-                    children: children[y],
+                    children: children[y] = List<Widget>.generate(10, (int x) {
+                      return Container(
+                        height: 100.0,
+                        width: 100.0,
+                        child: Text('$x,$y'),
+                      );
+                    }),
                   ),
                 );
               }),
@@ -695,15 +695,9 @@ void main() {
   });
 
   group('Nested viewports (same orientation) showOnScreen', () {
-    final List<Widget> children = List<Widget>.generate(10, (int i) {
-      return Container(
-        height: 100.0,
-        width: 300.0,
-        child: Text('$i'),
-      );
-    });
+    List<Widget> children;
 
-    Future<void> buildNestedScroller({ required WidgetTester tester, required ScrollController inner, required ScrollController outer }) {
+    Future<void> buildNestedScroller({ WidgetTester tester, ScrollController inner, ScrollController outer }) {
       return tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -722,7 +716,13 @@ void main() {
                     width: 300.0,
                     child: ListView(
                       controller: inner,
-                      children: children,
+                      children: children = List<Widget>.generate(10, (int i) {
+                        return Container(
+                          height: 100.0,
+                          width: 300.0,
+                          child: Text('$i'),
+                        );
+                      }),
                     ),
                   ),
                   Container(
@@ -1127,12 +1127,12 @@ void main() {
   });
 
   void testFloatingHeaderShowOnScreen({ bool animated = true, Axis axis = Axis.vertical }) {
-    final TickerProvider? vsync = animated ? const TestVSync() : null;
+    final TickerProvider vsync = animated ? const TestVSync() : null;
     const Key headerKey = Key('header');
-    late List<Widget> children;
-    final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
+    List<Widget> children;
+    ScrollController controller;
 
-    Widget buildList({ required SliverPersistentHeader floatingHeader, bool reversed = false }) {
+    Widget buildList({ SliverPersistentHeader floatingHeader, bool reversed = false }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -1142,7 +1142,7 @@ void main() {
             child: CustomScrollView(
               scrollDirection: axis,
               center: reversed ? const Key('19') : null,
-              controller: controller,
+              controller: controller = ScrollController(initialScrollOffset: 300.0),
               slivers: children = List<Widget>.generate(20, (int i) {
                   return i == 10
                   ? floatingHeader
@@ -1164,7 +1164,7 @@ void main() {
     double mainAxisExtent(WidgetTester tester, Finder finder) {
       final RenderObject renderObject = tester.renderObject(finder);
       if (renderObject is RenderSliver) {
-        return renderObject.geometry!.paintExtent;
+        return renderObject.geometry.paintExtent;
       }
 
       final RenderBox renderBox = renderObject as RenderBox;
@@ -1174,6 +1174,8 @@ void main() {
         case Axis.vertical:
           return renderBox.size.height;
       }
+      assert(false);
+      return null;
     }
 
     group('animated: $animated, scrollDirection: $axis', () {
@@ -1435,7 +1437,7 @@ void main() {
   group('RenderViewport getOffsetToReveal renderBox to sliver coordinates conversion', () {
     const EdgeInsets padding = EdgeInsets.fromLTRB(22, 22, 34, 34);
     const Key centerKey = Key('5');
-    Widget buildList({ required Axis axis, bool reverse = false, bool reverseGrowth = false }) {
+    Widget buildList({ Axis axis, bool reverse = false, bool reverseGrowth = false }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -1611,12 +1613,12 @@ void main() {
     }
 
     Future<void> expectFlutterError({
-      required Widget widget,
-      required WidgetTester tester,
-      required String message,
+      Widget widget,
+      WidgetTester tester,
+      String message,
     }) async {
       final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      final FlutterExceptionHandler oldHandler = FlutterError.onError;
       FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
       try {
         await tester.pumpWidget(widget);
@@ -1625,7 +1627,7 @@ void main() {
       }
       expect(errors, isNotEmpty);
       expect(errors.first.exception, isFlutterError);
-      expect((errors.first.exception as FlutterError).toStringDeep(), message);
+      expect(errors.first.exception.toStringDeep(), message);
     }
 
     testWidgets('Horizontal viewport was given unbounded height', (WidgetTester tester) async {
@@ -1703,12 +1705,13 @@ void main() {
     final RenderViewport renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.right, offset: ViewportOffset.zero()
     );
-    late FlutterError error;
+    FlutterError error;
     try {
       renderViewport.computeMinIntrinsicHeight(0);
     } on FlutterError catch (e) {
       error = e;
     }
+    expect(error, isNotNull);
     expect(
       error.toStringDeep(),
       'FlutterError\n'
@@ -1725,6 +1728,7 @@ void main() {
     final RenderShrinkWrappingViewport renderShrinkWrappingViewport = RenderShrinkWrappingViewport(
       crossAxisDirection: AxisDirection.right, offset: ViewportOffset.zero()
     );
+    error = null;
     try {
       renderShrinkWrappingViewport.computeMinIntrinsicHeight(0);
     } on FlutterError catch (e) {

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -88,7 +90,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context)!.copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: null,
@@ -113,7 +115,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context)!.copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: null,
@@ -390,19 +392,19 @@ void main() {
 class ClipCachePainter extends CustomPainter {
   ClipCachePainter(this.context);
 
-  late Path value;
+  Path value;
   BuildContext context;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final RenderPhysicalShape physicalShape = findPhysicalShapeChild(context)!;
-    value = physicalShape.clipper!.getClip(size);
+    final RenderPhysicalShape physicalShape = findPhysicalShapeChild(context);
+    value = physicalShape.clipper.getClip(size);
   }
 
-  RenderPhysicalShape? findPhysicalShapeChild(BuildContext context) {
-    RenderPhysicalShape? result;
+  RenderPhysicalShape findPhysicalShapeChild(BuildContext context) {
+    RenderPhysicalShape result;
     context.visitChildElements((Element e) {
-      final RenderObject renderObject = e.findRenderObject()!;
+      final RenderObject renderObject = e.findRenderObject();
       if (renderObject.runtimeType == RenderPhysicalShape) {
         assert(result == null);
         result = renderObject as RenderPhysicalShape;
@@ -420,7 +422,7 @@ class ClipCachePainter extends CustomPainter {
 }
 
 class ShapeListener extends StatefulWidget {
-  const ShapeListener(this.child, { Key? key }) : super(key: key);
+  const ShapeListener(this.child, { Key key }) : super(key: key);
 
   final Widget child;
 
@@ -438,7 +440,7 @@ class ShapeListenerState extends State<ShapeListener> {
     );
   }
 
-  late ClipCachePainter cache;
+  ClipCachePainter cache;
 
   @override
   void didChangeDependencies() {
@@ -452,7 +454,7 @@ class RectangularNotch extends NotchedShape {
   const RectangularNotch();
 
   @override
-  Path getOuterPath(Rect host, Rect? guest) {
+  Path getOuterPath(Rect host, Rect guest) {
     if (guest == null)
       return Path()..addRect(host);
     return Path()

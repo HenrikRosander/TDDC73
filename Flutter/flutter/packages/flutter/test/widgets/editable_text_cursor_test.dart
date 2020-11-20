@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -44,13 +46,13 @@ void main() {
     final EditableText editableText = tester.firstWidget(find.byType(EditableText));
     expect(editableText.cursorWidth, 10.0);
     expect(editableText.cursorHeight, 10.0);
-    expect(editableText.cursorRadius!.x, 2.0);
+    expect(editableText.cursorRadius.x, 2.0);
   });
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
 
-    late String changedValue;
+    String changedValue;
     final Widget widget = MaterialApp(
       home: RepaintBoundary(
         key: const ValueKey<int>(1),
@@ -59,7 +61,7 @@ void main() {
           key: editableTextKey,
           controller: TextEditingController(),
           focusNode: FocusNode(),
-          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
           keyboardType: TextInputType.text,
@@ -101,7 +103,7 @@ void main() {
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
 
-    late String changedValue;
+    String changedValue;
     final Widget widget = MaterialApp(
       home: RepaintBoundary(
         key: const ValueKey<int>(1),
@@ -110,7 +112,7 @@ void main() {
           key: editableTextKey,
           controller: TextEditingController(),
           focusNode: FocusNode(),
-          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1!,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
           keyboardType: TextInputType.text,
@@ -165,48 +167,47 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    expect(renderEditable.cursorColor!.alpha, 255);
+    expect(renderEditable.cursorColor.alpha, 255);
 
     // Trigger initial timer. When focusing the first time, the cursor shows
     // for slightly longer than the average on time.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
     // Start timing standard cursor show period.
-    expect(renderEditable.cursorColor!.alpha, 255);
+    expect(renderEditable.cursorColor.alpha, 255);
     expect(renderEditable, paints..rrect(color: const Color(0xff2196f3)));
 
     await tester.pump(const Duration(milliseconds: 500));
     // Start to animate the cursor away.
-    expect(renderEditable.cursorColor!.alpha, 255);
+    expect(renderEditable.cursorColor.alpha, 255);
     expect(renderEditable, paints..rrect(color: const Color(0xff2196f3)));
 
     await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor!.alpha, 110);
+    expect(renderEditable.cursorColor.alpha, 110);
     expect(renderEditable, paints..rrect(color: const Color(0x6e2196f3)));
 
     await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor!.alpha, 16);
+    expect(renderEditable.cursorColor.alpha, 16);
     expect(renderEditable, paints..rrect(color: const Color(0x102196f3)));
 
     await tester.pump(const Duration(milliseconds: 100));
-    expect(renderEditable.cursorColor!.alpha, 0);
+    expect(renderEditable.cursorColor.alpha, 0);
     // Don't try to draw the cursor.
     expect(renderEditable, paintsExactlyCountTimes(#drawRRect, 0));
 
     // Wait some more while the cursor is gone. It'll trigger the cursor to
     // start animating in again.
     await tester.pump(const Duration(milliseconds: 300));
-    expect(renderEditable.cursorColor!.alpha, 0);
+    expect(renderEditable.cursorColor.alpha, 0);
     expect(renderEditable, paintsExactlyCountTimes(#drawRRect, 0));
 
     await tester.pump(const Duration(milliseconds: 50));
     // Cursor starts coming back.
-    expect(renderEditable.cursorColor!.alpha, 79);
+    expect(renderEditable.cursorColor.alpha, 79);
     expect(renderEditable, paints..rrect(color: const Color(0x4f2196f3)));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
-    final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
     const Widget widget = MaterialApp(
       home: Material(
         child: TextField(
@@ -223,31 +224,30 @@ void main() {
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     await tester.pump();
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: defaultCursorColor));
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
 
     // Android cursor goes from exactly on to exactly off on the 500ms dot.
     await tester.pump(const Duration(milliseconds: 499));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: defaultCursorColor));
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
 
     await tester.pump(const Duration(milliseconds: 1));
-    expect(renderEditable.cursorColor!.alpha, 0);
+    expect(renderEditable.cursorColor.alpha, 0);
     // Don't try to draw the cursor.
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
 
     await tester.pump(const Duration(milliseconds: 500));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: defaultCursorColor));
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
 
     await tester.pump(const Duration(milliseconds: 500));
-    expect(renderEditable.cursorColor!.alpha, 0);
+    expect(renderEditable.cursorColor.alpha, 0);
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   });
 
   testWidgets('Cursor does not animates when debugDeterministicCursor is set', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
-    final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
     const Widget widget = MaterialApp(
       home: Material(
         child: TextField(
@@ -263,29 +263,29 @@ void main() {
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    expect(renderEditable.cursorColor!.alpha, 255);
+    expect(renderEditable.cursorColor.alpha, 255);
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rrect(color: defaultCursorColor));
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rrect(color: const Color(0xff2196f3)));
 
     // Cursor draw never changes.
     await tester.pump(const Duration(milliseconds: 200));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rrect(color: defaultCursorColor));
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rrect(color: const Color(0xff2196f3)));
 
     // No more transient calls.
     await tester.pumpAndSettle();
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rrect(color: defaultCursorColor));
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rrect(color: const Color(0xff2196f3)));
 
     EditableText.debugDeterministicCursor = false;
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Cursor does not animate on Android when debugDeterministicCursor is set', (WidgetTester tester) async {
-    final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
     EditableText.debugDeterministicCursor = true;
+
     const Widget widget = MaterialApp(
       home: Material(
         child: TextField(
@@ -302,22 +302,22 @@ void main() {
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     await tester.pump();
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: defaultCursorColor));
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
 
     await tester.pump(const Duration(milliseconds: 500));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: defaultCursorColor));
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
 
     // Cursor draw never changes.
     await tester.pump(const Duration(milliseconds: 500));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: defaultCursorColor));
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
 
     // No more transient calls.
     await tester.pumpAndSettle();
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: defaultCursorColor));
+    expect(renderEditable.cursorColor.alpha, 255);
+    expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
 
     EditableText.debugDeterministicCursor = false;
   });
@@ -714,7 +714,7 @@ void main() {
   testWidgets('cursor layout', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
 
-    late String changedValue;
+    String changedValue;
     final Widget widget = MaterialApp(
       home: RepaintBoundary(
         key: const ValueKey<int>(1),
@@ -726,7 +726,7 @@ void main() {
               key: editableTextKey,
               controller: TextEditingController(),
               focusNode: FocusNode(),
-              style: Typography.material2018(platform: TargetPlatform.iOS).black.subtitle1!,
+              style: Typography.material2018(platform: TargetPlatform.iOS).black.subtitle1,
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
               keyboardType: TextInputType.text,
@@ -770,7 +770,7 @@ void main() {
   testWidgets('cursor layout has correct height', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
 
-    late String changedValue;
+    String changedValue;
     final Widget widget = MaterialApp(
       home: RepaintBoundary(
         key: const ValueKey<int>(1),
@@ -782,7 +782,7 @@ void main() {
               key: editableTextKey,
               controller: TextEditingController(),
               focusNode: FocusNode(),
-              style: Typography.material2018(platform: TargetPlatform.iOS).black.subtitle1!,
+              style: Typography.material2018(platform: TargetPlatform.iOS).black.subtitle1,
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
               keyboardType: TextInputType.text,

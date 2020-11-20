@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -9,7 +11,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -167,7 +168,7 @@ void main() {
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.macos.managedDirectory.childFile('GeneratedPluginRegistrant.swift'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
+        FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
         FlutterProjectFactory: () => FlutterProjectFactory(
@@ -181,7 +182,7 @@ void main() {
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.macos.generatedXcodePropertiesFile);
       }, overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
+        FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
         FlutterProjectFactory: () => FlutterProjectFactory(
@@ -196,7 +197,7 @@ void main() {
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.cc'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
+        FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
         FlutterProjectFactory: () => FlutterProjectFactory(
@@ -211,7 +212,7 @@ void main() {
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
+        FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
         FlutterProjectFactory: () => FlutterProjectFactory(
@@ -239,19 +240,6 @@ void main() {
             .childDirectory('Classes');
         expectExists(pluginRegistrantClasses.childFile('GeneratedPluginRegistrant.h'));
         expectExists(pluginRegistrantClasses.childFile('GeneratedPluginRegistrant.m'));
-      });
-
-      testUsingContext('Version.json info is correct', (){
-        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-        final FlutterManifest manifest = FlutterManifest.createFromString('''
-    name: test
-    version: 1.0.0+3
-    ''', logger: BufferLogger.test());
-        final FlutterProject project = FlutterProject(fileSystem.systemTempDirectory,manifest,manifest);
-        final dynamic versionInfo = jsonDecode(project.getVersionInfo());
-        expect(versionInfo['app_name'],'test');
-        expect(versionInfo['version'],'1.0.0');
-        expect(versionInfo['build_number'],'3');
       });
     });
 
@@ -294,7 +282,7 @@ void main() {
       MemoryFileSystem fs;
       FlutterProjectFactory flutterProjectFactory;
       setUp(() {
-        fs = MemoryFileSystem.test();
+        fs = MemoryFileSystem();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
         flutterProjectFactory = FlutterProjectFactory(
           logger: logger,
@@ -332,7 +320,7 @@ apply plugin: 'kotlin-android'
       MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
       FlutterProjectFactory flutterProjectFactory;
       setUp(() {
-        fs = MemoryFileSystem.test();
+        fs = MemoryFileSystem();
         mockPlistUtils = MockPlistUtils();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
         flutterProjectFactory = FlutterProjectFactory(
@@ -496,7 +484,7 @@ apply plugin: 'kotlin-android'
       MemoryFileSystem fs;
       MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
       setUp(() {
-        fs = MemoryFileSystem.test();
+        fs = MemoryFileSystem();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
       });
 

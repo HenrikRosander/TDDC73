@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/gestures.dart';
 
 import '../flutter_test_alternative.dart';
@@ -62,9 +64,9 @@ void main() {
   setUp(ensureGestureBinding);
 
   group('Long press', () {
-    late LongPressGestureRecognizer longPress;
-    late bool longPressDown;
-    late bool longPressUp;
+    LongPressGestureRecognizer longPress;
+    bool longPressDown;
+    bool longPressUp;
 
     setUp(() {
       longPress = LongPressGestureRecognizer();
@@ -291,10 +293,10 @@ void main() {
   });
 
   group('long press drag', () {
-    late LongPressGestureRecognizer longPressDrag;
-    late bool longPressStart;
-    late bool longPressUp;
-    Offset? longPressDragUpdate;
+    LongPressGestureRecognizer longPressDrag;
+    bool longPressStart;
+    bool longPressUp;
+    Offset longPressDragUpdate;
 
     setUp(() {
       longPressDrag = LongPressGestureRecognizer();
@@ -390,7 +392,7 @@ void main() {
 
     final List<String> recognized = <String>[];
 
-    late LongPressGestureRecognizer longPress;
+    LongPressGestureRecognizer longPress;
 
     setUp(() {
       longPress = LongPressGestureRecognizer()
@@ -530,9 +532,9 @@ void main() {
     // competition with a tap gesture recognizer listening on a different button.
 
     final List<String> recognized = <String>[];
-    late TapGestureRecognizer tapPrimary;
-    late TapGestureRecognizer tapSecondary;
-    late LongPressGestureRecognizer longPress;
+    TapGestureRecognizer tapPrimary;
+    TapGestureRecognizer tapSecondary;
+    LongPressGestureRecognizer longPress;
     setUp(() {
       tapPrimary = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io' hide File;
 
 import 'package:args/command_runner.dart';
@@ -86,7 +87,7 @@ void main() {
       final Iterable<String> rows = testLogger.statusText
         .split('\n')
         .map((String line) => line.substring(2)); // remove '* ' or '  ' from output
-      expect(rows, containsAllInOrder(kOfficialChannels));
+      expect(rows, containsAllInOrder(FlutterVersion.officialChannels));
 
       // clear buffer for next process
       testLogger.clear();
@@ -107,7 +108,7 @@ void main() {
       final Iterable<String> rows2 = testLogger.statusText
         .split('\n')
         .map((String line) => line.substring(2)); // remove '* ' or '  ' from output
-      expect(rows2, containsAllInOrder(kOfficialChannels));
+      expect(rows2, containsAllInOrder(FlutterVersion.officialChannels));
 
       // clear buffer for next process
       testLogger.clear();
@@ -127,7 +128,7 @@ void main() {
       // check if available official channels are in order of stability
       int prev = -1;
       int next = -1;
-      for (final String branch in kOfficialChannels) {
+      for (final String branch in FlutterVersion.officialChannels) {
         next = testLogger.statusText.indexOf(branch);
         if (next != -1) {
           expect(prev < next, isTrue);
@@ -254,7 +255,7 @@ void main() {
         environment: anyNamed('environment'),
       )).called(1);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => mockProcessManager,
     });
 
@@ -307,7 +308,7 @@ void main() {
       );
       expect(testLogger.errorText, hasLength(0));
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => mockProcessManager,
     });
 
@@ -368,7 +369,7 @@ void main() {
       expect(testLogger.errorText, hasLength(0));
       expect(versionCheckFile.existsSync(), isFalse);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => mockProcessManager,
     });
   });

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
@@ -11,7 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  late FakeBuilder mockHelper;
+  FakeBuilder mockHelper;
 
   setUp(() {
     mockHelper = FakeBuilder();
@@ -1405,10 +1407,10 @@ class RefreshTaskInvocation extends MockHelperInvocation {
 @immutable
 class BuilderInvocation extends MockHelperInvocation {
   const BuilderInvocation({
-    required this.refreshState,
-    required this.pulledExtent,
-    required this.refreshIndicatorExtent,
-    required this.refreshTriggerPullDistance,
+    @required this.refreshState,
+    @required this.pulledExtent,
+    @required this.refreshIndicatorExtent,
+    @required this.refreshTriggerPullDistance,
   });
 
   final RefreshIndicatorMode refreshState;
@@ -1421,10 +1423,10 @@ class BuilderInvocation extends MockHelperInvocation {
 }
 
 Matcher matchesBuilder({
-  required RefreshIndicatorMode refreshState,
-  required dynamic pulledExtent,
-  required dynamic refreshTriggerPullDistance,
-  required dynamic refreshIndicatorExtent,
+  @required RefreshIndicatorMode refreshState,
+  @required dynamic pulledExtent,
+  @required dynamic refreshTriggerPullDistance,
+  @required dynamic refreshIndicatorExtent,
 }) {
   return isA<BuilderInvocation>()
     .having((BuilderInvocation invocation) => invocation.refreshState, 'refreshState', refreshState)

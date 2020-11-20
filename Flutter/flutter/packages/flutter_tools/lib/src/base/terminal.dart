@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import '../convert.dart';
@@ -96,14 +98,6 @@ abstract class Terminal {
   bool get usesTerminalUi;
   set usesTerminalUi(bool value);
 
-  /// Whether there is a terminal attached to stdin.
-  ///
-  /// If true, this usually indicates that a user is using the CLI as
-  /// opposed to using an IDE. This can be used to determine
-  /// whether it is appropriate to show a terminal prompt,
-  /// or whether an automatic selection should be made instead.
-  bool get stdinHasTerminal;
-
   String bolden(String message);
 
   String color(String message, TerminalColor color);
@@ -128,9 +122,6 @@ abstract class Terminal {
   /// null, and the user presses enter without any other input, the return value
   /// will be the character in `acceptedCharacters` at the index given by
   /// `defaultChoiceIndex`.
-  ///
-  /// The accepted characters must be a String with a length of 1, excluding any
-  /// whitespace characters such as `\t`, `\n`, or ` `.
   ///
   /// If [usesTerminalUi] is false, throws a [StateError].
   Future<String> promptForCharInput(
@@ -259,9 +250,6 @@ class AnsiTerminal implements Terminal {
     }
   }
 
-  @override
-  bool get stdinHasTerminal => _stdio.stdinHasTerminal;
-
   Stream<String> _broadcastStdInString;
 
   @override
@@ -290,7 +278,7 @@ class AnsiTerminal implements Terminal {
       assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
       charactersToDisplay = List<String>.of(charactersToDisplay);
       charactersToDisplay[defaultChoiceIndex] = bolden(charactersToDisplay[defaultChoiceIndex]);
-      acceptedCharacters.add('');
+      acceptedCharacters.add('\n');
     }
     String choice;
     singleCharMode = true;
@@ -303,11 +291,11 @@ class AnsiTerminal implements Terminal {
         // prompt ends with ': '
         logger.printStatus(': ', emphasis: true, newline: false);
       }
-      choice = (await keystrokes.first).trim();
+      choice = await keystrokes.first;
       logger.printStatus(choice);
     }
     singleCharMode = false;
-    if (defaultChoiceIndex != null && choice == '') {
+    if (defaultChoiceIndex != null && choice == '\n') {
       choice = acceptedCharacters[defaultChoiceIndex];
     }
     return choice;
@@ -350,7 +338,4 @@ class _TestTerminal implements Terminal {
 
   @override
   bool get supportsEmoji => false;
-
-  @override
-  bool get stdinHasTerminal => false;
 }

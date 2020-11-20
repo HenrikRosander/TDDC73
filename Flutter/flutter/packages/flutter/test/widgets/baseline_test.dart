@@ -93,26 +93,6 @@ void main() {
     await tester.pump();
     expect(calls, 2);
   });
-
-  testWidgets('LayoutBuilder returns child\'s baseline', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Baseline(
-            baseline: 180.0,
-            baselineType: TextBaseline.alphabetic,
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return BaselineDetector(() {});
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(tester.getRect(find.byType(BaselineDetector)).top, 160.0);
-  });
 }
 
 class BaselineDetector extends LeafRenderObjectWidget {
@@ -153,7 +133,7 @@ class RenderBaselineDetector extends RenderBox {
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     if (callback != null)
       callback();
-    return 20.0;
+    return 0.0;
   }
 
   void dirty() {

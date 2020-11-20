@@ -55,14 +55,8 @@ Future<vm_service.VmService> _kDefaultFuchsiaIsolateDiscoveryConnector(Uri uri) 
 Future<void> _kDefaultDartDevelopmentServiceStarter(
   Device device,
   Uri observatoryUri,
-  bool disableServiceAuthCodes,
 ) async {
-  await device.dds.startDartDevelopmentService(
-    observatoryUri,
-    0,
-    true,
-    disableServiceAuthCodes,
-  );
+  await device.dds.startDartDevelopmentService(observatoryUri, true);
 }
 
 /// Read the log for a particular device.
@@ -320,7 +314,7 @@ class FuchsiaDevice extends Device {
       }
       packageRepo.createSync(recursive: true);
     } on Exception catch (e) {
-      globals.printError('Failed to create Fuchsia package repo directory '
+      globals.printError('Failed to create Fuchisa package repo directory '
                  'at ${packageRepo.path}: $e');
       return LaunchResult.failed();
     }
@@ -440,7 +434,7 @@ class FuchsiaDevice extends Device {
     }
 
     if (debuggingOptions.buildInfo.mode.isRelease) {
-      globals.printTrace('App successfully started in a release mode.');
+      globals.printTrace('App succesfully started in a release mode.');
       return LaunchResult.succeeded();
     }
     globals.printTrace('App started in a non-release mode. Setting up vmservice connection.');
@@ -744,7 +738,7 @@ class FuchsiaIsolateDiscoveryProtocol {
   final String _isolateName;
   final Completer<Uri> _foundUri = Completer<Uri>();
   final Future<vm_service.VmService> Function(Uri) _vmServiceConnector;
-  final Future<void> Function(Device, Uri, bool) _ddsStarter;
+  final Future<void> Function(Device, Uri) _ddsStarter;
   // whether to only poll once.
   final bool _pollOnce;
   Timer _pollingTimer;
@@ -787,8 +781,8 @@ class FuchsiaIsolateDiscoveryProtocol {
         final int localPort = await _device.portForwarder.forward(port);
         try {
           final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$localPort');
-          await _ddsStarter(_device, uri, true);
-          service = await _vmServiceConnector(_device.dds.uri);
+          await _ddsStarter(_device, uri);
+          service = await _vmServiceConnector(uri);
           _ports[port] = service;
         } on SocketException catch (err) {
           globals.printTrace('Failed to connect to $localPort: $err');

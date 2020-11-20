@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -12,10 +14,10 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget buildSliverAppBarApp({
-  bool floating = false,
-  bool pinned = false,
-  double? collapsedHeight,
-  double? expandedHeight,
+  bool floating,
+  bool pinned,
+  double collapsedHeight,
+  double expandedHeight,
   bool snap = false,
   double toolbarHeight = kToolbarHeight,
 }) {
@@ -63,7 +65,7 @@ Widget buildSliverAppBarApp({
 }
 
 ScrollController primaryScrollController(WidgetTester tester) {
-  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)))!;
+  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
 }
 
 double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
@@ -301,7 +303,7 @@ void main() {
 
     final Key titleKey = UniqueKey();
     Widget leading = Container();
-    List<Widget> actions = <Widget>[];
+    List<Widget> actions;
 
     Widget buildApp() {
       return MaterialApp(
@@ -358,8 +360,8 @@ void main() {
 
     final Key titleKey = UniqueKey();
     double titleWidth = 700.0;
-    Widget? leading = Container();
-    List<Widget> actions = <Widget>[];
+    Widget leading = Container();
+    List<Widget> actions;
 
     Widget buildApp() {
       return MaterialApp(
@@ -410,8 +412,8 @@ void main() {
 
     final Key titleKey = UniqueKey();
     double titleWidth = 700.0;
-    Widget? leading = Container();
-    List<Widget> actions = <Widget>[];
+    Widget leading = Container();
+    List<Widget> actions;
 
     Widget buildApp() {
       return MaterialApp(
@@ -1950,14 +1952,14 @@ void main() {
   });
 
   testWidgets('AppBars title has upper limit on text scaling, textScaleFactor = 1, 1.34, 2', (WidgetTester tester) async {
-    late double textScaleFactor;
+    double textScaleFactor;
 
     Widget buildFrame() {
       return MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
             return MediaQuery(
-              data: MediaQuery.of(context)!.copyWith(textScaleFactor: textScaleFactor),
+              data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
               child: Scaffold(
                 appBar: AppBar(
                   centerTitle: false,
@@ -1986,9 +1988,9 @@ void main() {
   });
 
   testWidgets('AppBars with jumbo titles, textScaleFactor = 3, 3.5, 4', (WidgetTester tester) async {
-    double textScaleFactor = 1.0;
-    TextDirection textDirection = TextDirection.ltr;
-    bool centerTitle = false;
+    double textScaleFactor;
+    TextDirection textDirection;
+    bool centerTitle;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -2002,7 +2004,7 @@ void main() {
                     appBar: AppBar(
                       centerTitle: centerTitle,
                       title: MediaQuery(
-                        data: MediaQuery.of(context)!.copyWith(textScaleFactor: textScaleFactor),
+                        data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
                         child: const Text('Jumbo'),
                       ),
                     ),
@@ -2021,8 +2023,10 @@ void main() {
     // Overall screen size is 800x600
     // Left or right justified title is padded by 16 on the "start" side.
     // Toolbar height is 56.
-    // "Jumbo" title is 100x20.
 
+    textScaleFactor = 1; // "Jumbo" title is 100x20.
+    textDirection = TextDirection.ltr;
+    centerTitle = false;
     await tester.pumpWidget(buildFrame());
     expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, 18, 116, 38));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
@@ -2054,7 +2058,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar configures the delegate properly', (WidgetTester tester) async {
-    Future<void> buildAndVerifyDelegate({ required bool pinned, required bool floating, required bool snap }) async {
+    Future<void> buildAndVerifyDelegate({ bool pinned, bool floating, bool snap }) async {
       await tester.pumpWidget(
         MaterialApp(
           home: CustomScrollView(
@@ -2146,6 +2150,17 @@ void main() {
     expect(appBarHeight(tester), collapsedHeight + initialTabBarHeight);
   });
 
+  test('SliverApp toolbarHeight cannot be null', () {
+    try{
+       SliverAppBar(
+        toolbarHeight: null,
+      );
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('toolbarHeight != null'));
+      expect(error.toString(), contains('is not true'));
+    }
+  });
+
   testWidgets('AppBar respects leadingWidth', (WidgetTester tester) async {
     const Key key = Key('leading');
     await tester.pumpWidget(MaterialApp(
@@ -2178,45 +2193,5 @@ void main() {
 
     // By default toolbarHeight is 56.0.
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
-  });
-
-  testWidgets("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(),
-        endDrawer: const Drawer(),
-      ),
-    ));
-
-    final Finder endDrawerFinder = find.byTooltip('Open navigation menu');
-    await tester.tap(endDrawerFinder);
-    await tester.pump();
-
-    final Finder appBarFinder = find.byType(NavigationToolbar);
-    NavigationToolbar getAppBarWidget(Finder finder) => tester.widget<NavigationToolbar>(finder);
-    expect(getAppBarWidget(appBarFinder).leading, null);
-  });
-
-  testWidgets('AppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Title'),
-        ),
-      ),
-    ));
-
-    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
-    expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);
-  });
-
-  testWidgets('SliverAppBar.titleSpacing defaults to NavigationToolbar.kMiddleSpacing', (WidgetTester tester) async {
-    await tester.pumpWidget(buildSliverAppBarApp(
-      floating: false,
-      pinned: false,
-    ));
-
-    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
-    expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);
   });
 }

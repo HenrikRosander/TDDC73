@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -24,10 +25,11 @@ void main() {
       Cache.disableLocking();
     });
 
-    Cache cache;
+    MockCache cache;
 
     setUp(() {
-      cache = Cache.test();
+      cache = MockCache();
+      when(cache.dyLdLibEntry).thenReturn(const MapEntry<String, String>('foo', 'bar'));
     });
 
     testUsingContext('returns 0 when called', () async {
@@ -191,3 +193,5 @@ class NoDevicesManager extends DeviceManager {
 @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 }
+
+class MockCache extends Mock implements Cache {}

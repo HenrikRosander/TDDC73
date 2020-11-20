@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -17,7 +19,7 @@ void main() {
 
   testWidgets('Drawer control test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    late BuildContext savedContext;
+    BuildContext savedContext;
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
@@ -34,7 +36,7 @@ void main() {
     );
     await tester.pump(); // no effect
     expect(find.text('drawer'), findsNothing);
-    scaffoldKey.currentState!.openDrawer();
+    scaffoldKey.currentState.openDrawer();
     await tester.pump(); // drawer should be starting to animate in
     expect(find.text('drawer'), findsOneWidget);
     await tester.pump(const Duration(seconds: 1)); // animation done
@@ -59,7 +61,7 @@ void main() {
     );
     await tester.pump(); // no effect
     expect(find.text('drawer'), findsNothing);
-    scaffoldKey.currentState!.openDrawer();
+    scaffoldKey.currentState.openDrawer();
     await tester.pump(); // drawer should be starting to animate in
     expect(find.text('drawer'), findsOneWidget);
     await tester.pump(const Duration(seconds: 1)); // animation done
@@ -118,7 +120,7 @@ void main() {
     logs.clear();
 
     // When drawer is open, hover is uninteractable
-    scaffoldKey.currentState!.openDrawer();
+    scaffoldKey.currentState.openDrawer();
     await tester.pump(const Duration(seconds: 1)); // animation done
     expect(find.text('drawer'), findsOneWidget);
 
@@ -172,7 +174,7 @@ void main() {
       ),
     );
     expect(find.text('drawer'), findsNothing);
-    scaffoldKey.currentState!.openDrawer();
+    scaffoldKey.currentState.openDrawer();
     await tester.pump(); // drawer should be starting to animate in
     expect(find.text('drawer'), findsOneWidget);
     await tester.pump(const Duration(seconds: 1)); // animation done
@@ -226,7 +228,7 @@ void main() {
       ),
     );
     expect(find.text('drawer'), findsNothing);
-    scaffoldKey.currentState!.openDrawer();
+    scaffoldKey.currentState.openDrawer();
     await tester.pump(); // drawer should be starting to animate in
     expect(find.text('drawer'), findsOneWidget);
     await tester.pump(const Duration(seconds: 1)); // animation done
@@ -288,7 +290,7 @@ void main() {
     );
 
     // Open the drawer.
-    scaffoldKey.currentState!.openDrawer();
+    scaffoldKey.currentState.openDrawer();
     await tester.pump(); // drawer should be starting to animate in
     expect(find.text('drawer'), findsOneWidget);
 
@@ -322,7 +324,7 @@ void main() {
     );
 
     // Open the drawer.
-    scaffoldKey.currentState!.openDrawer();
+    scaffoldKey.currentState.openDrawer();
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap]));
@@ -350,7 +352,7 @@ void main() {
     );
 
     // Open the drawer.
-    scaffoldKey.currentState!.openDrawer();
+    scaffoldKey.currentState.openDrawer();
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
@@ -378,7 +380,7 @@ void main() {
     );
 
     // Open the drawer.
-    scaffoldKey.currentState!.openDrawer();
+    scaffoldKey.currentState.openDrawer();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 

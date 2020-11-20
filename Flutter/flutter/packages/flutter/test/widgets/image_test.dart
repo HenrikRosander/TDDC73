@@ -15,18 +15,24 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../image_data.dart';
+import '../painting/image_data.dart';
 import 'semantics_tester.dart';
+
+// This must be run with [WidgetTester.runAsync] since it performs real async
+// work.
+Future<ui.Image> createTestImage([List<int> bytes = kTransparentImage]) async {
+  final ui.Codec codec = await ui.instantiateImageCodec(Uint8List.fromList(bytes));
+  final ui.FrameInfo frameInfo = await codec.getNextFrame();
+  return frameInfo.image;
+}
 
 void main() {
   int originalCacheSize;
-  ui.Image image10x10;
 
-  setUp(() async {
+  setUp(() {
     originalCacheSize = imageCache.maximumSize;
     imageCache.clear();
     imageCache.clearLiveImages();
-    image10x10 = await createTestImage(width: 10, height: 10);
   });
 
   tearDown(() {
@@ -50,7 +56,7 @@ void main() {
     RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
-    imageProvider1.complete(image10x10);
+    imageProvider1.complete();
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
@@ -92,7 +98,7 @@ void main() {
     RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
-    imageProvider1.complete(image10x10);
+    imageProvider1.complete();
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
@@ -132,7 +138,7 @@ void main() {
     RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
-    imageProvider1.complete(image10x10);
+    imageProvider1.complete();
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
@@ -170,7 +176,7 @@ void main() {
     RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
-    imageProvider1.complete(image10x10);
+    imageProvider1.complete();
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
@@ -460,19 +466,15 @@ void main() {
   });
 
   testWidgets('Verify Image stops listening to ImageStream', (WidgetTester tester) async {
-    final ui.Image image100x100 = await tester.runAsync(() async => createTestImage(width: 100, height: 100));
-    // Web does not override the toString, whereas VM does
-    final String imageString = image100x100.toString();
-
     final TestImageProvider imageProvider = TestImageProvider();
     await tester.pumpWidget(Image(image: imageProvider, excludeFromSemantics: true));
     final State<Image> image = tester.state/*State<Image>*/(find.byType(Image));
     expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, unresolved, 2 listeners), pixels: null, loadingProgress: null, frameNumber: null, wasSynchronouslyLoaded: false)'));
-    imageProvider.complete(image100x100);
+    imageProvider.complete();
     await tester.pump();
-    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, $imageString @ 1.0x, 1 listener), pixels: $imageString @ 1.0x, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
+    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, [100×100] @ 1.0x, 1 listener), pixels: [100×100] @ 1.0x, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
     await tester.pumpWidget(Container());
-    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(lifecycle state: defunct, not mounted, stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, $imageString @ 1.0x, 0 listeners), pixels: null, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
+    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(lifecycle state: defunct, not mounted, stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, [100×100] @ 1.0x, 0 listeners), pixels: [100×100] @ 1.0x, loadingProgress: null, frameNumber: 0, wasSynchronouslyLoaded: false)'));
   });
 
   testWidgets('Stream completer errors can be listened to by attaching before resolving', (WidgetTester tester) async {
@@ -766,7 +768,7 @@ void main() {
         }
       )
     );
-    provider.complete(image10x10);
+    provider.complete();
     await precache;
     expect(provider._lastResolvedConfiguration, isNotNull);
 
@@ -860,7 +862,6 @@ void main() {
 
     final TestImageProvider imageProvider1 = TestImageProvider();
     final TestImageProvider imageProvider2 = TestImageProvider();
-    final ui.Image image100x100 = await tester.runAsync(() async => createTestImage(width: 100, height: 100));
 
     await tester.pumpWidget(
         Container(
@@ -876,8 +877,8 @@ void main() {
     RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
-    imageProvider1.complete(image10x10);
-    imageProvider2.complete(image100x100);
+    imageProvider1.complete();
+    imageProvider2.complete();
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
@@ -904,8 +905,8 @@ void main() {
   });
 
   testWidgets('Image State can be reconfigured to use another image', (WidgetTester tester) async {
-    final Image image1 = Image(image: TestImageProvider()..complete(image10x10.clone()), width: 10.0, excludeFromSemantics: true);
-    final Image image2 = Image(image: TestImageProvider()..complete(image10x10.clone()), width: 20.0, excludeFromSemantics: true);
+    final Image image1 = Image(image: TestImageProvider()..complete(), width: 10.0, excludeFromSemantics: true);
+    final Image image2 = Image(image: TestImageProvider()..complete(), width: 20.0, excludeFromSemantics: true);
 
     final Column column = Column(children: <Widget>[image1, image2]);
     await tester.pumpWidget(column, null, EnginePhase.layout);
@@ -1013,6 +1014,7 @@ void main() {
   });
 
   testWidgets('Image invokes frameBuilder with correct wasSynchronouslyLoaded=false', (WidgetTester tester) async {
+    final ui.Image image = await tester.runAsync(createTestImage);
     final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
     final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
     int lastFrame;
@@ -1032,14 +1034,15 @@ void main() {
     expect(lastFrame, isNull);
     expect(lastFrameWasSync, isFalse);
     expect(find.byType(RawImage), findsOneWidget);
-    streamCompleter.setData(imageInfo: ImageInfo(image: image10x10));
+    streamCompleter.setData(imageInfo: ImageInfo(image: image));
     await tester.pump();
     expect(lastFrame, 0);
     expect(lastFrameWasSync, isFalse);
   });
 
   testWidgets('Image invokes frameBuilder with correct wasSynchronouslyLoaded=true', (WidgetTester tester) async {
-    final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter(ImageInfo(image: image10x10.clone()));
+    final ui.Image image = await tester.runAsync(createTestImage);
+    final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter(ImageInfo(image: image));
     final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
     int lastFrame;
     bool lastFrameWasSync;
@@ -1058,7 +1061,7 @@ void main() {
     expect(lastFrame, 0);
     expect(lastFrameWasSync, isTrue);
     expect(find.byType(RawImage), findsOneWidget);
-    streamCompleter.setData(imageInfo: ImageInfo(image: image10x10.clone()));
+    streamCompleter.setData(imageInfo: ImageInfo(image: image));
     await tester.pump();
     expect(lastFrame, 1);
     expect(lastFrameWasSync, isTrue);
@@ -1170,6 +1173,7 @@ void main() {
   });
 
   testWidgets('Image invokes loadingBuilder on chunk event notification', (WidgetTester tester) async {
+    final ui.Image image = await tester.runAsync(createTestImage);
     final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
     final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
     final List<ImageChunkEvent> chunkEvents = <ImageChunkEvent>[];
@@ -1204,7 +1208,7 @@ void main() {
     expect(chunkEvents.length, 3);
     expect(find.text('loading 30 / 100'), findsOneWidget);
     expect(find.byType(RawImage), findsNothing);
-    streamCompleter.setData(imageInfo: ImageInfo(image: image10x10));
+    streamCompleter.setData(imageInfo: ImageInfo(image: image));
     await tester.pump();
     expect(chunkEvents.length, 4);
     expect(find.byType(Text), findsNothing);
@@ -1212,6 +1216,7 @@ void main() {
   });
 
   testWidgets("Image doesn't rebuild on chunk events if loadingBuilder is null", (WidgetTester tester) async {
+    final ui.Image image = await tester.runAsync(createTestImage);
     final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
     final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
 
@@ -1225,7 +1230,7 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isFalse);
-    streamCompleter.setData(imageInfo: ImageInfo(image: image10x10));
+    streamCompleter.setData(imageInfo: ImageInfo(image: image));
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
@@ -1446,6 +1451,7 @@ void main() {
   testWidgets('Same image provider in multiple parts of the tree, no cache room left', (WidgetTester tester) async {
     imageCache.maximumSize = 0;
 
+    final ui.Image image = await tester.runAsync(createTestImage);
     final TestImageProvider provider1 = TestImageProvider();
     final TestImageProvider provider2 = TestImageProvider();
 
@@ -1474,10 +1480,10 @@ void main() {
     expect(provider1.loadCallCount, 1);
     expect(provider2.loadCallCount, 1);
 
-    provider1.complete(image10x10.clone());
+    provider1.complete(image);
     await tester.idle();
 
-    provider2.complete(image10x10.clone());
+    provider2.complete(image);
     await tester.idle();
 
     expect(imageCache.liveImageCount, 2);
@@ -1510,7 +1516,7 @@ void main() {
         }
       )
     );
-    provider.complete(image10x10);
+    provider.complete();
     await precache;
 
     // Should have ended up with only a weak ref, not in cache because cache size is 0
@@ -1560,7 +1566,7 @@ void main() {
         }
       )
     );
-    provider.complete(image10x10);
+    provider.complete();
     await precache;
 
     // Should have ended up in the cache and have a weak reference.
@@ -1638,7 +1644,7 @@ void main() {
     Object caughtException;
     await tester.pumpWidget(
       Image(
-        image: FailingImageProvider(failOnObtainKey: true, throws: 'threw', image: image10x10),
+        image: const FailingImageProvider(failOnObtainKey: true, throws: 'threw'),
         errorBuilder: (BuildContext context, Object error, StackTrace stackTrace) {
           caughtException = error;
           return SizedBox.expand(key: errorKey);
@@ -1658,7 +1664,7 @@ void main() {
     Object caughtException;
     await tester.pumpWidget(
       Image(
-        image: FailingImageProvider(failOnLoad: true, throws: 'threw', image: image10x10),
+        image: const FailingImageProvider(failOnLoad: true, throws: 'threw'),
         errorBuilder: (BuildContext context, Object error, StackTrace stackTrace) {
           caughtException = error;
           return SizedBox.expand(key: errorKey);
@@ -1675,8 +1681,8 @@ void main() {
 
   testWidgets('no errorBuilder - failure reported to FlutterError', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Image(
-        image: FailingImageProvider(failOnLoad: true, throws: 'threw', image: image10x10),
+      const Image(
+        image: FailingImageProvider(failOnLoad: true, throws: 'threw'),
       ),
     );
 
@@ -1730,7 +1736,7 @@ void main() {
       imageSizeInfo = info;
     };
 
-    final ui.Image image = await tester.runAsync(() => createTestImage(width: 100, height: 100));
+    final ui.Image image = await tester.runAsync(() => createTestImage(kBlueRectPng));
     final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter(
       ImageInfo(
         image: image,
@@ -1761,122 +1767,6 @@ void main() {
     );
 
     debugOnPaintImage = null;
-  });
-
-  testWidgets('Disposes image handle when disposed', (WidgetTester tester) async {
-    final ui.Image image = await tester.runAsync(() => createTestImage(width: 1, height: 1, cache: false));
-
-    expect(image.debugGetOpenHandleStackTraces().length, 1);
-
-    final ImageProvider provider = TestImageProvider(
-      streamCompleter: OneFrameImageStreamCompleter(
-        Future<ImageInfo>.value(
-          ImageInfo(
-            image: image,
-            scale: 1.0,
-            debugLabel: 'TestImage',
-          ),
-        ),
-      ),
-    );
-
-    // creating the provider should not have changed anything, and the provider
-    // now owns the handle.
-    expect(image.debugGetOpenHandleStackTraces().length, 1);
-
-    await tester.pumpWidget(Image(image: provider));
-
-    // Image widget + 1, render object + 1
-    expect(image.debugGetOpenHandleStackTraces().length, 3);
-
-    await tester.pumpWidget(const SizedBox());
-
-    // Image widget and render object go away
-    expect(image.debugGetOpenHandleStackTraces().length, 1);
-
-    await provider.evict();
-
-    tester.binding.scheduleFrame();
-    await tester.pump();
-
-    // Image cache listener go away and Image stream listeners go away.
-    // Image is now at zero.
-    expect(image.debugGetOpenHandleStackTraces().length, 0);
-  }, skip: kIsWeb); // Web does not care about image handle/disposal.
-
-  testWidgets('Keeps stream alive when ticker mode is disabled',  (WidgetTester tester) async {
-    imageCache.maximumSize = 0;
-    final ui.Image image = await tester.runAsync(() => createTestImage(width: 1, height: 1, cache: false));
-    final TestImageProvider provider = TestImageProvider();
-    provider.complete(image);
-
-    await tester.pumpWidget(
-      TickerMode(
-        enabled: true,
-        child: Image(image: provider),
-      ),
-    );
-    expect(find.byType(Image), findsOneWidget);
-
-    await tester.pumpWidget(TickerMode(
-        enabled: false,
-        child: Image(image: provider),
-      ),
-    );
-    expect(find.byType(Image), findsOneWidget);
-
-    await tester.pumpWidget(TickerMode(
-        enabled: true,
-        child: Image(image: provider),
-      ),
-    );
-    expect(find.byType(Image), findsOneWidget);
-  });
-
-  testWidgets('Load a good image after a bad image was loaded should not call errorBuilder', (WidgetTester tester) async {
-    final UniqueKey errorKey = UniqueKey();
-    final ui.Image image = await tester.runAsync(() => createTestImage());
-    final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
-    final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
-
-    await tester.pumpWidget(
-      Center(
-        child: SizedBox(
-          height: 50,
-          width: 50,
-          child: Image(
-            image: imageProvider,
-            excludeFromSemantics: true,
-            errorBuilder: (BuildContext context, Object error, StackTrace stackTrace) {
-              return Container(key: errorKey);
-            },
-            frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
-              return Padding(padding: const EdgeInsets.all(1), child: child);
-            },
-          ),
-        ),
-      ),
-    );
-
-    // No error widget before loading a invalid image.
-    expect(find.byKey(errorKey), findsNothing);
-
-    // Loading good image succeed
-    streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
-    await tester.pump();
-    expect(find.byType(Padding), findsOneWidget);
-
-    // Loading bad image shows the error widget.
-    streamCompleter.setError(exception: 'thrown');
-    await tester.pump();
-    expect(find.byKey(errorKey), findsOneWidget);
-
-    // Loading good image shows the image widget instead of the error widget.
-    streamCompleter.setData(imageInfo: ImageInfo(image: image));
-    await tester.pump();
-    expect(find.byType(Padding), findsOneWidget);
-    expect(tester.widget<Padding>(find.byType(Padding)).child, isA<RawImage>());
-    expect(find.byKey(errorKey), findsNothing);
   });
 }
 
@@ -1957,7 +1847,8 @@ class TestImageProvider extends ImageProvider<Object> {
     return _streamCompleter;
   }
 
-  void complete(ui.Image image) {
+  void complete([ui.Image image]) {
+    image ??= TestImage();
     _completer.complete(ImageInfo(image: image));
   }
 
@@ -1967,12 +1858,6 @@ class TestImageProvider extends ImageProvider<Object> {
 
   @override
   String toString() => '${describeIdentity(this)}()';
-}
-
-class SimpleTestImageStreamCompleter extends ImageStreamCompleter {
-  void testSetImage(ui.Image image) {
-    setImage(ImageInfo(image: image, scale: 1.0));
-  }
 }
 
 class TestImageStreamCompleter extends ImageStreamCompleter {
@@ -1985,7 +1870,7 @@ class TestImageStreamCompleter extends ImageStreamCompleter {
   void addListener(ImageStreamListener listener) {
     listeners.add(listener);
     if (_currentImage != null) {
-      listener.onImage(_currentImage.clone(), true);
+      listener.onImage(_currentImage, true);
     }
   }
 
@@ -1999,33 +1884,37 @@ class TestImageStreamCompleter extends ImageStreamCompleter {
     ImageChunkEvent chunkEvent,
   }) {
     if (imageInfo != null) {
-      _currentImage?.dispose();
       _currentImage = imageInfo;
     }
     final List<ImageStreamListener> localListeners = listeners.toList();
     for (final ImageStreamListener listener in localListeners) {
       if (imageInfo != null) {
-        listener.onImage(imageInfo.clone(), false);
+        listener.onImage(imageInfo, false);
       }
       if (chunkEvent != null && listener.onChunk != null) {
         listener.onChunk(chunkEvent);
       }
     }
   }
+}
 
-  void setError({
-    dynamic exception,
-    StackTrace stackTrace,
-  }) {
-    assert(exception != null, 'exception must not be null.');
+class TestImage implements ui.Image {
+  @override
+  int get width => 100;
 
-    final List<ImageStreamListener> localListeners = listeners.toList();
-    for (final ImageStreamListener listener in localListeners) {
-      if (listener.onError != null) {
-        listener.onError(exception, stackTrace);
-      }
-    }
+  @override
+  int get height => 100;
+
+  @override
+  void dispose() { }
+
+  @override
+  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
+    throw UnsupportedError('Cannot encode test image');
   }
+
+  @override
+  String toString() => '[$width\u00D7$height]';
 }
 
 class DebouncingImageProvider extends ImageProvider<Object> {
@@ -2060,17 +1949,14 @@ class FailingImageProvider extends ImageProvider<int> {
     this.failOnObtainKey = false,
     this.failOnLoad = false,
     @required this.throws,
-    @required this.image,
   }) : assert(failOnLoad != null),
        assert(failOnObtainKey != null),
        assert(failOnLoad == true || failOnObtainKey == true),
-       assert(throws != null),
-       assert(image != null);
+       assert(throws != null);
 
   final bool failOnObtainKey;
   final bool failOnLoad;
   final Object throws;
-  final ui.Image image;
 
   @override
   Future<int> obtainKey(ImageConfiguration configuration) {
@@ -2088,7 +1974,7 @@ class FailingImageProvider extends ImageProvider<int> {
     return OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(
         ImageInfo(
-          image: image,
+          image: TestImage(),
           scale: 0,
         ),
       ),

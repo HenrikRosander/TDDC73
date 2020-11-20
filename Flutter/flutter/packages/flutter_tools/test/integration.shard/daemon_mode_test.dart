@@ -27,7 +27,7 @@ void main() {
 
     const ProcessManager processManager = LocalProcessManager();
     final Process process = await processManager.start(
-      <String>[flutterBin, ...getLocalEngineArguments(), '--show-test-device', 'daemon'],
+      <String>[flutterBin, '--show-test-device', 'daemon'],
       workingDirectory: tempDir.path,
     );
 

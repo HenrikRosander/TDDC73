@@ -158,7 +158,7 @@ class _ActionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _OptionsItem(
-      child: _TextButton(
+      child: _FlatButton(
         onPressed: onTap,
         child: Text(text),
       ),
@@ -166,23 +166,21 @@ class _ActionItem extends StatelessWidget {
   }
 }
 
-class _TextButton extends StatelessWidget {
-  const _TextButton({ Key key, this.onPressed, this.child }) : super(key: key);
+class _FlatButton extends StatelessWidget {
+  const _FlatButton({ Key key, this.onPressed, this.child }) : super(key: key);
 
   final VoidCallback onPressed;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return TextButton(
-      style: TextButton.styleFrom(
-        primary: theme.colorScheme.onPrimary,
-        textStyle: theme.textTheme.subtitle1,
-        padding: EdgeInsets.zero,
-      ),
+    return FlatButton(
+      padding: EdgeInsets.zero,
       onPressed: onPressed,
-      child: child,
+      child: DefaultTextStyle(
+        style: Theme.of(context).primaryTextTheme.subtitle1,
+        child: child,
+      ),
     );
   }
 }

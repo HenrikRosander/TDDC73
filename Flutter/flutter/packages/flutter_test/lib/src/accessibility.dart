@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart' as flutter_material;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
@@ -32,13 +33,13 @@ class Evaluation {
   final bool passed;
 
   /// If [passed] is false, contains the reason for failure.
-  final String? reason;
+  final String reason;
 
   /// Combines two evaluation results.
   ///
   /// The [reason] will be concatenated with a newline, and [passed] will be
   /// combined with an `&&` operator.
-  Evaluation operator +(Evaluation? other) {
+  Evaluation operator +(Evaluation other) {
     if (other == null)
       return this;
     final StringBuffer buffer = StringBuffer();
@@ -81,7 +82,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
 
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
-    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
+    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
     Evaluation traverse(SemanticsNode node) {
       Evaluation result = const Evaluation.pass();
       node.visitChildren((SemanticsNode child) {
@@ -97,10 +98,10 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
         || data.hasFlag(ui.SemanticsFlag.isHidden))
         return result;
       Rect paintBounds = node.rect;
-      SemanticsNode? current = node;
+      SemanticsNode current = node;
       while (current != null) {
         if (current.transform != null)
-          paintBounds = MatrixUtils.transformRect(current.transform!, paintBounds);
+          paintBounds = MatrixUtils.transformRect(current.transform, paintBounds);
         current = current.parent;
       }
       // skip node if it is touching the edge of the screen, since it might
@@ -138,7 +139,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
 
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
-    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
+    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
     Evaluation traverse(SemanticsNode node) {
       Evaluation result = const Evaluation.pass();
       node.visitChildren((SemanticsNode child) {
@@ -192,21 +193,18 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
   static const double kMinimumRatioLargeText = 3.0;
 
-  static const double _kDefaultFontSize = 12.0;
-
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
-    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
+    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
     final RenderView renderView = tester.binding.renderView;
-    final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
-    ui.Image? image;
-    final ByteData byteData = (await tester.binding.runAsync<ByteData?>(() async {
+    final OffsetLayer layer = renderView.debugLayer as OffsetLayer;
+    ui.Image image;
+    final ByteData byteData = await tester.binding.runAsync<ByteData>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
       // last transform layer.
       image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / tester.binding.window.devicePixelRatio);
-      return image!.toByteData();
-    }))!;
-    assert(image != null);
+      return image.toByteData();
+    });
 
     Future<Evaluation> evaluateNode(SemanticsNode node) async {
       Evaluation result = const Evaluation.pass();
@@ -227,32 +225,33 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
       // We need to look up the inherited text properties to determine the
       // contrast ratio based on text size/weight.
-      double? fontSize;
+      double fontSize;
       bool isBold;
-      final String text = data.label.isEmpty ? data.value : data.label;
+      final String text = (data.label?.isEmpty == true) ? data.value : data.label;
       final List<Element> elements = find.text(text).hitTestable().evaluate().toList();
       Rect paintBounds;
       if (elements.length == 1) {
         final Element element = elements.single;
-        assert(element.renderObject != null && element.renderObject is RenderBox);
-        final RenderBox renderObject = element.renderObject! as RenderBox;
+        final RenderBox renderObject = element.renderObject as RenderBox;
+        element.renderObject.paintBounds;
         paintBounds = Rect.fromPoints(
-          renderObject.localToGlobal(renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
-          renderObject.localToGlobal(renderObject.paintBounds.bottomRight + const Offset(4.0, 4.0)),
+          renderObject.localToGlobal(element.renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
+          renderObject.localToGlobal(element.renderObject.paintBounds.bottomRight + const Offset(4.0, 4.0)),
         );
         final Widget widget = element.widget;
         final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
         if (widget is Text) {
-          final TextStyle effectiveTextStyle = widget.style == null || widget.style!.inherit
-              ? defaultTextStyle.style.merge(widget.style)
-              : widget.style!;
+          TextStyle effectiveTextStyle = widget.style;
+          if (widget.style == null || widget.style.inherit) {
+            effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
+          }
           fontSize = effectiveTextStyle.fontSize;
           isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
         } else if (widget is EditableText) {
           isBold = widget.style.fontWeight == FontWeight.bold;
           fontSize = widget.style.fontSize;
         } else {
-          throw StateError('Unexpected widget type: ${widget.runtimeType}');
+          assert(false);
         }
       } else if (elements.length > 1) {
         return Evaluation.fail('Multiple nodes with the same label: ${data.label}\n');
@@ -265,7 +264,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       if (_isNodeOffScreen(paintBounds, tester.binding.window)) {
         return result;
       }
-      final List<int> subset = _colorsWithinRect(byteData, paintBounds, image!.width, image!.height);
+      final List<int> subset = _colorsWithinRect(byteData, paintBounds, image.width, image.height);
       // Node was too far off screen.
       if (subset.isEmpty) {
         return result;
@@ -278,7 +277,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
       double targetContrastRatio;
-      if ((isBold && (fontSize ?? _kDefaultFontSize) > kBoldTextMinimumSize) || (fontSize ?? _kDefaultFontSize) > kLargeTextMinimumSize) {
+      if ((isBold && fontSize > kBoldTextMinimumSize) || (fontSize ?? 12.0) > kLargeTextMinimumSize) {
         targetContrastRatio = kMinimumRatioLargeText;
       } else {
         targetContrastRatio = kMinimumRatioNormalText;
@@ -301,7 +300,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   bool _shouldSkipNode(SemanticsData data) {
     if (data.hasFlag(ui.SemanticsFlag.scopesRoute))
       return true;
-    if (data.label.trim().isEmpty && data.value.trim().isEmpty)
+    if (data.label?.trim()?.isEmpty == true && data.value?.trim()?.isEmpty == true)
       return true;
     return false;
   }
@@ -330,7 +329,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
   ///
   /// An optional description string can be given using the [description] parameter.
   const CustomMinimumContrastGuideline({
-    required this.finder,
+    @required this.finder,
     this.minimumRatio = 4.5,
     this.tolerance = 0.01,
     String description = 'Contrast should follow custom guidelines',
@@ -370,20 +369,19 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
     // Obtain rendered image.
 
     final RenderView renderView = tester.binding.renderView;
-    final OffsetLayer layer = renderView.debugLayer! as OffsetLayer;
-    ui.Image? image;
-    final ByteData byteData = (await tester.binding.runAsync<ByteData?>(() async {
+    final OffsetLayer layer = renderView.debugLayer as OffsetLayer;
+    ui.Image image;
+    final ByteData byteData = await tester.binding.runAsync<ByteData>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
       // last transform layer.
       image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / tester.binding.window.devicePixelRatio);
-      return image!.toByteData();
-    }))!;
-    assert(image != null);
+      return image.toByteData();
+    });
 
     // How to evaluate a single element.
 
     Evaluation evaluateElement(Element element) {
-      final RenderBox renderObject = element.renderObject! as RenderBox;
+      final RenderBox renderObject = element.renderObject as RenderBox;
 
       final Rect originalPaintBounds = renderObject.paintBounds;
 
@@ -394,7 +392,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
         renderObject.localToGlobal(inflatedPaintBounds.bottomRight),
       );
 
-      final List<int> subset = _colorsWithinRect(byteData, paintBounds, image!.width, image!.height);
+      final List<int> subset = _colorsWithinRect(byteData, paintBounds, image.width, image.height);
 
       if (subset.isEmpty) {
         return const Evaluation.pass();
@@ -457,7 +455,7 @@ class _ContrastReport {
     double averageLightness = 0.0;
     for (final int color in colorHistogram.keys) {
       final HSLColor hslColor = HSLColor.fromColor(Color(color));
-      averageLightness += hslColor.lightness * colorHistogram[color]!;
+      averageLightness += hslColor.lightness * colorHistogram[color];
     }
     averageLightness /= colors.length;
     assert(averageLightness != double.nan);
@@ -501,12 +499,10 @@ class _ContrastReport {
         isEmptyRect = false;
 
   const _ContrastReport.emptyRect()
-      : lightColor = _transparent,
-        darkColor = _transparent,
+      : lightColor = flutter_material.Colors.transparent,
+        darkColor = flutter_material.Colors.transparent,
         isSingleColor = false,
         isEmptyRect = true;
-
-  static const Color _transparent = Color(0x00000000);
 
   /// The most frequently occurring light color. Uses [Colors.transparent] if
   /// the rectangle is empty.

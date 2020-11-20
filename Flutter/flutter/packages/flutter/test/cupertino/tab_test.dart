@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -40,7 +42,7 @@ void main() {
             return CupertinoButton(
               child: const Text('go to second page'),
               onPressed: () {
-                Navigator.of(context)!.pushNamed('/2');
+                Navigator.of(context).pushNamed('/2');
               },
             );
           },
@@ -81,12 +83,12 @@ void main() {
   });
 
   testWidgets('Use onUnknownRoute', (WidgetTester tester) async {
-    late String unknownForRouteCalled;
+    String unknownForRouteCalled;
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
           onUnknownRoute: (RouteSettings settings) {
-            unknownForRouteCalled = settings.name!;
+            unknownForRouteCalled = settings.name;
             return null;
           },
         ),
@@ -95,10 +97,6 @@ void main() {
 
     expect(tester.takeException(), isFlutterError);
     expect(unknownForRouteCalled, '/');
-
-    // Work-around for https://github.com/flutter/flutter/issues/65655.
-    await tester.pumpWidget(Container());
-    expect(tester.takeException(), isAssertionError);
   });
 
   testWidgets('Can use navigatorKey to navigate', (WidgetTester tester) async {
@@ -115,7 +113,7 @@ void main() {
       ),
     );
 
-    key.currentState!.pushNamed('/2');
+    key.currentState.pushNamed('/2');
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -131,7 +129,7 @@ void main() {
             return CupertinoButton(
               child: const Text('go to second page'),
               onPressed: () {
-                Navigator.of(context)!.pushNamed('/2');
+                Navigator.of(context).pushNamed('/2');
               },
             );
           },
@@ -156,7 +154,7 @@ void main() {
             return CupertinoButton(
               child: const Text('go to second page'),
               onPressed: () {
-                Navigator.of(context)!.pushNamed('/2');
+                Navigator.of(context).pushNamed('/2');
               },
             );
           },
@@ -184,9 +182,9 @@ void main() {
         ),
       ),
     );
-    late FlutterError error;
+    FlutterError error;
     try {
-      key.currentState!.pushNamed('/2');
+      key.currentState.pushNamed('/2');
     } on FlutterError catch (e) {
       error = e;
     }
@@ -220,9 +218,9 @@ void main() {
         ),
       ),
     );
-    late FlutterError error;
+    FlutterError error;
     try {
-      key.currentState!.pushNamed('/2');
+      key.currentState.pushNamed('/2');
     } on FlutterError catch (e) {
       error = e;
     }
@@ -234,56 +232,5 @@ void main() {
       '   RouteSettings("/2", null) from its onUnknownRoute callback, the\n'
       '   callback returned null. Such callbacks must never return null.\n'
     ));
-  });
-
-  testWidgets('Navigator of CupertinoTabView restores state', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      CupertinoApp(
-        restorationScopeId: 'app',
-        home: CupertinoTabView(
-          restorationScopeId: 'tab',
-          builder: (BuildContext context) => CupertinoButton(
-            child: const Text('home'),
-            onPressed: () {
-              Navigator.of(context)!.restorablePushNamed('/2');
-            },
-          ),
-          routes: <String, WidgetBuilder>{
-            '/2' : (BuildContext context) => const Text('second route'),
-          }
-        ),
-      ),
-    );
-
-    expect(find.text('home'), findsOneWidget);
-    await tester.tap(find.text('home'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('home'), findsNothing);
-    expect(find.text('second route'), findsOneWidget);
-
-    final TestRestorationData data = await tester.getRestorationData();
-
-    await tester.restartAndRestore();
-
-    expect(find.text('home'), findsNothing);
-    expect(find.text('second route'), findsOneWidget);
-
-    Navigator.of(tester.element(find.text('second route')))!.pop();
-    await tester.pumpAndSettle();
-
-    expect(find.text('home'), findsOneWidget);
-    expect(find.text('second route'), findsNothing);
-
-    await tester.restoreFrom(data);
-
-    expect(find.text('home'), findsNothing);
-    expect(find.text('second route'), findsOneWidget);
-
-    Navigator.of(tester.element(find.text('second route')))!.pop();
-    await tester.pumpAndSettle();
-
-    expect(find.text('home'), findsOneWidget);
-    expect(find.text('second route'), findsNothing);
   });
 }

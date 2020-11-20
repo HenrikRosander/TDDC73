@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
@@ -14,7 +15,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Android', () {
-    late FakeAndroidPlatformViewsController viewsController;
+    FakeAndroidPlatformViewsController viewsController;
     setUp(() {
       viewsController = FakeAndroidPlatformViewsController();
     });
@@ -201,7 +202,7 @@ void main() {
   });
 
   group('iOS', () {
-    late FakeIosPlatformViewsController viewsController;
+    FakeIosPlatformViewsController viewsController;
     setUp(() {
       viewsController = FakeIosPlatformViewsController();
     });

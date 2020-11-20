@@ -79,8 +79,8 @@ void main() {
           logger: logger,
           xcode: mockXcode,
           platform: null,
-          artifacts: Artifacts.test(),
-          cache: Cache.test(),
+          artifacts: MockArtifacts(),
+          cache: MockCache(),
           iproxy: IProxy.test(logger: logger, processManager: processManager),
         );
       });
@@ -338,16 +338,20 @@ void main() {
     group('xcdevice', () {
       XCDevice xcdevice;
       MockXcode mockXcode;
+      MockArtifacts mockArtifacts;
+      MockCache mockCache;
 
       setUp(() {
         mockXcode = MockXcode();
+        mockArtifacts = MockArtifacts();
+        mockCache = MockCache();
         xcdevice = XCDevice(
           processManager: fakeProcessManager,
           logger: logger,
           xcode: mockXcode,
           platform: null,
-          artifacts: Artifacts.test(),
-          cache: Cache.test(),
+          artifacts: mockArtifacts,
+          cache: mockCache,
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
         );
       });
@@ -839,3 +843,5 @@ class MockXcode extends Mock implements Xcode {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockPlatform extends Mock implements Platform {}
+class MockArtifacts extends Mock implements Artifacts {}
+class MockCache extends Mock implements Cache {}

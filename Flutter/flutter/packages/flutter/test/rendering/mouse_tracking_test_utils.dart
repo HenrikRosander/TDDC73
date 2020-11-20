@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -18,7 +20,7 @@ class _TestHitTester extends RenderBox {
   final BoxHitTest hitTestOverride;
 
   @override
-  bool hitTest(BoxHitTestResult result, {required ui.Offset position}) {
+  bool hitTest(BoxHitTestResult result, {ui.Offset position}) {
     return hitTestOverride(result, position);
   }
 }
@@ -37,7 +39,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
     renderView.child = _TestHitTester(hitTest);
   }
 
-  SchedulerPhase? _overridePhase;
+  SchedulerPhase _overridePhase;
   @override
   SchedulerPhase get schedulerPhase => _overridePhase ?? super.schedulerPhase;
 
@@ -46,7 +48,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
   // In real apps this is done by the renderer binding, but in tests we have to
   // bypass the phase assertion of [MouseTracker.schedulePostFrameCheck].
   void scheduleMouseTrackerPostFrameCheck() {
-    final SchedulerPhase? lastPhase = _overridePhase;
+    final SchedulerPhase lastPhase = _overridePhase;
     _overridePhase = SchedulerPhase.persistentCallbacks;
     addPostFrameCallback((_) {
       mouseTracker.updateAllDevices(renderView.hitTestMouseTrackers);
@@ -54,7 +56,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
     _overridePhase = lastPhase;
   }
 
-  List<void Function(Duration)> postFrameCallbacks = <void Function(Duration)>[];
+  List<void Function(Duration)> postFrameCallbacks;
 
   // Proxy post-frame callbacks.
   @override
@@ -75,12 +77,13 @@ class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation
   const TestAnnotationTarget({this.onEnter, this.onHover, this.onExit, this.cursor = MouseCursor.defer});
 
   @override
-  final PointerEnterEventListener? onEnter;
-
-  final PointerHoverEventListener? onHover;
+  final PointerEnterEventListener onEnter;
 
   @override
-  final PointerExitEventListener? onExit;
+  final PointerHoverEventListener onHover;
+
+  @override
+  final PointerExitEventListener onExit;
 
   @override
   final MouseCursor cursor;
@@ -89,14 +92,14 @@ class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     if (event is PointerHoverEvent)
       if (onHover != null)
-        onHover!(event);
+        onHover(event);
   }
 }
 
 // A hit test entry that can be assigned with a [TestAnnotationTarget] and an
 // optional transform matrix.
 class TestAnnotationEntry extends HitTestEntry {
-  TestAnnotationEntry(TestAnnotationTarget target, [Matrix4? transform])
+  TestAnnotationEntry(TestAnnotationTarget target, [Matrix4 transform])
     : transform = transform ?? Matrix4.identity(), super(target);
 
   @override

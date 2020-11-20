@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
@@ -40,14 +41,14 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'fake_async': '1.2.0-nullsafety.1',
   'js': '0.6.3-nullsafety.1',
   'matcher': '0.12.10-nullsafety.1',
-  'meta': '1.3.0-nullsafety.4',
+  'meta': '1.3.0-nullsafety.3',
   'path': '1.8.0-nullsafety.1',
   'pedantic': '1.10.0-nullsafety.1',
   'pool': '1.5.0-nullsafety.1',
   'source_maps': '0.10.10-nullsafety.1',
   'source_map_stack_trace': '2.1.0-nullsafety.2',
   'source_span': '1.8.0-nullsafety.2',
-  'stack_trace': '1.10.0-nullsafety.2',
+  'stack_trace': '1.10.0-nullsafety.1',
   'stream_channel': '2.1.0-nullsafety.1',
   'string_scanner': '1.1.0-nullsafety.1',
   'term_glyph': '1.2.0-nullsafety.1',
@@ -59,11 +60,8 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'platform': '3.0.0-nullsafety.2',
   'file': '6.0.0-nullsafety.2',
   'process': '4.0.0-nullsafety.2',
-  'process_runner': '4.0.0-nullsafety.1',
   // https://github.com/dart-lang/build/issues/2772
   'build_runner_core': '5.2.0',
-  'build_modules': '2.10.1',
-  'path_provider': '1.6.14'
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -518,7 +516,7 @@ enum DependencyKind {
   // "sdk" dependency in the dependency_overrides section.
   overridden,
 
-  // A dependency that uses git.
+  // A depdendency that uses git.
   git,
 }
 
@@ -812,7 +810,7 @@ class PubspecYaml {
             // Since we're in one of the places where we can list dependencies,
             // remember this as the current last known valid place to insert our
             // transitive dev dependencies. If the section is for regular dependencies,
-            // then also remember the line for the end of direct dependencies.
+            // then also rememeber the line for the end of direct dependencies.
             if (section == Section.dependencies) {
               endOfDirectDependencies = output.length;
             }

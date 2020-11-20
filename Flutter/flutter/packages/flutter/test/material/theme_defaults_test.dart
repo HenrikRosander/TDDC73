@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -26,7 +28,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle!.color, const Color(0xdd000000));
+      expect(raw.textStyle.color, const Color(0xdd000000));
       expect(raw.fillColor, const Color(0xffe0e0e0));
       expect(raw.highlightColor, const Color(0x29000000)); // Was Color(0x66bcbcbc)
       expect(raw.splashColor, const Color(0x1f000000)); // Was Color(0x66c8c8c8)
@@ -54,7 +56,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle!.color, const Color(0x61000000));
+      expect(raw.textStyle.color, const Color(0x61000000));
       expect(raw.fillColor, const Color(0x61000000));
       // highlightColor, disabled button can't be pressed
       // splashColor, disabled button doesn't splash
@@ -84,7 +86,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle!.color, const Color(0xdd000000));
+      expect(raw.textStyle.color, const Color(0xdd000000));
       expect(raw.fillColor, null);
       expect(raw.highlightColor, const Color(0x29000000)); // Was Color(0x66bcbcbc)
       expect(raw.splashColor, const Color(0x1f000000)); // Was Color(0x66c8c8c8)
@@ -112,7 +114,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle!.color, const Color(0x61000000));
+      expect(raw.textStyle.color, const Color(0x61000000));
       expect(raw.fillColor, null);
       // highlightColor, disabled button can't be pressed
       // splashColor, disabled button doesn't splash
@@ -146,7 +148,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle!.color, const Color(0xdd000000));
+      expect(raw.textStyle.color, const Color(0xdd000000));
       expect(raw.fillColor, const Color(0x00fafafa));
       expect(raw.highlightColor, const Color(0x29000000)); // Was Color(0x66bcbcbc)
       expect(raw.splashColor, const Color(0x1f000000)); // Was Color(0x66c8c8c8)
@@ -173,7 +175,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle!.color, const Color(0xdd000000));
+      expect(raw.textStyle.color, const Color(0xdd000000));
       expect(raw.fillColor, Colors.transparent);
       expect(raw.highlightColor, const Color(0x29000000)); // Was Color(0x66bcbcbc)
       expect(raw.splashColor, const Color(0x1f000000)); // Was Color(0x66c8c8c8)
@@ -200,7 +202,7 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle!.color, const Color(0x61000000));
+      expect(raw.textStyle.color, const Color(0x61000000));
       expect(raw.fillColor, const Color(0x00000000));
       // highlightColor, disabled button can't be pressed
       // splashColor, disabled button doesn't splash
@@ -234,7 +236,7 @@ void main() {
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
       expect(raw.enabled, true);
-      expect(raw.textStyle!.color, const Color(0xffffffff));
+      expect(raw.textStyle.color, const Color(0xffffffff));
       expect(raw.fillColor, const Color(0xff2196f3));
       expect(raw.elevation, 6.0);
       expect(raw.highlightElevation, 12.0);
@@ -261,7 +263,7 @@ void main() {
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
       expect(raw.enabled, false);
-      expect(raw.textStyle!.color, const Color(0xffffffff));
+      expect(raw.textStyle.color, const Color(0xffffffff));
       expect(raw.fillColor, const Color(0xff2196f3));
       // highlightColor, disabled button can't be pressed
       // splashColor, disabled button doesn't splash

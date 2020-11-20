@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 @TestOn('!chrome') // web has different stack traces
+
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 
-Object getAssertionErrorWithMessage() {
+dynamic getAssertionErrorWithMessage() {
   try {
     assert(false, 'Message goes here.');
   } catch (e) {
@@ -16,7 +20,7 @@ Object getAssertionErrorWithMessage() {
   throw 'assert failed';
 }
 
-Object getAssertionErrorWithoutMessage() {
+dynamic getAssertionErrorWithoutMessage() {
   try {
     assert(false);
   } catch (e) {
@@ -25,7 +29,7 @@ Object getAssertionErrorWithoutMessage() {
   throw 'assert failed';
 }
 
-Object getAssertionErrorWithLongMessage() {
+dynamic getAssertionErrorWithLongMessage() {
   try {
     assert(false, 'word ' * 100);
   } catch (e) {
@@ -39,13 +43,13 @@ Future<StackTrace> getSampleStack() async {
 }
 
 Future<void> main() async {
-  final List<String?> console = <String?>[];
+  final List<String> console = <String>[];
 
   final StackTrace sampleStack = await getSampleStack();
 
   setUp(() async {
     expect(debugPrint, equals(debugPrintThrottled));
-    debugPrint = (String? message, { int? wrapWidth }) {
+    debugPrint = (String message, { int wrapWidth }) {
       console.add(message);
     };
   });
@@ -158,7 +162,7 @@ Future<void> main() async {
 
   test('Error reporting - NoSuchMethodError', () async {
     expect(console, isEmpty);
-    final Object exception = NoSuchMethodError.withInvocation(5,
+    final dynamic exception = NoSuchMethodError.withInvocation(5,
         Invocation.method(#foo, <dynamic>[2, 4]));
 
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(

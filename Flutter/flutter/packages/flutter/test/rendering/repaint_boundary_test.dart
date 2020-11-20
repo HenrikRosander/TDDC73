@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import '../flutter_test_alternative.dart';
@@ -90,9 +92,9 @@ void main() {
       child: faultyRenderObject,
     );
 
-    late FlutterErrorDetails error;
+    FlutterErrorDetails error;
     layout(opacity, phase: EnginePhase.flushSemantics, onErrors: () {
-      error = renderer.takeFlutterErrorDetails()!;
+      error = renderer.takeFlutterErrorDetails();
     });
     expect('${error.exception}', contains('Attempted to set a layer to a repaint boundary render object.'));
   });

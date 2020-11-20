@@ -343,33 +343,6 @@ void main() {
     expect(find.text('B'), findsOneWidget);
   });
 
-  testWidgets('popAndPushNamed with explicit void type parameter', (WidgetTester tester) async {
-    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed<void>(context, '/A'); }),
-      '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.popAndPushNamed<void, void>(context, '/B'); }),
-      '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () { Navigator.pop<void>(context); }),
-    };
-
-    await tester.pumpWidget(MaterialApp(routes: routes));
-    expect(find.text('/'), findsOneWidget);
-    expect(find.text('A', skipOffstage: false), findsNothing);
-    expect(find.text('B', skipOffstage: false), findsNothing);
-
-    await tester.tap(find.text('/'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.text('/'), findsNothing);
-    expect(find.text('A'), findsOneWidget);
-    expect(find.text('B'), findsNothing);
-
-    await tester.tap(find.text('A'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.text('/'), findsNothing);
-    expect(find.text('A'), findsNothing);
-    expect(find.text('B'), findsOneWidget);
-  });
-
   testWidgets('Push and pop should trigger the observers', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
@@ -546,57 +519,6 @@ void main() {
     // This test should finish without crashing.
     controller.index = 2;
     await tester.pumpAndSettle();
-  });
-
-  testWidgets('Pages update does update overlay correctly', (WidgetTester tester) async {
-    // Regression Test for https://github.com/flutter/flutter/issues/64941.
-    List<Page<void>> pages = const <Page<void>>[
-      MaterialPage<void>(
-        key:  ValueKey<int>(0),
-        child: Text('page 0'),
-      ),
-      MaterialPage<void>(
-        key: ValueKey<int>(1),
-        child: Text('page 1'),
-      ),
-    ];
-    Widget buildNavigator() {
-      return Navigator(
-        pages: pages,
-        onPopPage: (Route<dynamic> route, dynamic result) => false,
-      );
-    }
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: buildNavigator(),
-      ),
-    );
-
-    expect(find.text('page 1'), findsOneWidget);
-    expect(find.text('page 0'), findsNothing);
-
-    // Removes the first page.
-    pages = const <Page<void>>[
-      MaterialPage<void>(
-        key: ValueKey<int>(1),
-        child: Text('page 1'),
-      ),
-    ];
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: buildNavigator(),
-      ),
-    );
-    // Overlay updates correctly.
-    expect(find.text('page 1'), findsOneWidget);
-    expect(find.text('page 0'), findsNothing);
-
-    await tester.pumpAndSettle();
-    expect(find.text('page 1'), findsOneWidget);
-    expect(find.text('page 0'), findsNothing);
   });
 
   testWidgets('replaceNamed replaces', (WidgetTester tester) async {
@@ -1664,7 +1586,7 @@ void main() {
           '   The onGenerateRoute callback must never return null, unless an\n'
           '   onUnknownRoute callback is provided as well.\n'
           '   The Navigator was:\n'
-          '     NavigatorState#00000(lifecycle state: initialized)\n'
+          '     NavigatorState#4d6bf(lifecycle state: created)\n',
         ),
       );
     });
@@ -1690,7 +1612,7 @@ void main() {
           '   route "/".\n'
           '   The onUnknownRoute callback must never return null.\n'
           '   The Navigator was:\n'
-          '     NavigatorState#00000(lifecycle state: initialized)\n',
+          '     NavigatorState#38036(lifecycle state: created)\n',
         ),
       );
     });

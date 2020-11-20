@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 
+import 'dart:async';
+
 import 'system_channels.dart';
 
 /// Allows access to the haptic feedback interface on the device.

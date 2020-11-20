@@ -23,6 +23,7 @@ void main() {
     MemoryFileSystem memoryFileSystem;
     MockFlutterVersion mockFlutterVersion;
     MockGitTagVersion mockGitTagVersion;
+    MockCache mockCache;
     Directory outputDirectory;
     FakePlatform fakePlatform;
 
@@ -30,17 +31,12 @@ void main() {
       Cache.disableLocking();
     });
 
-    const String storageBaseUrl = 'https://fake.googleapis.com';
     setUp(() {
-      memoryFileSystem = MemoryFileSystem.test();
+      memoryFileSystem = MemoryFileSystem();
       mockFlutterVersion = MockFlutterVersion();
       mockGitTagVersion = MockGitTagVersion();
-      fakePlatform = FakePlatform(
-        operatingSystem: 'macos',
-        environment: <String, String>{
-          'FLUTTER_STORAGE_BASE_URL': storageBaseUrl,
-        },
-      );
+      mockCache = MockCache();
+      fakePlatform = FakePlatform()..operatingSystem = 'macos';
 
       when(mockFlutterVersion.gitTagVersion).thenReturn(mockGitTagVersion);
       outputDirectory = globals.fs.systemTempDirectory
@@ -50,20 +46,16 @@ void main() {
     });
 
     group('podspec', () {
+      const String storageBaseUrl = 'https://fake.googleapis.com';
       const String engineRevision = '0123456789abcdef';
-      Cache cache;
+      File licenseFile;
 
       setUp(() {
-        final Directory rootOverride = memoryFileSystem.directory('cache');
-        cache = Cache.test(
-          rootOverride: rootOverride,
-          platform: fakePlatform,
-          fileSystem: memoryFileSystem,
-        );
-        rootOverride.childDirectory('bin').childDirectory('internal').childFile('engine.version')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(engineRevision);
         when(mockFlutterVersion.gitTagVersion).thenReturn(mockGitTagVersion);
+        when(mockCache.storageBaseUrl).thenReturn(storageBaseUrl);
+        when(mockCache.engineRevision).thenReturn(engineRevision);
+        licenseFile = memoryFileSystem.file('LICENSE');
+        when(mockCache.getLicenseFile()).thenReturn(licenseFile);
       });
 
       testUsingContext('version unknown', () async {
@@ -74,7 +66,7 @@ void main() {
           buildSystem: MockBuildSystem(),
           platform: fakePlatform,
           flutterVersion: mockFlutterVersion,
-          cache: cache,
+          cache: mockCache,
           verboseHelp: false,
         );
 
@@ -99,7 +91,7 @@ void main() {
           buildSystem: MockBuildSystem(),
           platform: fakePlatform,
           flutterVersion: mockFlutterVersion,
-          cache: cache,
+          cache: mockCache,
           verboseHelp: false,
         );
 
@@ -121,7 +113,7 @@ void main() {
           buildSystem: MockBuildSystem(),
           platform: fakePlatform,
           flutterVersion: mockFlutterVersion,
-          cache: cache,
+          cache: mockCache,
           verboseHelp: false,
         );
 
@@ -144,7 +136,7 @@ void main() {
 
           when(mockFlutterVersion.frameworkVersion).thenReturn(frameworkVersion);
 
-          cache.getLicenseFile()
+          licenseFile
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
         });
@@ -159,7 +151,7 @@ void main() {
               buildSystem: MockBuildSystem(),
               platform: fakePlatform,
               flutterVersion: mockFlutterVersion,
-              cache: cache,
+              cache: mockCache,
               verboseHelp: false,
             );
             command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
@@ -182,7 +174,7 @@ void main() {
               buildSystem: MockBuildSystem(),
               platform: fakePlatform,
               flutterVersion: mockFlutterVersion,
-              cache: cache,
+              cache: mockCache,
               verboseHelp: false,
             );
             command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
@@ -202,7 +194,7 @@ void main() {
               buildSystem: MockBuildSystem(),
               platform: fakePlatform,
               flutterVersion: mockFlutterVersion,
-              cache: cache,
+              cache: mockCache,
               verboseHelp: false,
             );
             command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
@@ -220,7 +212,7 @@ void main() {
               buildSystem: MockBuildSystem(),
               platform: fakePlatform,
               flutterVersion: mockFlutterVersion,
-              cache: cache,
+              cache: mockCache,
               verboseHelp: false,
             );
             command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
@@ -238,7 +230,7 @@ void main() {
               buildSystem: MockBuildSystem(),
               platform: fakePlatform,
               flutterVersion: mockFlutterVersion,
-              cache: cache,
+              cache: mockCache,
               verboseHelp: false,
             );
             command.produceFlutterPodspec(BuildMode.release, outputDirectory);
@@ -258,4 +250,5 @@ void main() {
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
 class MockGitTagVersion extends Mock implements GitTagVersion {}
+class MockCache extends Mock implements Cache {}
 class MockBuildSystem extends Mock implements BuildSystem {}

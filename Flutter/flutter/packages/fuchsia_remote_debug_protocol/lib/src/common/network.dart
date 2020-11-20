@@ -17,10 +17,7 @@ void validateAddress(String address) {
 /// Returns true if `address` is a valid IPv6 address.
 bool isIpV6Address(String address) {
   try {
-    // parseIpv6Address fails if there's a zone ID. Since this is still a valid
-    // IP, remove any zone ID before parsing.
-    final List<String> addressParts = address.split('%');
-    Uri.parseIPv6Address(addressParts[0]);
+    Uri.parseIPv6Address(address);
     return true;
   } on FormatException {
     return false;

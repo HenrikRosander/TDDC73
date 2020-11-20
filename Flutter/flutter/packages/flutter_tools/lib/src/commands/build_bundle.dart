@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -79,13 +81,13 @@ class BuildBundleCommand extends BuildSubCommand {
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
     final String projectDir = globals.fs.file(targetFile).parent.parent.path;
-    final FlutterProject flutterProject = FlutterProject.fromPath(projectDir);
-    if (flutterProject == null) {
+    final FlutterProject futterProject = FlutterProject.fromPath(projectDir);
+    if (futterProject == null) {
       return const <CustomDimensions, String>{};
     }
     return <CustomDimensions, String>{
       CustomDimensions.commandBuildBundleTargetPlatform: stringArg('target-platform'),
-      CustomDimensions.commandBuildBundleIsModule: '${flutterProject.isModule}',
+      CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}',
     };
   }
 

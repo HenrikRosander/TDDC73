@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -21,21 +23,22 @@ void main() {
   test('default binary messenger calls callback once', () async {
     int count = 0;
     const String channel = 'foo';
-    ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-        channel, _makeByteData('bar'), (ByteData? message) async {
+    ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        channel, _makeByteData('bar'), (ByteData message) async {
       count += 1;
     });
     expect(count, equals(0));
     await ui.channelBuffers.drain(channel,
-        (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
+        (ByteData data, ui.PlatformMessageResponseCallback callback) {
       callback(null);
+      return null;
     });
     expect(count, equals(1));
   });
 
   test('can check the handler', () {
-    Future<ByteData> handler(ByteData? call) => Future<ByteData>.value(null);
-    final BinaryMessenger messenger = ServicesBinding.instance!.defaultBinaryMessenger;
+    Future<ByteData> handler(ByteData call) => Future<ByteData>.value(null);
+    final BinaryMessenger messenger = ServicesBinding.instance.defaultBinaryMessenger;
 
     expect(messenger.checkMessageHandler('test_channel', null), true);
     expect(messenger.checkMessageHandler('test_channel', handler), false);
@@ -45,8 +48,8 @@ void main() {
   });
 
   test('can check the mock handler', () {
-    Future<ByteData> handler(ByteData? call) => Future<ByteData>.value(null);
-    final BinaryMessenger messenger = ServicesBinding.instance!.defaultBinaryMessenger;
+    Future<ByteData> handler(ByteData call) => Future<ByteData>.value(null);
+    final BinaryMessenger messenger = ServicesBinding.instance.defaultBinaryMessenger;
 
     expect(messenger.checkMockMessageHandler('test_channel', null), true);
     expect(messenger.checkMockMessageHandler('test_channel', handler), false);

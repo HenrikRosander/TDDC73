@@ -3,60 +3,59 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/testbed.dart';
 
 void main() {
-  final FakePlatform windows = FakePlatform(operatingSystem: 'windows');
-  final FakePlatform notWindows = FakePlatform(operatingSystem: 'linux');
+  Testbed testbed;
+  MockPlatform windows;
+  MockPlatform notWindows;
 
-  testWithoutContext('Windows workflow configuration when feature is enabled on Windows host machine', () {
-    final WindowsWorkflow windowsWorkflow = WindowsWorkflow(
-      platform: windows,
-      featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+  setUp(() {
+    windows = MockPlatform();
+    notWindows = MockPlatform();
+    when(windows.isWindows).thenReturn(true);
+    when(notWindows.isWindows).thenReturn(false);
+    testbed = Testbed(
+      overrides: <Type, Generator>{
+        Platform: () => windows,
+        FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+      },
     );
+  });
 
+  test('Windows default workflow values', () => testbed.run(() {
     expect(windowsWorkflow.appliesToHostPlatform, true);
     expect(windowsWorkflow.canListDevices, true);
     expect(windowsWorkflow.canLaunchDevices, true);
     expect(windowsWorkflow.canListEmulators, false);
-  });
+  }));
 
-  testWithoutContext('Windows workflow configuration when feature is disabled on Windows host machine', () {
-    final WindowsWorkflow windowsWorkflow = WindowsWorkflow(
-      platform: windows,
-      featureFlags: TestFeatureFlags(isWindowsEnabled: false),
-    );
-
+  test('Windows defaults on non-windows platform', () => testbed.run(() {
     expect(windowsWorkflow.appliesToHostPlatform, false);
     expect(windowsWorkflow.canListDevices, false);
     expect(windowsWorkflow.canLaunchDevices, false);
     expect(windowsWorkflow.canListEmulators, false);
-  });
+  }, overrides: <Type, Generator>{
+    Platform: () => notWindows,
+  }));
 
-  testWithoutContext('Windows workflow configuration when feature is enabled on non-Windows host machine', () {
-    final WindowsWorkflow windowsWorkflow = WindowsWorkflow(
-      platform: notWindows,
-      featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-    );
-
+  test('Windows defaults on non-windows platform', () => testbed.run(() {
     expect(windowsWorkflow.appliesToHostPlatform, false);
     expect(windowsWorkflow.canListDevices, false);
     expect(windowsWorkflow.canLaunchDevices, false);
     expect(windowsWorkflow.canListEmulators, false);
-  });
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
+  }));
+}
 
-  testWithoutContext('Windows workflow configuration when feature is disabled on non-Windows host machine', () {
-    final WindowsWorkflow windowsWorkflow = WindowsWorkflow(
-      platform: notWindows,
-      featureFlags: TestFeatureFlags(isWindowsEnabled: false),
-    );
-
-    expect(windowsWorkflow.appliesToHostPlatform, false);
-    expect(windowsWorkflow.canListDevices, false);
-    expect(windowsWorkflow.canLaunchDevices, false);
-    expect(windowsWorkflow.canListEmulators, false);
-  });
+class MockPlatform extends Mock implements Platform {
+  @override
+  final Map<String, String> environment = <String, String>{};
 }

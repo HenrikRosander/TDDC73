@@ -117,7 +117,7 @@ void main() {
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -143,7 +143,7 @@ void main() {
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -157,7 +157,7 @@ void main() {
     List<int> mockTimes;
 
     setUp(() {
-      memoryFileSystem = MemoryFileSystem.test();
+      memoryFileSystem = MemoryFileSystem();
       mockStdio = MockStdio();
       mockUsage = MockUsage();
       when(mockUsage.isFirstRun).thenReturn(false);

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -10,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_test/flutter_test.dart';
+
 
 void main() {
   test('PaintingBinding with memory pressure before initInstances', () {
@@ -22,7 +25,7 @@ void main() {
     expect(binding.imageCache, null);
     binding.initInstances();
     expect(binding.imageCache, isNotNull);
-    expect(binding.imageCache!.currentSize, 0);
+    expect(binding.imageCache.currentSize, 0);
   });
 }
 
@@ -53,19 +56,19 @@ class TestBindingBase implements BindingBase {
   }
 
   @override
-  void registerBoolServiceExtension({required String name, required AsyncValueGetter<bool> getter, required AsyncValueSetter<bool> setter}) {}
+  void registerBoolServiceExtension({String name, AsyncValueGetter<bool> getter, AsyncValueSetter<bool> setter}) {}
 
   @override
-  void registerNumericServiceExtension({required String name, required AsyncValueGetter<double> getter, required AsyncValueSetter<double> setter}) {}
+  void registerNumericServiceExtension({String name, AsyncValueGetter<double> getter, AsyncValueSetter<double> setter}) {}
 
   @override
-  void registerServiceExtension({required String name, required ServiceExtensionCallback callback}) {}
+  void registerServiceExtension({String name, ServiceExtensionCallback callback}) {}
 
   @override
-  void registerSignalServiceExtension({required String name, required AsyncCallback callback}) {}
+  void registerSignalServiceExtension({String name, AsyncCallback callback}) {}
 
   @override
-  void registerStringServiceExtension({required String name, required AsyncValueGetter<String> getter, required AsyncValueSetter<String> setter}) {}
+  void registerStringServiceExtension({String name, AsyncValueGetter<String> getter, AsyncValueSetter<String> setter}) {}
 
   @override
   void unlocked() {}

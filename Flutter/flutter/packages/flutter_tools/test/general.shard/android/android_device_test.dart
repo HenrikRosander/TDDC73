@@ -131,7 +131,23 @@ void main() {
   });
 
   testWithoutContext('AndroidDevice can detect local emulator for known types', () async {
-    for (final String hardware in kKnownHardware.keys) {
+    final Set<String> knownPhyiscal = <String>{
+      'qcom',
+      'samsungexynos7420',
+      'samsungexynos7580',
+      'samsungexynos7870',
+      'samsungexynos7880',
+      'samsungexynos8890',
+      'samsungexynos8895',
+      'samsungexynos9810',
+      'samsungexynos7570',
+    };
+    final Set<String> knownEmulator = <String>{
+      'goldfish',
+      'ranchu',
+    };
+
+    for (final String hardware in knownPhyiscal.followedBy(knownEmulator)) {
       final AndroidDevice device = setUpAndroidDevice(
         processManager: FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
@@ -144,7 +160,7 @@ void main() {
         ])
       );
 
-      expect(await device.isLocalEmulator, kKnownHardware[hardware] == HardwareType.emulator);
+      expect(await device.isLocalEmulator, knownEmulator.contains(hardware));
     }
   });
 
@@ -342,7 +358,7 @@ flutter:
       ])
     );
 
-    expect(await device.lastLogcatTimestamp(), isNull);
+    expect(device.lastLogcatTimestamp, isNull);
   });
 
   testWithoutContext('AndroidDevice AdbLogReaders for past+future and future logs are not the same', () async {
@@ -641,7 +657,7 @@ const String kAdbShellGetprop = '''
 
 /// A mock Android Console that presents a connection banner and responds to
 /// "avd name" requests with the supplied name.
-class MockWorkingAndroidConsoleSocket extends Fake implements Socket {
+class MockWorkingAndroidConsoleSocket extends Mock implements Socket {
   MockWorkingAndroidConsoleSocket(this.avdName) {
     _controller.add('Android Console: Welcome!\n');
     // Include OK in the same packet here. In the response to "avd name"
@@ -667,13 +683,10 @@ class MockWorkingAndroidConsoleSocket extends Fake implements Socket {
       throw 'Unexpected command $text';
     }
   }
-
-  @override
-  void destroy() { }
 }
 
 /// An Android console socket that drops all input and returns no output.
-class MockUnresponsiveAndroidConsoleSocket extends Fake implements Socket {
+class MockUnresponsiveAndroidConsoleSocket extends Mock implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
@@ -681,13 +694,10 @@ class MockUnresponsiveAndroidConsoleSocket extends Fake implements Socket {
 
   @override
   void add(List<int> data) {}
-
-  @override
-  void destroy() { }
 }
 
 /// An Android console socket that drops all input and returns no output.
-class MockDisconnectingAndroidConsoleSocket extends Fake implements Socket {
+class MockDisconnectingAndroidConsoleSocket extends Mock implements Socket {
   MockDisconnectingAndroidConsoleSocket() {
     _controller.add('Android Console: Welcome!\n');
     // Include OK in the same packet here. In the response to "avd name"
@@ -704,7 +714,4 @@ class MockDisconnectingAndroidConsoleSocket extends Fake implements Socket {
   void add(List<int> data) {
     _controller.close();
   }
-
-  @override
-  void destroy() { }
 }

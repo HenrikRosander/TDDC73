@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
@@ -91,7 +93,7 @@ String getAarTaskFor(BuildInfo buildInfo) {
 /// For example, when [splitPerAbi] is true, multiple APKs are created.
 Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
-  final String productFlavor = androidBuildInfo.buildInfo.lowerCasedFlavor ?? '';
+  final String productFlavor = androidBuildInfo.buildInfo.flavor ?? '';
   final String flavorString = productFlavor.isEmpty ? '' : '-$productFlavor';
   if (androidBuildInfo.splitPerAbi) {
     return androidBuildInfo.targetArchs.map<String>((AndroidArch arch) {
@@ -410,7 +412,7 @@ Future<void> buildGradleApp({
 
   if (exitCode != 0) {
     if (detectedGradleError == null) {
-      BuildEvent('gradle-unknown-failure', flutterUsage: globals.flutterUsage).send();
+      BuildEvent('gradle-unkown-failure', flutterUsage: globals.flutterUsage).send();
       throwToolExit(
         'Gradle task $assembleTask failed with exit code $exitCode',
         exitCode: exitCode,
@@ -608,7 +610,7 @@ Future<void> buildGradleAar({
   }
   if (buildInfo.dartObfuscation) {
     if (buildInfo.mode == BuildMode.debug || buildInfo.mode == BuildMode.profile) {
-      globals.printStatus('Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)} mode, building as un-obfuscated.');
+      globals.printStatus('Dart obfuscation is not supported in ${toTitleCase(buildInfo.friendlyModeName)} mode, building as unobfuscated.');
     } else {
       command.add('-Pdart-obfuscation=true');
     }
@@ -901,7 +903,7 @@ Iterable<String> listApkPaths(
   final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
   final List<String> apkPartialName = <String>[
     if (androidBuildInfo.buildInfo.flavor?.isNotEmpty ?? false)
-      androidBuildInfo.buildInfo.lowerCasedFlavor,
+      androidBuildInfo.buildInfo.flavor,
     '$buildType.apk',
   ];
   if (androidBuildInfo.splitPerAbi) {
@@ -938,7 +940,7 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo) {
     // the directory name is `foo_barRelease`.
     fileCandidates.add(
       getBundleDirectory(project)
-        .childDirectory('${buildInfo.lowerCasedFlavor}${camelCase('_' + buildInfo.modeName)}')
+        .childDirectory('${buildInfo.flavor}${camelCase('_' + buildInfo.modeName)}')
         .childFile('app.aab'));
 
     // The Android Gradle plugin 3.5.0 adds the flavor name to file name.
@@ -946,8 +948,8 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo) {
     // the file name name is `app-foo_bar-release.aab`.
     fileCandidates.add(
       getBundleDirectory(project)
-        .childDirectory('${buildInfo.lowerCasedFlavor}${camelCase('_' + buildInfo.modeName)}')
-        .childFile('app-${buildInfo.lowerCasedFlavor}-${buildInfo.modeName}.aab'));
+        .childDirectory('${buildInfo.flavor}${camelCase('_' + buildInfo.modeName)}')
+        .childFile('app-${buildInfo.flavor}-${buildInfo.modeName}.aab'));
   }
   for (final File bundleFile in fileCandidates) {
     if (bundleFile.existsSync()) {

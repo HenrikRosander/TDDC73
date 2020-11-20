@@ -1542,8 +1542,7 @@ abstract class DiagnosticsNode {
   ///
   /// See also:
   ///
-  ///  * [getProperties], which returns the properties of the [DiagnosticsNode]
-  ///    object.
+  ///  * [getProperties]
   List<DiagnosticsNode> getChildren();
 
   String get _separator => showSeparator ? ':' : '';
@@ -1660,7 +1659,9 @@ abstract class DiagnosticsNode {
         result = toStringDeep(
             parentConfiguration: parentConfiguration, minLevel: minLevel);
       } else {
-        final String description = toDescription(parentConfiguration: parentConfiguration)!;
+        String? description = toDescription(parentConfiguration: parentConfiguration);
+        assert(description != null);
+        description = description!;
 
         if (name == null || name!.isEmpty || !showName) {
           result = description;
@@ -1895,7 +1896,7 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
 
   _NumProperty.lazy(
     String name,
-    ComputePropertyValueCallback<T?> computeValue, {
+    ComputePropertyValueCallback<T> computeValue, {
     String? ifNull,
     this.unit,
     bool showName = true,
@@ -1982,7 +1983,7 @@ class DoubleProperty extends _NumProperty<double> {
   /// The [showName] and [level] arguments must not be null.
   DoubleProperty.lazy(
     String name,
-    ComputePropertyValueCallback<double?> computeValue, {
+    ComputePropertyValueCallback<double> computeValue, {
     String? ifNull,
     bool showName = true,
     String? unit,
@@ -2478,7 +2479,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
 ///    only one flag, and is preferred if there is only one entry.
 ///  * [IterableProperty], which provides similar functionality describing
 ///    the values a collection of objects.
-class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
+class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
   /// Create a summary for multiple properties, indicating whether each of them
   /// is present (non-null) or absent (null).
   ///
@@ -2486,7 +2487,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
   /// null.
   FlagsSummary(
     String name,
-    Map<String, T?> value, {
+    Map<String, T> value, {
     String? ifEmpty,
     bool showName = true,
     bool showSeparator = true,
@@ -2505,7 +2506,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
        );
 
   @override
-  Map<String, T?> get value => super.value!;
+  Map<String, T> get value => super.value as Map<String, T>;
 
   @override
   String valueToString({TextTreeConfiguration? parentConfiguration}) {
@@ -2543,7 +2544,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
     return json;
   }
 
-  bool _hasNonNullEntry() => value.values.any((T? o) => o != null);
+  bool _hasNonNullEntry() => value.values.any((T o) => o != null);
 
   // An iterable of each entry's description in [value].
   //
@@ -2552,7 +2553,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
   // For a null value, it is omitted unless `includeEmtpy` is true and
   // [ifEntryNull] contains a corresponding description.
   Iterable<String> _formattedValues() sync* {
-    for (final MapEntry<String, T?> entry in value.entries) {
+    for (final MapEntry<String, T> entry in value.entries) {
       if (entry.value != null) {
         yield entry.key;
       }
@@ -2565,7 +2566,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T?>> {
 /// May throw exception if accessing the property would throw an exception
 /// and callers must handle that case gracefully. For example, accessing a
 /// property may trigger an assert that layout constraints were violated.
-typedef ComputePropertyValueCallback<T> = T? Function();
+typedef ComputePropertyValueCallback<T> = T Function();
 
 /// Property with a [value] of type [T].
 ///
@@ -2649,7 +2650,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(showSeparator != null),
-       assert(defaultValue == kNoDefaultValue || defaultValue is T?),
+       assert(defaultValue == kNoDefaultValue || defaultValue is T),
        assert(missingIfNull != null),
        assert(style != null),
        assert(level != null),
@@ -2846,8 +2847,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// of the property is downgraded to [DiagnosticLevel.fine] as the property
   /// value is uninteresting.
   ///
-  /// The [defaultValue] is [kNoDefaultValue] by default. Otherwise it must be of
-  /// type `T?`.
+  /// [defaultValue] has type [T] or is [kNoDefaultValue].
   final Object? defaultValue;
 
   final DiagnosticLevel _defaultLevel;

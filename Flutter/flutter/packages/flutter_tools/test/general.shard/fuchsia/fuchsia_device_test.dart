@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -60,11 +59,13 @@ final vm_service.Isolate fakeIsolate = vm_service.Isolate(
 void main() {
   group('fuchsia device', () {
     MemoryFileSystem memoryFileSystem;
-    File sshConfig;
+    MockFile sshConfig;
 
     setUp(() {
-      memoryFileSystem = MemoryFileSystem.test();
-      sshConfig = memoryFileSystem.file('ssh_config')..writeAsStringSync('\n');
+      memoryFileSystem = MemoryFileSystem();
+      sshConfig = MockFile();
+      when(sshConfig.existsSync()).thenReturn(true);
+      when(sshConfig.absolute).thenReturn(sshConfig);
     });
 
     testWithoutContext('stores the requested id and name', () {
@@ -291,14 +292,14 @@ void main() {
   group('displays friendly error when', () {
     MockProcessManager mockProcessManager;
     MockProcessResult mockProcessResult;
-    File artifactFile;
+    MockFile mockFile;
     MockProcessManager emptyStdoutProcessManager;
     MockProcessResult emptyStdoutProcessResult;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
       mockProcessResult = MockProcessResult();
-      artifactFile = MemoryFileSystem.test().file('artifact');
+      mockFile = MockFile();
       when(mockProcessManager.run(
         any,
         environment: anyNamed('environment'),
@@ -308,6 +309,8 @@ void main() {
       when(mockProcessResult.exitCode).thenReturn(1);
       when<String>(mockProcessResult.stdout as String).thenReturn('');
       when<String>(mockProcessResult.stderr as String).thenReturn('');
+      when(mockFile.absolute).thenReturn(mockFile);
+      when(mockFile.path).thenReturn('');
 
       emptyStdoutProcessManager = MockProcessManager();
       emptyStdoutProcessResult = MockProcessResult();
@@ -337,8 +340,8 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => emptyStdoutProcessManager,
       FuchsiaArtifacts: () => FuchsiaArtifacts(
-            sshConfig: artifactFile,
-            devFinder: artifactFile,
+            sshConfig: mockFile,
+            devFinder: mockFile,
           ),
       FuchsiaSdk: () => MockFuchsiaSdk(),
     });
@@ -358,8 +361,8 @@ void main() {
       Completer<int> exitCode;
       StreamController<List<int>> stdout;
       StreamController<List<int>> stderr;
-      File devFinder;
-      File sshConfig;
+      MockFile devFinder;
+      MockFile sshConfig;
 
       setUp(() {
         mockProcessManager = MockProcessManager();
@@ -372,9 +375,12 @@ void main() {
         when(mockProcess.exitCode).thenAnswer((Invocation _) => exitCode.future);
         when(mockProcess.stdout).thenAnswer((Invocation _) => stdout.stream);
         when(mockProcess.stderr).thenAnswer((Invocation _) => stderr.stream);
-        final FileSystem memoryFileSystem = MemoryFileSystem.test();
-        devFinder = memoryFileSystem.file('device-finder')..writeAsStringSync('\n');
-        sshConfig = memoryFileSystem.file('ssh_config')..writeAsStringSync('\n');
+        devFinder = MockFile();
+        sshConfig = MockFile();
+        when(devFinder.existsSync()).thenReturn(true);
+        when(sshConfig.existsSync()).thenReturn(true);
+        when(devFinder.absolute).thenReturn(devFinder);
+        when(sshConfig.absolute).thenReturn(sshConfig);
       });
 
       tearDown(() {
@@ -693,11 +699,15 @@ void main() {
 
   group('portForwarder', () {
     MockProcessManager mockProcessManager;
-    File sshConfig;
+    MockFile sshConfig;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
-      sshConfig = MemoryFileSystem.test().file('irrelevant')..writeAsStringSync('\n');
+
+      sshConfig = MockFile();
+      when(sshConfig.path).thenReturn('irrelevant');
+      when(sshConfig.existsSync()).thenReturn(true);
+      when(sshConfig.absolute).thenReturn(sshConfig);
     });
 
     testUsingContext('`unforward` prints stdout and stderr if ssh command failed', () async {
@@ -710,7 +720,7 @@ void main() {
       when(mockProcessManager.run(<String>[
         'ssh',
         '-F',
-        sshConfig.absolute.path,
+        'irrelevant',
         '-O',
         'cancel',
         '-vvv',
@@ -759,13 +769,10 @@ void main() {
         fuchsiaDevice,
         expectedIsolateName,
         (Uri uri) async => fakeVmServiceHost.vmService,
-        (Device device, Uri uri, bool enableServiceAuthCodes) => null,
+        (Device device, Uri uri) => null,
         true, // only poll once.
       );
-      final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
-      when(fuchsiaDevice.dds).thenReturn(mockDds);
-      when(mockDds.startDartDevelopmentService(any, any, any, any)).thenReturn(null);
-      when(mockDds.uri).thenReturn(Uri.parse('example'));
+
       when(fuchsiaDevice.servicePorts())
           .thenAnswer((Invocation invocation) async => <int>[1]);
       when(portForwarder.forward(1))
@@ -827,10 +834,9 @@ void main() {
   });
 
   testUsingContext('Correct flutter runner', () async {
-    final Cache cache = Cache.test(
-      processManager: FakeProcessManager.any(),
-    );
+    final MockCache cache = MockCache();
     final FileSystem fileSystem = MemoryFileSystem.test();
+    when(cache.getArtifactDirectory('flutter_runner')).thenReturn(fileSystem.directory('fuchsia'));
     final CachedArtifacts artifacts = CachedArtifacts(
       cache: cache,
       fileSystem: fileSystem,
@@ -872,37 +878,46 @@ void main() {
     FakeFuchsiaDeviceTools fuchsiaDeviceTools;
     MockFuchsiaSdk fuchsiaSdk;
     MockFuchsiaArtifacts fuchsiaArtifacts;
-    Artifacts artifacts;
+    MockArtifacts mockArtifacts;
+
+    File compilerSnapshot;
+    File platformDill;
+    File patchedSdk;
+    File runner;
 
     setUp(() {
-      memoryFileSystem = MemoryFileSystem.test();
+      memoryFileSystem = MemoryFileSystem();
       osUtils = FakeOperatingSystemUtils();
       fuchsiaDeviceTools = FakeFuchsiaDeviceTools();
       fuchsiaSdk = MockFuchsiaSdk();
       fuchsiaArtifacts = MockFuchsiaArtifacts();
 
-      artifacts = Artifacts.test();
-      for (final BuildMode mode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
-        memoryFileSystem.file(
-          artifacts.getArtifactPath(Artifact.fuchsiaKernelCompiler,
-              platform: TargetPlatform.fuchsia_arm64, mode: mode),
-        ).createSync();
+      compilerSnapshot = memoryFileSystem.file('kernel_compiler.snapshot')..createSync();
+      platformDill = memoryFileSystem.file('platform_strong.dill')..createSync();
+      patchedSdk = memoryFileSystem.file('flutter_runner_patched_sdk')..createSync();
+      runner = memoryFileSystem.file('flutter_jit_runner')..createSync();
 
-        memoryFileSystem.file(
-          artifacts.getArtifactPath(Artifact.platformKernelDill,
-              platform: TargetPlatform.fuchsia_arm64, mode: mode),
-        ).createSync();
-
-        memoryFileSystem.file(
-          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath,
-              platform: TargetPlatform.fuchsia_arm64, mode: mode),
-        ).createSync();
-
-        memoryFileSystem.file(
-          artifacts.getArtifactPath(Artifact.fuchsiaFlutterRunner,
-              platform: TargetPlatform.fuchsia_arm64, mode: mode),
-        ).createSync();
-      }
+      mockArtifacts = MockArtifacts();
+      when(mockArtifacts.getArtifactPath(
+        Artifact.fuchsiaKernelCompiler,
+        platform: anyNamed('platform'),
+        mode: anyNamed('mode'),
+      )).thenReturn(compilerSnapshot.path);
+      when(mockArtifacts.getArtifactPath(
+        Artifact.platformKernelDill,
+        platform: anyNamed('platform'),
+        mode: anyNamed('mode'),
+      )).thenReturn(platformDill.path);
+      when(mockArtifacts.getArtifactPath(
+        Artifact.flutterPatchedSdkPath,
+        platform: anyNamed('platform'),
+        mode: anyNamed('mode'),
+      )).thenReturn(patchedSdk.path);
+      when(mockArtifacts.getArtifactPath(
+        Artifact.fuchsiaFlutterRunner,
+        platform: anyNamed('platform'),
+        mode: anyNamed('mode'),
+      )).thenReturn(runner.path);
     });
 
     Future<LaunchResult> setupAndStartApp({
@@ -942,7 +957,7 @@ void main() {
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
-      Artifacts: () => artifacts,
+      Artifacts: () => mockArtifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
@@ -969,7 +984,7 @@ void main() {
       expect(launchResult.hasObservatory, isFalse);
       expect(await device.stopApp(app), isTrue);
     }, overrides: <Type, Generator>{
-      Artifacts: () => artifacts,
+      Artifacts: () => mockArtifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
@@ -984,7 +999,7 @@ void main() {
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isTrue);
     }, overrides: <Type, Generator>{
-      Artifacts: () => artifacts,
+      Artifacts: () => mockArtifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
@@ -999,7 +1014,7 @@ void main() {
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
-      Artifacts: () => artifacts,
+      Artifacts: () => mockArtifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
@@ -1014,7 +1029,7 @@ void main() {
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isTrue);
     }, overrides: <Type, Generator>{
-      Artifacts: () => artifacts,
+      Artifacts: () => mockArtifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
@@ -1029,7 +1044,7 @@ void main() {
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
-      Artifacts: () => artifacts,
+      Artifacts: () => mockArtifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
@@ -1044,7 +1059,7 @@ void main() {
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
-      Artifacts: () => artifacts,
+      Artifacts: () => mockArtifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
@@ -1059,7 +1074,7 @@ void main() {
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
-      Artifacts: () => artifacts,
+      Artifacts: () => mockArtifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => FakeFuchsiaDeviceTools(amber: FailingAmberCtl()),
@@ -1074,7 +1089,7 @@ void main() {
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
-      Artifacts: () => artifacts,
+      Artifacts: () => mockArtifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FuchsiaDeviceTools: () => FakeFuchsiaDeviceTools(tiles: FailingTilesCtl()),
@@ -1086,7 +1101,7 @@ void main() {
   });
 
   group('sdkNameAndVersion: ', () {
-    File sshConfig;
+    MockFile sshConfig;
     MockProcessManager mockSuccessProcessManager;
     MockProcessResult mockSuccessProcessResult;
     MockProcessManager mockFailureProcessManager;
@@ -1095,7 +1110,9 @@ void main() {
     MockProcessResult emptyStdoutProcessResult;
 
     setUp(() {
-      sshConfig = MemoryFileSystem.test().file('ssh_config')..writeAsStringSync('\n');
+      sshConfig = MockFile();
+      when(sshConfig.existsSync()).thenReturn(true);
+      when(sshConfig.absolute).thenReturn(sshConfig);
 
       mockSuccessProcessManager = MockProcessManager();
       mockSuccessProcessResult = MockProcessResult();
@@ -1167,11 +1184,15 @@ class FuchsiaModulePackage extends ApplicationPackage {
   final String name;
 }
 
+class MockArtifacts extends Mock implements Artifacts {}
+
 class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
 
 class MockProcessManager extends Mock implements ProcessManager {}
 
 class MockProcessResult extends Mock implements ProcessResult {}
+
+class MockFile extends Mock implements File {}
 
 class MockProcess extends Mock implements Process {}
 
@@ -1579,5 +1600,5 @@ class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
   final FuchsiaDevFinder fuchsiaDevFinder;
 }
 
-class MockDartDevelopmentService extends Mock implements DartDevelopmentService {}
 class MockFuchsiaWorkflow extends Mock implements FuchsiaWorkflow {}
+class MockCache extends Mock implements Cache {}

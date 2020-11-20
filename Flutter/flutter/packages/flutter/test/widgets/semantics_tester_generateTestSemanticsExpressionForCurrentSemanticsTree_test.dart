@@ -5,6 +5,7 @@
 // @dart = 2.8
 
 @TestOn('!chrome')
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';

@@ -5,8 +5,6 @@
 import 'dart:math' as math;
 import 'package:meta/meta.dart';
 
-import 'task_result.dart';
-
 const String kBenchmarkTypeKeyName = 'benchmark_type';
 const String kBenchmarkVersionKeyName = 'version';
 const String kLocalEngineKeyName = 'local_engine';
@@ -60,7 +58,7 @@ class ABTest {
   /// The result may contain multiple score keys.
   ///
   /// [result] is expected to be a serialization of [TaskResult].
-  void addAResult(TaskResult result) {
+  void addAResult(Map<String, dynamic> result) {
     if (_runEnd != null) {
       throw StateError('Cannot add results to ABTest after it is finalized');
     }
@@ -72,7 +70,7 @@ class ABTest {
   /// The result may contain multiple score keys.
   ///
   /// [result] is expected to be a serialization of [TaskResult].
-  void addBResult(TaskResult result) {
+  void addBResult(Map<String, dynamic> result) {
     if (_runEnd != null) {
       throw StateError('Cannot add results to ABTest after it is finalized');
     }
@@ -278,9 +276,11 @@ class _ScoreSummary {
   }
 }
 
-void _addResult(TaskResult result, Map<String, List<double>> results) {
-  for (final String scoreKey in result.benchmarkScoreKeys) {
-    final double score = (result.data[scoreKey] as num).toDouble();
+void _addResult(Map<String, dynamic> result, Map<String, List<double>> results) {
+  final List<String> scoreKeys = (result['benchmarkScoreKeys'] as List<dynamic>).cast<String>();
+  final Map<String, dynamic> data = result['data'] as Map<String, dynamic>;
+  for (final String scoreKey in scoreKeys) {
+    final double score = (data[scoreKey] as num).toDouble();
     results.putIfAbsent(scoreKey, () => <double>[]).add(score);
   }
 }

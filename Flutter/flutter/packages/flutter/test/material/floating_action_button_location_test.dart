@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -77,11 +79,11 @@ void main() {
     });
 
     group('interrupts in-progress animations without jumps', () {
-      _GeometryListener? geometryListener;
-      ScaffoldGeometry? geometry;
-      _GeometryListenerState? listenerState;
-      Size? previousRect;
-      Iterable<double>? previousRotations;
+      _GeometryListener geometryListener;
+      ScaffoldGeometry geometry;
+      _GeometryListenerState listenerState;
+      Size previousRect;
+      Iterable<double> previousRotations;
 
       // The maximum amounts we expect the fab width and height to change
       // during one step of a transition.
@@ -98,13 +100,13 @@ void main() {
         // Measure the delta in width and height of the fab, and check that it never grows
         // by more than the expected maximum deltas.
         void check() {
-          geometry = listenerState?.cache.value;
-          final Size? currentRect = geometry?.floatingActionButtonArea?.size;
+          geometry = listenerState.cache.value;
+          final Size currentRect = geometry.floatingActionButtonArea?.size;
           // Measure the delta in width and height of the rect, and check that
           // it never grows by more than a safe amount.
           if (previousRect != null && currentRect != null) {
-            final double deltaWidth = currentRect.width - previousRect!.width;
-            final double deltaHeight = currentRect.height - previousRect!.height;
+            final double deltaWidth = currentRect.width - previousRect.width;
+            final double deltaHeight = currentRect.height - previousRect.height;
             expect(
               deltaWidth.abs(),
               lessThanOrEqualTo(maxDeltaWidth),
@@ -133,15 +135,15 @@ void main() {
           final Iterable<double> currentRotations = rotationTransitions.map(
               (RotationTransition t) => t.turns.value);
 
-          if (previousRotations != null && previousRotations!.isNotEmpty
+          if (previousRotations != null && previousRotations.isNotEmpty
               && currentRotations != null && currentRotations.isNotEmpty
               && previousRect != null && currentRect != null) {
             final List<double> deltas = <double>[];
             for (final double currentRotation in currentRotations) {
-              late double minDelta;
-              for (final double previousRotation in previousRotations!) {
+              double minDelta;
+              for (final double previousRotation in previousRotations) {
                 final double delta = (previousRotation - currentRotation).abs();
-                minDelta = delta;
+                minDelta ??= delta;
                 minDelta = min(delta, minDelta);
               }
               deltas.add(minDelta);
@@ -159,7 +161,7 @@ void main() {
         }
 
         listenerState = tester.state(find.byType(_GeometryListener));
-        listenerState!.geometryListenable!.addListener(check);
+        listenerState.geometryListenable.addListener(check);
       }
 
       setUp(() {
@@ -633,11 +635,11 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.star),
-                  label: '0',
+                  title: Text('0'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.star_border),
-                  label: '1',
+                  title: Text('1'),
                 ),
               ],
               currentIndex: 0,
@@ -647,7 +649,7 @@ void main() {
               builder: (BuildContext context) {
                 return FloatingActionButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context)!.showSnackBar(
+                    Scaffold.of(context).showSnackBar(
                       const SnackBar(content: Text('Snacky!')),
                     );
                   },
@@ -675,10 +677,10 @@ void main() {
     Future<void> _runFloatTests(
       WidgetTester tester,
       FloatingActionButtonLocation location, {
-      required Rect defaultRect,
-      required Rect bottomNavigationBarRect,
-      required Rect bottomSheetRect,
-      required Rect snackBarRect,
+      Rect defaultRect,
+      Rect bottomNavigationBarRect,
+      Rect bottomSheetRect,
+      Rect snackBarRect,
       bool mini = false,
     }) async  {
       const double keyboardHeight = 200.0;
@@ -1048,10 +1050,10 @@ void main() {
     Future<void> _runDockedTests(
       WidgetTester tester,
       FloatingActionButtonLocation location, {
-      required Rect defaultRect,
-      required Rect bottomNavigationBarRect,
-      required Rect bottomSheetRect,
-      required Rect snackBarRect,
+      Rect defaultRect,
+      Rect bottomNavigationBarRect,
+      Rect bottomSheetRect,
+      Rect snackBarRect,
       bool mini = false,
     }) async  {
       const double keyboardHeight = 200.0;
@@ -1383,8 +1385,8 @@ void main() {
     Future<void> _runTopTests(
       WidgetTester tester,
       FloatingActionButtonLocation location, {
-      required Rect defaultRect,
-      required Rect appBarRect,
+      Rect defaultRect,
+      Rect appBarRect,
       bool mini = false,
     }) async  {
       const double viewPadding = 50.0;
@@ -1506,8 +1508,8 @@ class _GeometryListenerState extends State<_GeometryListener> {
   }
 
   int numNotifications = 0;
-  ValueListenable<ScaffoldGeometry>? geometryListenable;
-  late _GeometryCachePainter cache;
+  ValueListenable<ScaffoldGeometry> geometryListenable;
+  _GeometryCachePainter cache;
 
   @override
   void didChangeDependencies() {
@@ -1517,11 +1519,11 @@ class _GeometryListenerState extends State<_GeometryListener> {
       return;
 
     if (geometryListenable != null)
-      geometryListenable!.removeListener(onGeometryChanged);
+      geometryListenable.removeListener(onGeometryChanged);
 
     geometryListenable = newListenable;
-    geometryListenable!.addListener(onGeometryChanged);
-    cache = _GeometryCachePainter(geometryListenable!);
+    geometryListenable.addListener(onGeometryChanged);
+    cache = _GeometryCachePainter(geometryListenable);
   }
 
   void onGeometryChanged() {
@@ -1543,7 +1545,7 @@ const double _miniFloatOffsetY = _floatOffsetY + kMiniButtonOffsetAdjustment;
 Widget _singleFabScaffold(
   FloatingActionButtonLocation location,
   {
-    FloatingActionButtonAnimator? animator,
+    FloatingActionButtonAnimator animator,
     bool mini = false,
     TextDirection textDirection = TextDirection.ltr,
   }
@@ -1559,11 +1561,11 @@ Widget _singleFabScaffold(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
-              label: 'Home',
+              title: Text('Home'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.school),
-              label: 'School',
+              title: Text('School'),
             ),
           ],
         ),
@@ -1587,7 +1589,7 @@ class _GeometryCachePainter extends CustomPainter {
 
   final ValueListenable<ScaffoldGeometry> geometryListenable;
 
-  late ScaffoldGeometry value;
+  ScaffoldGeometry value;
   @override
   void paint(Canvas canvas, Size size) {
     value = geometryListenable.value;
@@ -1600,15 +1602,15 @@ class _GeometryCachePainter extends CustomPainter {
 }
 
 Widget buildFrame({
-  FloatingActionButton? fab = const FloatingActionButton(
+  FloatingActionButton fab = const FloatingActionButton(
     onPressed: null,
     child: Text('1'),
   ),
-  FloatingActionButtonLocation? location,
-  _GeometryListener? listener,
+  FloatingActionButtonLocation location,
+  _GeometryListener listener,
   TextDirection textDirection = TextDirection.ltr,
   EdgeInsets viewInsets = const EdgeInsets.only(bottom: 200.0),
-  Widget? bab,
+  Widget bab,
 }) {
   return Localizations(
     locale: const Locale('en', 'us'),
@@ -1675,17 +1677,17 @@ class _QuarterEndTopFabLocation extends StandardFabLocation
 
 class _LinearMovementFabAnimator extends FloatingActionButtonAnimator {
   @override
-  Offset getOffset({required Offset begin, required Offset end, required double progress}) {
-    return Offset.lerp(begin, end, progress)!;
+  Offset getOffset({@required Offset begin, @required Offset end, @required double progress}) {
+    return Offset.lerp(begin, end, progress);
   }
 
   @override
-  Animation<double> getScaleAnimation({required Animation<double> parent}) {
+  Animation<double> getScaleAnimation({@required Animation<double> parent}) {
     return const AlwaysStoppedAnimation<double>(1.0);
   }
 
   @override
-  Animation<double> getRotationAnimation({required Animation<double> parent}) {
+  Animation<double> getRotationAnimation({@required Animation<double> parent}) {
     return const AlwaysStoppedAnimation<double>(1.0);
   }
 }

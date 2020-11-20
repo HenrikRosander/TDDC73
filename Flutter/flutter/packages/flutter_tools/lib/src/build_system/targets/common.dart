@@ -161,12 +161,8 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
   List<Target> get dependencies => const <Target>[];
 }
 
+
 /// Generate a snapshot of the dart code used in the program.
-///
-/// Note that this target depends on the `.dart_tool/package_config.json` file
-/// even though it is not listed as an input. Pub inserts a timestamp into
-/// the file which causes unnecessary rebuilds, so instead a subset of the contents
-/// are used an input instead.
 class KernelSnapshot extends Target {
   const KernelSnapshot();
 
@@ -175,7 +171,7 @@ class KernelSnapshot extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
+    Source.pattern('{PROJECT_DIR}/.packages'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     Source.artifact(Artifact.platformKernelDill),
     Source.artifact(Artifact.engineDartBinary),
@@ -202,8 +198,6 @@ class KernelSnapshot extends Target {
       logger: environment.logger,
       processManager: environment.processManager,
       artifacts: environment.artifacts,
-      fileSystemRoots: <String>[],
-      fileSystemScheme: null,
     );
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'kernel_snapshot');
@@ -213,9 +207,7 @@ class KernelSnapshot extends Target {
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String targetFile = environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
-    final File packagesFile = environment.projectDir
-      .childDirectory('.dart_tool')
-      .childFile('package_config.json');
+    final File packagesFile = environment.projectDir.childFile('.packages');
     final String targetFileAbsolute = environment.fileSystem.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
@@ -246,7 +238,7 @@ class KernelSnapshot extends Target {
     }
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packagesFile,
+      environment.projectDir.childFile('.packages'),
       logger: environment.logger,
     );
 
@@ -347,6 +339,7 @@ class AotElfProfile extends AotElfBase {
   List<Source> get inputs => <Source>[
     const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.pattern('{PROJECT_DIR}/.packages'),
     const Source.artifact(Artifact.engineDartBinary),
     const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
@@ -379,6 +372,7 @@ class AotElfRelease extends AotElfBase {
   List<Source> get inputs => <Source>[
     const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.pattern('{PROJECT_DIR}/.packages'),
     const Source.artifact(Artifact.engineDartBinary),
     const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,

@@ -10,7 +10,6 @@ import 'package:path/path.dart' as path;
 
 import '../framework/adb.dart';
 import '../framework/framework.dart';
-import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 final Directory _editedFlutterGalleryDir = dir(path.join(Directory.systemTemp.path, 'edited_flutter_gallery'));
@@ -26,7 +25,7 @@ TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> env
     final File benchmarkFile = file(path.join(_editedFlutterGalleryDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
     final List<String> options = <String>[
-      '--hot', '-d', deviceIdOverride, '--benchmark', '--verbose', '--resident',
+      '--hot', '-d', deviceIdOverride, '--benchmark', '--verbose', '--resident', '--output-dill', path.join('build', 'app.dill')
     ];
     int hotReloadCount = 0;
     Map<String, dynamic> twoReloadsData;

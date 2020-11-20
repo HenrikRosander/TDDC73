@@ -84,7 +84,6 @@ abstract class FlutterTestDriver {
     String script,
     bool withDebugger = false,
     File pidFile,
-    bool singleWidgetReloads = false,
   }) async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     if (withDebugger) {
@@ -108,12 +107,7 @@ abstract class FlutterTestDriver {
         .toList(),
       workingDirectory: _projectFolder.path,
       // The web environment variable has the same effect as `flutter config --enable-web`.
-      environment: <String, String>{
-        'FLUTTER_TEST': 'true',
-        'FLUTTER_WEB': 'true',
-        if (singleWidgetReloads)
-          'FLUTTER_SINGLE_WIDGET_RELOAD': 'true',
-      },
+      environment: <String, String>{'FLUTTER_TEST': 'true', 'FLUTTER_WEB': 'true'},
     );
 
     // This class doesn't use the result of the future. It's made available
@@ -376,7 +370,7 @@ abstract class FlutterTestDriver {
         if (json['params'] != null && json['params']['trace'] != null) {
           error.write('${json['params']['trace']}\n\n');
         }
-        response.completeError(Exception(error.toString()));
+        response.completeError(error.toString());
       }
     });
 
@@ -448,7 +442,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool expressionEvaluation = true,
     bool structuredErrors = false,
     bool machine = true,
-    bool singleWidgetReloads = false,
     File pidFile,
     String script,
   }) async {
@@ -459,7 +452,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           '--disable-service-auth-codes',
         if (machine) '--machine',
         if (!spawnDdsInstance) '--disable-dds',
-        ...getLocalEngineArguments(),
         '-d',
         if (chrome)
           ...<String>[
@@ -477,7 +469,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       pauseOnExceptions: pauseOnExceptions,
       pidFile: pidFile,
       script: script,
-      singleWidgetReloads: singleWidgetReloads,
     );
   }
 
@@ -487,12 +478,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool startPaused = false,
     bool pauseOnExceptions = false,
     File pidFile,
-    bool singleWidgetReloads = false,
   }) async {
     await _setupProcess(
       <String>[
         'attach',
-         ...getLocalEngineArguments(),
         '--machine',
         if (!spawnDdsInstance)
           '--disable-dds',
@@ -505,7 +494,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       startPaused: startPaused,
       pauseOnExceptions: pauseOnExceptions,
       pidFile: pidFile,
-      singleWidgetReloads: singleWidgetReloads,
     );
   }
 
@@ -516,7 +504,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
-    bool singleWidgetReloads = false,
     File pidFile,
   }) async {
     assert(!startPaused || withDebugger);
@@ -525,7 +512,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       script: script,
       withDebugger: withDebugger,
       pidFile: pidFile,
-      singleWidgetReloads: singleWidgetReloads,
     );
 
     final Completer<void> prematureExitGuard = Completer<void>();
@@ -536,7 +522,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     // fast.
     unawaited(_process.exitCode.then((_) {
       if (!prematureExitGuard.isCompleted) {
-        prematureExitGuard.completeError(Exception('Process exited prematurely: ${args.join(' ')}: $_errorBuffer'));
+        prematureExitGuard.completeError('Process exited prematurely: ${args.join(' ')}: $_errorBuffer');
       }
     }));
 
@@ -567,7 +553,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         _currentRunningAppId = (await started)['params']['appId'] as String;
         prematureExitGuard.complete();
       } on Exception catch (error, stackTrace) {
-        prematureExitGuard.completeError(Exception(error.toString()), stackTrace);
+        prematureExitGuard.completeError(error, stackTrace);
       }
     }());
 
@@ -586,6 +572,19 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       'app.callServiceExtension',
       <String, dynamic>{'appId': _currentRunningAppId, 'methodName': 'ext.ui.window.scheduleFrame'},
     );
+  }
+
+  Future<void> reloadMethod({ String libraryId, String classId }) async {
+    if (_currentRunningAppId == null) {
+      throw Exception('App has not started yet');
+    }
+    final dynamic reloadMethodResponse = await _sendRequest(
+      'app.reloadMethod',
+      <String, dynamic>{'appId': _currentRunningAppId, 'class': classId, 'library': libraryId},
+    );
+    if (reloadMethodResponse == null || reloadMethodResponse['code'] != 0) {
+      _throwErrorResponse('reloadMethodResponse request failed');
+    }
   }
 
   Future<void> _restart({ bool fullRestart = false, bool pause = false, bool debounce = false, int debounceDurationOverrideMs }) async {
@@ -706,7 +705,6 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   }) async {
     await _setupProcess(<String>[
       'test',
-       ...getLocalEngineArguments(),
       '--disable-service-auth-codes',
       '--machine',
       if (coverage)
@@ -722,14 +720,12 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     bool pauseOnExceptions = false,
     File pidFile,
     Future<void> Function() beforeStart,
-    bool singleWidgetReloads = false,
   }) async {
     await super._setupProcess(
       args,
       script: script,
       withDebugger: withDebugger,
       pidFile: pidFile,
-      singleWidgetReloads: singleWidgetReloads,
     );
 
     // Stash the PID so that we can terminate the VM more reliably than using
@@ -801,11 +797,11 @@ Stream<String> transformToLines(Stream<List<int>> byteStream) {
 }
 
 Map<String, dynamic> parseFlutterResponse(String line) {
-  if (line.startsWith('[') && line.endsWith(']') && line.length > 2) {
+  if (line.startsWith('[') && line.endsWith(']')) {
     try {
       final Map<String, dynamic> response = castStringKeyedMap(json.decode(line)[0]);
       return response;
-    } on FormatException {
+    } on Exception {
       // Not valid JSON, so likely some other output that was surrounded by [brackets]
       return null;
     }

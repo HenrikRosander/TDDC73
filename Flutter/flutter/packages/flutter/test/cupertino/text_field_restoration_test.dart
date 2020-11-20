@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -14,9 +16,9 @@ const String alternativeText = 'Everything is awesome!!';
 void main() {
   testWidgets('CupertinoTextField restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const CupertinoApp(
-        restorationScopeId: 'app',
-        home: TestWidget(),
+      const RootRestorationScope(
+        child: TestWidget(),
+        restorationId: 'root',
       ),
     );
 
@@ -25,11 +27,11 @@ void main() {
 
   testWidgets('CupertinoTextField restoration with external controller', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const CupertinoApp(
-        restorationScopeId: 'app',
-        home: TestWidget(
+      const RootRestorationScope(
+        child: TestWidget(
           useExternal: true,
         ),
+        restorationId: 'root',
       ),
     );
 
@@ -73,7 +75,7 @@ Future<void> restoreAndVerify(WidgetTester tester) async {
 }
 
 class TestWidget extends StatefulWidget {
-  const TestWidget({Key? key, this.useExternal = false}) : super(key: key);
+  const TestWidget({Key key, this.useExternal = false}) : super(key: key);
 
   final bool useExternal;
 
@@ -88,7 +90,7 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
   String get restorationId => 'widget';
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
     registerForRestoration(controller, 'controller');
   }
 
@@ -100,15 +102,17 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Align(
-        alignment: Alignment.center,
-        child: SizedBox(
-          width: 50,
-          child: CupertinoTextField(
-            restorationId: 'text',
-            maxLines: 3,
-            controller: widget.useExternal ? controller.value : null,
+    return MaterialApp(
+      home: Material(
+        child: Align(
+          alignment: Alignment.center,
+          child: SizedBox(
+            width: 50,
+            child: CupertinoTextField(
+              restorationId: 'text',
+              maxLines: 3,
+              controller: widget.useExternal ? controller.value : null,
+            ),
           ),
         ),
       ),

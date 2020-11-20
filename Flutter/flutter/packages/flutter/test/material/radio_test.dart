@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -16,7 +18,7 @@ import '../widgets/semantics_tester.dart';
 void main() {
   testWidgets('Radio control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
-    final List<int?> log = <int?>[];
+    final List<int> log = <int>[];
 
     await tester.pumpWidget(Material(
       child: Center(
@@ -68,7 +70,7 @@ void main() {
 
   testWidgets('Radio can be toggled when toggleable is set', (WidgetTester tester) async {
     final Key key = UniqueKey();
-    final List<int?> log = <int?>[];
+    final List<int> log = <int>[];
 
     await tester.pumpWidget(Material(
       child: Center(
@@ -101,7 +103,7 @@ void main() {
 
     await tester.tap(find.byKey(key));
 
-    expect(log, equals(<int?>[null]));
+    expect(log, equals(<int>[null]));
     log.clear();
 
     await tester.pumpWidget(Material(
@@ -134,7 +136,7 @@ void main() {
                 key: key1,
                 groupValue: true,
                 value: true,
-                onChanged: (bool? newValue) { },
+                onChanged: (bool newValue) { },
               ),
             ),
           ),
@@ -156,7 +158,7 @@ void main() {
                 key: key2,
                 groupValue: true,
                 value: true,
-                onChanged: (bool? newValue) { },
+                onChanged: (bool newValue) { },
               ),
             ),
           ),
@@ -175,7 +177,7 @@ void main() {
       child: Radio<int>(
         value: 1,
         groupValue: 2,
-        onChanged: (int? i) { },
+        onChanged: (int i) { },
       ),
     ));
 
@@ -201,7 +203,7 @@ void main() {
       child: Radio<int>(
         value: 2,
         groupValue: 2,
-        onChanged: (int? i) { },
+        onChanged: (int i) { },
       ),
     ));
 
@@ -291,7 +293,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
     dynamic semanticEvent;
-    int? radioValue = 2;
+    int radioValue = 2;
     SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
       semanticEvent = message;
     });
@@ -301,7 +303,7 @@ void main() {
         key: key,
         value: 1,
         groupValue: radioValue,
-        onChanged: (int? i) {
+        onChanged: (int i) {
           radioValue = i;
         },
       ),
@@ -313,10 +315,10 @@ void main() {
     expect(radioValue, 1);
     expect(semanticEvent, <String, dynamic>{
       'type': 'tap',
-      'nodeId': object.debugSemantics!.id,
+      'nodeId': object.debugSemantics.id,
       'data': <String, dynamic>{},
     });
-    expect(object.debugSemantics!.getSemanticsData().hasAction(SemanticsAction.tap), true);
+    expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.tap), true);
 
     semantics.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);
@@ -340,7 +342,7 @@ void main() {
                 key: radioKey,
                 value: 1,
                 groupValue: 1,
-                onChanged: (int? value) { },
+                onChanged: (int value) { },
               ),
             ),
           ),
@@ -359,7 +361,7 @@ void main() {
   testWidgets('Radio is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    int? groupValue = 0;
+    int groupValue = 0;
     const Key radioKey = Key('radio');
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -373,7 +375,7 @@ void main() {
                 child: Radio<int>(
                   key: radioKey,
                   value: 0,
-                  onChanged: enabled ? (int? newValue) {
+                  onChanged: enabled ? (int newValue) {
                     setState(() {
                       groupValue = newValue;
                     });
@@ -437,7 +439,7 @@ void main() {
 
   testWidgets('Radio can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    int? groupValue = 0;
+    int groupValue = 0;
     const Key radioKey = Key('radio');
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -451,7 +453,7 @@ void main() {
                 child: Radio<int>(
                   key: radioKey,
                   value: 0,
-                  onChanged: enabled ? (int? newValue) {
+                  onChanged: enabled ? (int newValue) {
                     setState(() {
                       groupValue = newValue;
                     });
@@ -517,7 +519,7 @@ void main() {
 
   testWidgets('Radio can be controlled by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    int? groupValue = 1;
+    int groupValue = 1;
     const Key radioKey0 = Key('radio0');
     const Key radioKey1 = Key('radio1');
     const Key radioKey2 = Key('radio2');
@@ -536,7 +538,7 @@ void main() {
                     Radio<int>(
                       key: radioKey0,
                       value: 0,
-                      onChanged: enabled ? (int? newValue) {
+                      onChanged: enabled ? (int newValue) {
                         setState(() {
                           groupValue = newValue;
                         });
@@ -548,7 +550,7 @@ void main() {
                     Radio<int>(
                       key: radioKey1,
                       value: 1,
-                      onChanged: enabled ? (int? newValue) {
+                      onChanged: enabled ? (int newValue) {
                         setState(() {
                           groupValue = newValue;
                         });
@@ -559,7 +561,7 @@ void main() {
                     Radio<int>(
                       key: radioKey2,
                       value: 2,
-                      onChanged: enabled ? (int? newValue) {
+                      onChanged: enabled ? (int newValue) {
                         setState(() {
                           groupValue = newValue;
                         });
@@ -603,7 +605,7 @@ void main() {
               child: Radio<int>(
                 visualDensity: visualDensity,
                 key: key,
-                onChanged: (int? value) {},
+                onChanged: (int value) {},
                 value: 0,
                 groupValue: 0,
               ),
@@ -646,7 +648,7 @@ void main() {
                   key: key,
                   mouseCursor: SystemMouseCursors.text,
                   value: 1,
-                  onChanged: (int? v) {},
+                  onChanged: (int v) {},
                   groupValue: 2,
                 ),
               ),
@@ -662,7 +664,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
 
     // Test default cursor
@@ -676,7 +678,7 @@ void main() {
                 cursor: SystemMouseCursors.forbidden,
                 child: Radio<int>(
                   value: 1,
-                  onChanged: (int? v) {},
+                  onChanged: (int v) {},
                   groupValue: 2,
                 ),
               ),
@@ -686,7 +688,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -709,6 +711,6 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 }

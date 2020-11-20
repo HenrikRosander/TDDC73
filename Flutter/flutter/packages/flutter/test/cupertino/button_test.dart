@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/scheduler.dart';
@@ -149,11 +151,11 @@ void main() {
 
     expect(value, isFalse);
     // No animating by default.
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
     await tester.tap(find.byType(CupertinoButton));
     expect(value, isTrue);
     // Animates.
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
   });
 
   testWidgets("Disabled button doesn't animate", (WidgetTester tester) async {
@@ -161,10 +163,10 @@ void main() {
       child: Text('Tap me'),
       onPressed: null,
     )));
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
     await tester.tap(find.byType(CupertinoButton));
     // Still doesn't animate.
-    expect(SchedulerBinding.instance!.transientCallbackCount, equals(0));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
   testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
@@ -293,7 +295,7 @@ void main() {
       find.widgetWithText(DecoratedBox, 'Skeuomorph me')
     ).decoration as BoxDecoration;
 
-    expect(boxDecoration.color!.value, 0xFF654321);
+    expect(boxDecoration.color.value, 0xFF654321);
 
     await tester.pumpWidget(
       MediaQuery(
@@ -312,11 +314,11 @@ void main() {
     ).decoration as BoxDecoration;
 
     // Disabled color.
-    expect(boxDecoration.color!.value, 0xFF111111);
+    expect(boxDecoration.color.value, 0xFF111111);
   });
 
   testWidgets('Button respects themes', (WidgetTester tester) async {
-    late TextStyle textStyle;
+    TextStyle textStyle;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -390,7 +392,7 @@ void main() {
   });
 }
 
-Widget boilerplate({ required Widget child }) {
+Widget boilerplate({ Widget child }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(child: child),

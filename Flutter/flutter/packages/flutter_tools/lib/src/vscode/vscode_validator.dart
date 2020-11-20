@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/file_system.dart';
-import '../base/platform.dart';
+import 'dart:async';
+
 import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../doctor.dart';
+import '../globals.dart' as globals;
 import 'vscode.dart';
 
 class VsCodeValidator extends DoctorValidator {
@@ -14,9 +15,9 @@ class VsCodeValidator extends DoctorValidator {
 
   final VsCode _vsCode;
 
-  static Iterable<DoctorValidator> installedValidators(FileSystem fileSystem, Platform platform) {
+  static Iterable<DoctorValidator> get installedValidators {
     return VsCode
-        .allInstalled(fileSystem, platform)
+        .allInstalled(globals.fs, globals.platform)
         .map<DoctorValidator>((VsCode vsCode) => VsCodeValidator(vsCode));
   }
 
@@ -26,8 +27,12 @@ class VsCodeValidator extends DoctorValidator {
         ? null
         : userMessages.vsCodeVersion(_vsCode.version.toString());
 
+    final ValidationType validationType = _vsCode.isValid
+        ? ValidationType.installed
+        : ValidationType.partial;
+
     return ValidationResult(
-      ValidationType.installed,
+      validationType,
       _vsCode.validationMessages.toList(),
       statusInfo: vsCodeVersionText,
     );

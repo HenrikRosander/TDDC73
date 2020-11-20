@@ -23,7 +23,7 @@ void main() {
     Platform platform;
 
     setUp(() {
-      fileSystem = MemoryFileSystem.test();
+      fileSystem = MemoryFileSystem();
       final Directory cacheRoot = fileSystem.directory('root')
         ..createSync();
       platform = FakePlatform(operatingSystem: 'linux');
@@ -110,7 +110,7 @@ void main() {
     Platform platform;
 
     setUp(() {
-      fileSystem = MemoryFileSystem.test();
+      fileSystem = MemoryFileSystem();
       final Directory cacheRoot = fileSystem.directory('root')
         ..createSync();
       platform = FakePlatform(operatingSystem: 'linux');

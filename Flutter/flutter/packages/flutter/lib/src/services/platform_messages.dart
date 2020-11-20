@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -65,7 +66,7 @@ class BinaryMessages {
     'Use defaultBinaryMessenger.send instead. '
     'This feature was deprecated after v1.6.5.'
   )
-  static Future<ByteData?>? send(String channel, ByteData? message) {
+  static Future<ByteData?> send(String channel, ByteData? message) {
     return _binaryMessenger.send(channel, message);
   }
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -43,11 +45,11 @@ class ElevationOverlay {
   ///  * <https://material.io/design/color/dark-theme.html>, which specifies how
   ///    the overlay should be applied.
   static Color applyOverlay(BuildContext context, Color color, double elevation) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     if (elevation > 0.0 &&
         theme.applyElevationOverlayColor &&
         theme.brightness == Brightness.dark &&
-        color.withOpacity(1.0) == theme.colorScheme.surface.withOpacity(1.0)) {
+        color == theme.colorScheme.surface) {
       return Color.alphaBlend(overlayColor(context, elevation), color);
     }
     return color;
@@ -61,7 +63,7 @@ class ElevationOverlay {
   ///  * https://material.io/design/color/dark-theme.html#properties which
   ///    specifies the exact overlay values for a given elevation.
   static Color overlayColor(BuildContext context, double elevation) {
-    final ThemeData theme = Theme.of(context)!;
+    final ThemeData theme = Theme.of(context);
     // Compute the opacity for the given elevation
     // This formula matches the values in the spec:
     // https://material.io/design/color/dark-theme.html#properties

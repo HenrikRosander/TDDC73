@@ -94,7 +94,7 @@ class DialogDemoState extends State<DialogDemo> {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
         children: <Widget>[
-          ElevatedButton(
+          RaisedButton(
             child: const Text('ALERT'),
             onPressed: () {
               showDemoDialog<DialogDemoAction>(
@@ -105,11 +105,11 @@ class DialogDemoState extends State<DialogDemo> {
                     style: dialogTextStyle,
                   ),
                   actions: <Widget>[
-                    TextButton(
+                    FlatButton(
                       child: const Text('CANCEL'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.cancel); },
                     ),
-                    TextButton(
+                    FlatButton(
                       child: const Text('DISCARD'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.discard); },
                     ),
@@ -118,7 +118,7 @@ class DialogDemoState extends State<DialogDemo> {
               );
             },
           ),
-          ElevatedButton(
+          RaisedButton(
             child: const Text('ALERT WITH TITLE'),
             onPressed: () {
               showDemoDialog<DialogDemoAction>(
@@ -130,11 +130,11 @@ class DialogDemoState extends State<DialogDemo> {
                     style: dialogTextStyle,
                   ),
                   actions: <Widget>[
-                    TextButton(
+                    FlatButton(
                       child: const Text('DISAGREE'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.disagree); },
                     ),
-                    TextButton(
+                    FlatButton(
                       child: const Text('AGREE'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.agree); },
                     ),
@@ -143,7 +143,7 @@ class DialogDemoState extends State<DialogDemo> {
               );
             },
           ),
-          ElevatedButton(
+          RaisedButton(
             child: const Text('SIMPLE'),
             onPressed: () {
               showDemoDialog<String>(
@@ -173,7 +173,7 @@ class DialogDemoState extends State<DialogDemo> {
               );
             },
           ),
-          ElevatedButton(
+          RaisedButton(
             child: const Text('CONFIRMATION'),
             onPressed: () {
               showTimePicker(
@@ -190,7 +190,7 @@ class DialogDemoState extends State<DialogDemo> {
               });
             },
           ),
-          ElevatedButton(
+          RaisedButton(
             child: const Text('FULLSCREEN'),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute<DismissDialogAction>(

@@ -21,7 +21,7 @@ void main() {
   FileSystem fs;
   setUp(() {
     logger = BufferLogger.test();
-    fs = MemoryFileSystem.test();
+    fs = MemoryFileSystem();
   });
 
   group('GitHub template creator', () {
@@ -170,7 +170,7 @@ void main() {
             _kShortURL
         );
       }, overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
+        FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => FakeProcessManager.any(),
       });
 
@@ -196,7 +196,7 @@ void main() {
         );
         expect(logger.traceText, contains('Failed to shorten GitHub template URL'));
       }, overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem.test(),
+        FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => FakeProcessManager.any(),
       });
 

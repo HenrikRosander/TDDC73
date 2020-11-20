@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,28 +11,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'feedback_tester.dart';
 
 void main() {
-  late DateTime firstDate;
-  late DateTime lastDate;
-  late DateTime? currentDate;
-  late DateTimeRange? initialDateRange;
-  late DatePickerEntryMode initialEntryMode = DatePickerEntryMode.calendar;
+  DateTime firstDate;
+  DateTime lastDate;
+  DateTimeRange initialDateRange;
+  DatePickerEntryMode initialEntryMode = DatePickerEntryMode.calendar;
 
-  String? cancelText;
-  String? confirmText;
-  String? errorInvalidRangeText;
-  String? errorFormatText;
-  String? errorInvalidText;
-  String? fieldStartHintText;
-  String? fieldEndHintText;
-  String? fieldStartLabelText;
-  String? fieldEndLabelText;
-  String? helpText;
-  String? saveText;
+  String cancelText;
+  String confirmText;
+  String errorInvalidRangeText;
+  String errorFormatText;
+  String errorInvalidText;
+  String fieldStartHintText;
+  String fieldEndHintText;
+  String fieldStartLabelText;
+  String fieldEndLabelText;
+  String helpText;
+  String saveText;
 
   setUp(() {
     firstDate = DateTime(2015, DateTime.january, 1);
     lastDate = DateTime(2016, DateTime.december, 31);
-    currentDate = null;
     initialDateRange = DateTimeRange(
       start: DateTime(2016, DateTime.january, 15),
       end: DateTime(2016, DateTime.january, 25),
@@ -55,7 +55,7 @@ void main() {
     Future<void> callback(Future<DateTimeRange> date),
     { TextDirection textDirection = TextDirection.ltr }
   ) async {
-    late BuildContext buttonContext;
+    BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Builder(
@@ -79,7 +79,6 @@ void main() {
       initialDateRange: initialDateRange,
       firstDate: firstDate,
       lastDate: lastDate,
-      currentDate: currentDate,
       initialEntryMode: initialEntryMode,
       cancelText: cancelText,
       confirmText: confirmText,
@@ -92,10 +91,10 @@ void main() {
       fieldEndLabelText: fieldEndLabelText,
       helpText: helpText,
       saveText: saveText,
-      builder: (BuildContext context, Widget? child) {
+      builder: (BuildContext context, Widget child) {
         return Directionality(
           textDirection: textDirection,
-          child: child ?? const SizedBox(),
+          child: child,
         );
       },
     );
@@ -108,8 +107,8 @@ void main() {
     helpText = 'help';
     saveText = 'make it so';
     await preparePicker(tester, (Future<DateTimeRange> range) async {
-      expect(find.text(helpText!), findsOneWidget);
-      expect(find.text(saveText!), findsOneWidget);
+      expect(find.text(helpText), findsOneWidget);
+      expect(find.text(saveText), findsOneWidget);
     });
   });
 
@@ -120,52 +119,6 @@ void main() {
         start: DateTime(2016, DateTime.january, 15),
         end: DateTime(2016, DateTime.january, 25)
       ));
-    });
-  });
-
-  testWidgets('Last month header should be visible if last date is selected',
-      (WidgetTester tester) async {
-    firstDate = DateTime(2015, DateTime.january, 1);
-    lastDate = DateTime(2016, DateTime.december, 31);
-    initialDateRange = DateTimeRange(
-      start: lastDate,
-      end: lastDate,
-    );
-    await preparePicker(tester, (Future<DateTimeRange> range) async {
-      // December header should be showing, but no November
-      expect(find.text('December 2016'), findsOneWidget);
-      expect(find.text('November 2016'), findsNothing);
-    });
-  });
-
-  testWidgets('First month header should be visible if first date is selected',
-      (WidgetTester tester) async {
-    firstDate = DateTime(2015, DateTime.january, 1);
-    lastDate = DateTime(2016, DateTime.december, 31);
-    initialDateRange = DateTimeRange(
-      start: firstDate,
-      end: firstDate,
-    );
-    await preparePicker(tester, (Future<DateTimeRange> range) async {
-      // January and February headers should be showing, but no March
-      expect(find.text('January 2015'), findsOneWidget);
-      expect(find.text('February 2015'), findsOneWidget);
-      expect(find.text('March 2015'), findsNothing);
-    });
-  });
-
-  testWidgets('Current month header should be visible if no date is selected',
-      (WidgetTester tester) async {
-    firstDate = DateTime(2015, DateTime.january, 1);
-    lastDate = DateTime(2016, DateTime.december, 31);
-    currentDate = DateTime(2016, DateTime.september, 1);
-    initialDateRange = null;
-
-    await preparePicker(tester, (Future<DateTimeRange> range) async {
-      // September and October headers should be showing, but no August
-      expect(find.text('September 2016'), findsOneWidget);
-      expect(find.text('October 2016'), findsOneWidget);
-      expect(find.text('August 2016'), findsNothing);
     });
   });
 
@@ -254,52 +207,6 @@ void main() {
     });
   });
 
-  group('Toggle from input entry mode validates dates', () {
-    setUp(() {
-      initialEntryMode = DatePickerEntryMode.input;
-    });
-
-    testWidgets('Invalid start date', (WidgetTester tester) async {
-      // Invalid start date should have neither a start nor end date selected in
-      // calendar mode
-      await preparePicker(tester, (Future<DateTimeRange> range) async {
-        await tester.enterText(find.byType(TextField).at(0), '12/27/1918');
-        await tester.enterText(find.byType(TextField).at(1), '12/25/2016');
-        await tester.tap(find.byIcon(Icons.calendar_today));
-        await tester.pumpAndSettle();
-
-        expect(find.text('Start Date'), findsOneWidget);
-        expect(find.text('End Date'), findsOneWidget);
-      });
-    });
-
-    testWidgets('Invalid end date', (WidgetTester tester) async {
-      // Invalid end date should only have a start date selected
-      await preparePicker(tester, (Future<DateTimeRange> range) async {
-        await tester.enterText(find.byType(TextField).at(0), '12/24/2016');
-        await tester.enterText(find.byType(TextField).at(1), '12/25/2050');
-        await tester.tap(find.byIcon(Icons.calendar_today));
-        await tester.pumpAndSettle();
-
-        expect(find.text('Dec 24'), findsOneWidget);
-        expect(find.text('End Date'), findsOneWidget);
-      });
-    });
-
-    testWidgets('Invalid range', (WidgetTester tester) async {
-      // Start date after end date should just use the start date
-      await preparePicker(tester, (Future<DateTimeRange> range) async {
-        await tester.enterText(find.byType(TextField).at(0), '12/25/2016');
-        await tester.enterText(find.byType(TextField).at(1), '12/24/2016');
-        await tester.tap(find.byIcon(Icons.calendar_today));
-        await tester.pumpAndSettle();
-
-        expect(find.text('Dec 25'), findsOneWidget);
-        expect(find.text('End Date'), findsOneWidget);
-      });
-    });
-  });
-
   testWidgets('OK Cancel button layout', (WidgetTester tester) async {
      Widget buildFrame(TextDirection textDirection) {
        return MaterialApp(
@@ -314,10 +221,10 @@ void main() {
                        context: context,
                        firstDate:DateTime(2001, DateTime.january, 1),
                        lastDate: DateTime(2031, DateTime.december, 31),
-                       builder: (BuildContext context, Widget? child) {
+                       builder: (BuildContext context, Widget child) {
                          return Directionality(
                            textDirection: textDirection,
-                           child: child ?? const SizedBox(),
+                           child: child,
                          );
                        },
                      );
@@ -358,7 +265,7 @@ void main() {
 
   group('Haptic feedback', () {
     const Duration hapticFeedbackInterval = Duration(milliseconds: 10);
-    late FeedbackTester feedback;
+    FeedbackTester feedback;
 
     setUp(() {
       feedback = FeedbackTester();
@@ -371,7 +278,7 @@ void main() {
     });
 
     tearDown(() {
-      feedback.dispose();
+      feedback?.dispose();
     });
 
     testWidgets('Selecting dates vibrates', (WidgetTester tester) async {
@@ -465,10 +372,10 @@ void main() {
 
     testWidgets('Navigating with arrow keys scrolls as needed', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange> range) async {
-        // Jan and Feb headers should be showing, but no March
+        // Jan and Feb headers should be showing, but no Mar
         expect(find.text('January 2016'), findsOneWidget);
         expect(find.text('February 2016'), findsOneWidget);
-        expect(find.text('March 2016'), findsNothing);
+        expect(find.text('Mar 2016'), findsNothing);
 
         // Navigate to the grid
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -604,13 +511,13 @@ void main() {
       fieldEndLabelText = 'label2';
       helpText = 'help';
       await preparePicker(tester, (Future<DateTimeRange> range) async {
-        expect(find.text(cancelText!), findsOneWidget);
-        expect(find.text(confirmText!), findsOneWidget);
-        expect(find.text(fieldStartHintText!), findsOneWidget);
-        expect(find.text(fieldEndHintText!), findsOneWidget);
-        expect(find.text(fieldStartLabelText!), findsOneWidget);
-        expect(find.text(fieldEndLabelText!), findsOneWidget);
-        expect(find.text(helpText!), findsOneWidget);
+        expect(find.text(cancelText), findsOneWidget);
+        expect(find.text(confirmText), findsOneWidget);
+        expect(find.text(fieldStartHintText), findsOneWidget);
+        expect(find.text(fieldEndHintText), findsOneWidget);
+        expect(find.text(fieldStartLabelText), findsOneWidget);
+        expect(find.text(fieldEndLabelText), findsOneWidget);
+        expect(find.text(helpText), findsOneWidget);
       });
     });
 
@@ -669,11 +576,11 @@ void main() {
       await preparePicker(tester, (Future<DateTimeRange> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/25');
         await tester.enterText(find.byType(TextField).at(1), '12/25');
-        expect(find.text(errorFormatText!), findsNothing);
+        expect(find.text(errorFormatText), findsNothing);
 
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
-        expect(find.text(errorFormatText!), findsNWidgets(2));
+        expect(find.text(errorFormatText), findsNWidgets(2));
       });
     });
 
@@ -683,11 +590,11 @@ void main() {
       await preparePicker(tester, (Future<DateTimeRange> range) async {
         await tester.enterText(find.byType(TextField).at(0), '20202014');
         await tester.enterText(find.byType(TextField).at(1), '20212014');
-        expect(find.text(errorFormatText!), findsNothing);
+        expect(find.text(errorFormatText), findsNothing);
 
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
-        expect(find.text(errorFormatText!), findsNWidgets(2));
+        expect(find.text(errorFormatText), findsNWidgets(2));
       });
     });
 
@@ -697,11 +604,11 @@ void main() {
       await preparePicker(tester, (Future<DateTimeRange> range) async {
         await tester.enterText(find.byType(TextField).at(0), '08/08/2014');
         await tester.enterText(find.byType(TextField).at(1), '08/08/2014');
-        expect(find.text(errorInvalidText!), findsNothing);
+        expect(find.text(errorInvalidText), findsNothing);
 
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
-        expect(find.text(errorInvalidText!), findsNWidgets(2));
+        expect(find.text(errorInvalidText), findsNWidgets(2));
       });
     });
 
@@ -711,11 +618,11 @@ void main() {
       await preparePicker(tester, (Future<DateTimeRange> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/27/2016');
         await tester.enterText(find.byType(TextField).at(1), '12/25/2016');
-        expect(find.text(errorInvalidRangeText!), findsNothing);
+        expect(find.text(errorInvalidRangeText), findsNothing);
 
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
-        expect(find.text(errorInvalidRangeText!), findsOneWidget);
+        expect(find.text(errorInvalidRangeText), findsOneWidget);
       });
     });
 
@@ -725,11 +632,11 @@ void main() {
       await preparePicker(tester, (Future<DateTimeRange> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/27/2016');
         await tester.enterText(find.byType(TextField).at(1), '01/01/2018');
-        expect(find.text(errorInvalidText!), findsNothing);
+        expect(find.text(errorInvalidText), findsNothing);
 
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
-        expect(find.text(errorInvalidText!), findsOneWidget);
+        expect(find.text(errorInvalidText), findsOneWidget);
       });
     });
 
@@ -766,7 +673,7 @@ void main() {
         expect(containerColor, equals(expectedContainerColor));
       }
 
-      late BuildContext buttonContext;
+      BuildContext buttonContext;
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData.light().copyWith(

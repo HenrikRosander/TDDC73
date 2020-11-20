@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -29,7 +30,7 @@ void main() {
     environment = Environment.test(
       fileSystem.currentDirectory,
       processManager: FakeProcessManager.any(),
-      artifacts: Artifacts.test(),
+      artifacts: MockArtifacts(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
     );
@@ -247,3 +248,5 @@ flutter:
     expect(logger.errorText, isEmpty);
   });
 }
+
+class MockArtifacts extends Mock implements Artifacts {}

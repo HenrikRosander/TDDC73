@@ -4,6 +4,8 @@
 
 // @dart = 2.8
 
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -2442,7 +2444,7 @@ void main() {
       );
 
       // But don't trigger the toolbar.
-      expect(find.byType(TextButton), findsNothing);
+      expect(find.byType(FlatButton), findsNothing);
     },
   );
 
@@ -2564,7 +2566,7 @@ void main() {
       );
 
       // Selected text shows 2 toolbar buttons: copy, select all
-      expect(find.byType(TextButton), findsNWidgets(2));
+      expect(find.byType(FlatButton), findsNWidgets(2));
     },
   );
 
@@ -2613,7 +2615,7 @@ void main() {
       );
 
       // Selected text shows 2 toolbar buttons: copy, select all
-      expect(find.byType(TextButton), findsNWidgets(2));
+      expect(find.byType(FlatButton), findsNWidgets(2));
     },
   );
 
@@ -2769,7 +2771,7 @@ void main() {
       );
 
       // Collapsed toolbar shows 2 buttons: copy, select all
-      expect(find.byType(TextButton), findsNWidgets(2));
+      expect(find.byType(FlatButton), findsNWidgets(2));
     },
   );
 
@@ -3175,7 +3177,7 @@ void main() {
 
     await gesture.up();
     await tester.pump();
-    expect(find.byType(TextButton), findsNothing);
+    expect(find.byType(FlatButton), findsNothing);
   });
 
   testWidgets('force press selects word', (WidgetTester tester) async {
@@ -4009,34 +4011,5 @@ void main() {
       );
       expect(state.selectionOverlay.handlesAreVisible, isFalse);
     }
-  });
-
-  testWidgets('onSelectionChanged is called when selection changes', (WidgetTester tester) async {
-    int onSelectionChangedCallCount = 0;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: SelectableText(
-            'abc def ghi',
-            onSelectionChanged: (TextSelection selection, SelectionChangedCause cause) {
-              onSelectionChangedCallCount += 1;
-            },
-          ),
-        ),
-      ),
-    );
-
-    // Long press to select 'abc'.
-    final Offset aLocation = textOffsetToPosition(tester, 1);
-    await tester.longPressAt(aLocation);
-    await tester.pump();
-    expect(onSelectionChangedCallCount, equals(1));
-
-    // Tap on 'Select all' option to select the whole text.
-    await tester.longPressAt(textOffsetToPosition(tester, 5));
-    await tester.pump();
-    await tester.tap(find.text('Select all'));
-    expect(onSelectionChangedCallCount, equals(2));
   });
 }

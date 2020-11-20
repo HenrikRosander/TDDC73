@@ -115,7 +115,7 @@ void main() {
       ]),
     ]);
 
-    await const DebugUniversalFramework().build(environment);
+    await const DebugUniveralFramework().build(environment);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

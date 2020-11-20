@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -77,7 +79,7 @@ void main() {
             PopupMenuButton<void>(
               key: popupButtonKey,
               itemBuilder: (BuildContext context) {
-                return <PopupMenuEntry<void>>[
+                return <PopupMenuEntry<Object>>[
                   PopupMenuItem<void>(
                     key: popupItemKey,
                     child: const Text('Example'),
@@ -137,7 +139,7 @@ void main() {
               key: popupButtonKey,
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<Object>>[
-                  PopupMenuItem<Object>(
+                  PopupMenuItem<void>(
                     key: popupItemKey,
                     child: const Text('Example'),
                   ),
@@ -204,7 +206,7 @@ void main() {
               color: color,
               shape: shape,
               itemBuilder: (BuildContext context) {
-                return <PopupMenuEntry<void>>[
+                return <PopupMenuEntry<Object>>[
                   PopupMenuItem<void>(
                     key: popupItemKey,
                     textStyle: textStyle,
@@ -268,7 +270,7 @@ void main() {
               child: PopupMenuButton<void>(
                 key: popupButtonKey,
                 itemBuilder: (BuildContext context) {
-                  return <PopupMenuEntry<void>>[
+                  return <PopupMenuEntry<Object>>[
                     PopupMenuItem<void>(
                       key: popupItemKey,
                       child: const Text('Example'),

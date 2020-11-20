@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-
-import 'task_result.dart';
-import 'utils.dart';
-
-final String platformLineSep = Platform.isWindows ? '\r\n' : '\n';
+import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/utils.dart';
 
 final List<String> flutterAssets = <String>[
   'assets/flutter_assets/AssetManifest.json',
@@ -270,8 +268,8 @@ subprojects {
     final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = await pubspec.readAsString();
     content = content.replaceFirst(
-      '${platformLineSep}dependencies:$platformLineSep',
-      '${platformLineSep}dependencies:$platformLineSep  $plugin:$platformLineSep',
+      '\ndependencies:\n',
+      '\ndependencies:\n  $plugin:\n',
     );
     await pubspec.writeAsString(content, flush: true);
   }
@@ -318,7 +316,7 @@ android {
       path.join(parent.path, 'hello', 'pubspec.yaml')
     );
     final String contents = pubspec.readAsStringSync();
-    final String newContents = contents.replaceFirst('# The following section is specific to Flutter.${platformLineSep}flutter:$platformLineSep', '''
+    final String newContents = contents.replaceFirst('# The following section is specific to Flutter.\nflutter:\n', '''
 flutter:
   assets:
     - lib/gallery/example_code.dart

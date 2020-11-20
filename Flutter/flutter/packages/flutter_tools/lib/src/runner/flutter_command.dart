@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
@@ -285,9 +287,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption(observatoryPortOption,
         help: '(deprecated use host-vmservice-port instead) '
               'Listen to the given port for an observatory debugger connection.\n'
-              'Specifying port 0 (the default) will find a random free port.\nNote: '
-              'if the Dart Development Service (DDS) is enabled, this will not be the port '
-              'of the Observatory instance advertised on the command line.',
+              'Specifying port 0 (the default) will find a random free port.',
     );
     argParser.addOption('device-vmservice-port',
       help: 'Look for vmservice connections only from the specified port.\n'
@@ -303,10 +303,6 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addDdsOptions({@required bool verboseHelp}) {
-    argParser.addOption('dds-port',
-      help: 'When this value is provided, the Dart Development Service (DDS) will be '
-            'bound to the provided port.\nSpecifying port 0 (the default) will find '
-            'a random free port.');
     argParser.addFlag(
       'disable-dds',
       hide: !verboseHelp,
@@ -317,15 +313,6 @@ abstract class FlutterCommand extends Command<void> {
             'Note: passing this flag may degrade IDE functionality if a DDS instance is not'
             ' already connected to the target application.'
     );
-  }
-
-  bool get disableDds => boolArg('disable-dds');
-
-  int get ddsPort {
-    if (argResults.wasParsed('dds-port')) {
-      return int.tryParse(stringArg('dds-port')) ?? 0;
-    }
-    return 0;
   }
 
   /// Gets the vmservice port provided to in the 'observatory-port' or
@@ -368,17 +355,6 @@ abstract class FlutterCommand extends Command<void> {
     }
     return null;
   }
-
-  void addPublishPort({ bool enabledByDefault = true, bool verboseHelp = false }) {
-    argParser.addFlag('publish-port',
-        negatable: true,
-        hide: !verboseHelp,
-        help: 'Publish the VM service port over mDNS. Disable to prevent the'
-            'local network permission app dialog in debug and profile build modes (iOS devices only.)',
-        defaultsTo: enabledByDefault);
-  }
-
-  bool get disablePortPublication => !boolArg('publish-port');
 
   void usesIpv6Flag() {
     argParser.addFlag(ipv6Flag,
@@ -484,7 +460,7 @@ abstract class FlutterCommand extends Command<void> {
         "with this flag, the 'flutter symbolize' command with the right program "
         'symbol file is required to obtain a human readable stack trace.\n'
         'This flag cannot be combined with --analyze-size',
-      valueHelp: 'v1.2.3/',
+      valueHelp: '/project-name/v1.2.3/',
     );
   }
 
@@ -511,7 +487,7 @@ abstract class FlutterCommand extends Command<void> {
         'during "flutter run". These can be included in an application to '
         'improve the first frame render times.',
       hide: hide,
-      valueHelp: 'flutter_1.sksl'
+      valueHelp: '/project-name/flutter_1.sksl'
     );
   }
 
@@ -553,7 +529,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(FlutterOptions.kNullAssertions,
       help:
         'Perform additional null assertions on the boundaries of migrated and '
-        'un-migrated code. This setting is not currently supported on desktop '
+        'unmigrated code. This setting is not currently supported on desktop '
         'devices.'
     );
   }
@@ -598,7 +574,7 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kPerformanceMeasurementFile,
       help:
         'The name of a file where flutter assemble performance and '
-        'cached-ness information will be written in a JSON format.'
+        'cachedness information will be written in a JSON format.'
     );
   }
 
@@ -774,10 +750,6 @@ abstract class FlutterCommand extends Command<void> {
     final String bundleSkSLPath = argParser.options.containsKey(FlutterOptions.kBundleSkSLPathOption)
       ? stringArg(FlutterOptions.kBundleSkSLPathOption)
       : null;
-
-    if (bundleSkSLPath != null && !globals.fs.isFileSync(bundleSkSLPath)) {
-      throwToolExit('No SkSL shader bundle found at $bundleSkSLPath.');
-    }
 
     final String performanceMeasurementFile = argParser.options.containsKey(FlutterOptions.kPerformanceMeasurementFile)
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
@@ -1020,18 +992,13 @@ abstract class FlutterCommand extends Command<void> {
   /// devices and criteria entered by the user on the command line.
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
-  Future<List<Device>> findAllTargetDevices({
-    bool includeUnsupportedDevices = false,
-  }) async {
+  Future<List<Device>> findAllTargetDevices() async {
     if (!globals.doctor.canLaunchAnything) {
       globals.printError(userMessages.flutterNoDevelopmentDevice);
       return null;
     }
     final DeviceManager deviceManager = globals.deviceManager;
-    List<Device> devices = await deviceManager.findTargetDevices(
-      includeUnsupportedDevices ? null : FlutterProject.current(),
-      timeout: deviceDiscoveryTimeout,
-    );
+    List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current(), timeout: deviceDiscoveryTimeout);
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
       globals.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId));
@@ -1067,7 +1034,7 @@ abstract class FlutterCommand extends Command<void> {
         devices = await deviceManager.getAllConnectedDevices();
       }
       globals.printStatus('');
-      await Device.printDevices(devices, globals.logger);
+      await Device.printDevices(devices);
       return null;
     }
     return devices;
@@ -1077,13 +1044,8 @@ abstract class FlutterCommand extends Command<void> {
   /// devices and criteria entered by the user on the command line.
   /// If a device cannot be found that meets specified criteria,
   /// then print an error message and return null.
-  ///
-  /// If [includeUnsupportedDevices] is true, the tool does not filter
-  /// the list by the current project support list.
-  Future<Device> findTargetDevice({
-    bool includeUnsupportedDevices = false,
-  }) async {
-    List<Device> deviceList = await findAllTargetDevices(includeUnsupportedDevices: includeUnsupportedDevices);
+  Future<Device> findTargetDevice() async {
+    List<Device> deviceList = await findAllTargetDevices();
     if (deviceList == null) {
       return null;
     }
@@ -1091,7 +1053,7 @@ abstract class FlutterCommand extends Command<void> {
       globals.printStatus(userMessages.flutterSpecifyDevice);
       deviceList = await globals.deviceManager.getAllConnectedDevices();
       globals.printStatus('');
-      await Device.printDevices(deviceList, globals.logger);
+      await Device.printDevices(deviceList);
       return null;
     }
     return deviceList.single;
@@ -1190,7 +1152,7 @@ mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
     // If there is no specified target device, fallback to the default
-    // configuration.
+    // confiugration.
     final String rawTargetPlatform = stringArg('target-platform');
     final TargetPlatform targetPlatform = getTargetPlatformForName(rawTargetPlatform);
     if (targetPlatform == null) {

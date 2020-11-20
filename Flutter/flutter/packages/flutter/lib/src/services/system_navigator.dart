@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 
+import 'dart:async';
+
 import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.

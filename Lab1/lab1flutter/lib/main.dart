@@ -68,7 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
+        resizeToAvoidBottomPadding: true,
+        appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
@@ -93,21 +94,78 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+            Transform.translate(
+              offset: const Offset(0.0, -80.0),
+              child: Image(
+                image: AssetImage('Images/Image.png'),
+                height: 150,
+                width: 150,
+
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+
+            Transform.translate(
+              offset: const Offset(-100.0, 15.0-50),
+              child: RaisedButton(
+                onPressed: () {  },
+                child:Text('BUTTON'),
+
+              ),
             ),
+            Transform.translate(
+              offset: const Offset(100.0, -32.0-50),
+              child: RaisedButton(
+                onPressed: () {  },
+                child:Text('BUTTON'),
+
+              ),
+            ),
+            Transform.translate(
+              offset: const Offset(-100.0, 15.0-50),
+              child: RaisedButton(
+                onPressed: () {  },
+                child:Text('BUTTON'),
+
+              ),
+            ), Transform.translate(
+              offset: const Offset(100.0, -32.0-50),
+              child: RaisedButton(
+                onPressed: () {  },
+                child:Text('BUTTON'),
+
+              ),
+            ),
+              Transform.translate(
+              offset: const Offset(-150.0, -7),
+              child: Text(
+                "Email",
+
+              ),
+              ),
+            Transform.translate(
+              offset:const Offset(100, -50),
+              child:
+                TextField(
+                  obscureText: false,
+
+                  decoration: InputDecoration(
+                      enabledBorder: const OutlineInputBorder(
+                        // width: 0.0 produces a thin "hairline" border
+                        borderSide: const BorderSide(color: Colors.red, width: 1.0),
+                      ),
+
+                      contentPadding: EdgeInsets.only(
+                        bottom: -10,  // HERE THE IMPORTANT PART
+                      )
+
+                  ),
+                )
+            )
+
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
+
      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }

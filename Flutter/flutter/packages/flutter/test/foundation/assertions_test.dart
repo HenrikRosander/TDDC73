@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 
@@ -57,10 +59,10 @@ void main() {
         '\n'
         'INFO\n'
         '═════════════════════════════════════════════════════════════════\n',
+
     );
     expect(
       FlutterErrorDetails(
-        exception: NullThrownError(),
         library: 'LIBRARY',
         context: ErrorDescription('CONTEXTING'),
         informationCollector: () sync* {
@@ -68,10 +70,11 @@ void main() {
         },
       ).toString(),
       '══╡ EXCEPTION CAUGHT BY LIBRARY ╞════════════════════════════════\n'
-      'The null value was thrown CONTEXTING.\n'
+      'The following Null object was thrown CONTEXTING:\n'
+      '  null\n'
       '\n'
       'INFO\n'
-      '═════════════════════════════════════════════════════════════════\n'
+      '═════════════════════════════════════════════════════════════════\n',
     );
     expect(
       FlutterErrorDetails(
@@ -113,10 +116,11 @@ void main() {
       '═════════════════════════════════════════════════════════════════\n',
     );
     expect(
-      FlutterErrorDetails(exception: NullThrownError()).toString(),
+      const FlutterErrorDetails().toString(),
       '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
-      'The null value was thrown.\n'
-      '═════════════════════════════════════════════════════════════════\n'
+      'The following Null object was thrown:\n'
+      '  null\n'
+      '═════════════════════════════════════════════════════════════════\n',
     );
   });
 
@@ -219,7 +223,7 @@ void main() {
 
   test('Malformed FlutterError objects', () {
     {
-      final AssertionError error;
+      AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[]);
       } on AssertionError catch (e) {
@@ -235,7 +239,7 @@ void main() {
     }
 
     {
-      final AssertionError error;
+      AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           (ErrorDescription('Error description without a summary'))]);
@@ -261,7 +265,7 @@ void main() {
     }
 
     {
-      final AssertionError error;
+      AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Error Summary A'),
@@ -298,7 +302,7 @@ void main() {
     }
 
     {
-      final AssertionError error;
+      AssertionError error;
       try {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorDescription('Some description'),
@@ -329,7 +333,7 @@ void main() {
 
   test('User-thrown exceptions have ErrorSummary properties', () {
     {
-      final DiagnosticsNode node;
+      DiagnosticsNode node;
       try {
         throw 'User thrown string';
       } catch (e) {
@@ -340,7 +344,7 @@ void main() {
     }
 
     {
-      final DiagnosticsNode node;
+      DiagnosticsNode node;
       try {
         throw ArgumentError.notNull('myArgument');
       } catch (e) {
@@ -438,7 +442,7 @@ void main() {
       ],
       replacement: 'test',
     );
-    final List<String?> reasons = List<String?>.filled(2, null);
+    final List<String> reasons = List<String>(2);
     filter.filter(
       const <StackFrame>[
         StackFrame(className: 'TestClass', method: 'test1', packageScheme: 'package', package: 'test', packagePath: 'blah.dart', line: 1, column: 1, number: 0, source: ''),
@@ -446,6 +450,6 @@ void main() {
       ],
       reasons,
     );
-    expect(reasons, List<String?>.filled(2, null));
+    expect(reasons, List<String>(2));
   });
 }

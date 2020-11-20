@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import '../flutter_test_alternative.dart';
 
@@ -45,10 +48,10 @@ void main() {
 
 class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   TestRenderSliverBoxChildManager({
-    required this.children,
+    this.children,
   });
 
-  RenderSliverMultiBoxAdaptor? _renderObject;
+  RenderSliverMultiBoxAdaptor _renderObject;
   List<RenderBox> children;
 
   RenderSliverFillViewport createRenderSliverFillViewport() {
@@ -56,18 +59,18 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
     _renderObject = RenderSliverFillViewport(
       childManager: this,
     );
-    return _renderObject! as RenderSliverFillViewport;
+    return _renderObject as RenderSliverFillViewport;
   }
 
-  int? _currentlyUpdatingChildIndex;
+  int _currentlyUpdatingChildIndex;
 
   @override
-  void createChild(int index, { required RenderBox? after }) {
+  void createChild(int index, { @required RenderBox after }) {
     if (index < 0 || index >= children.length)
       return;
     try {
       _currentlyUpdatingChildIndex = index;
-      _renderObject!.insert(children[index], after: after);
+      _renderObject.insert(children[index], after: after);
     } finally {
       _currentlyUpdatingChildIndex = null;
     }
@@ -75,19 +78,19 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   @override
   void removeChild(RenderBox child) {
-    _renderObject!.remove(child);
+    _renderObject.remove(child);
   }
 
   @override
   double estimateMaxScrollOffset(
     SliverConstraints constraints, {
-    int? firstIndex,
-    int? lastIndex,
-    double? leadingScrollOffset,
-    double? trailingScrollOffset,
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
   }) {
-    assert(lastIndex! >= firstIndex!);
-    return children.length * (trailingScrollOffset! - leadingScrollOffset!) / (lastIndex! - firstIndex! + 1);
+    assert(lastIndex >= firstIndex);
+    return children.length * (trailingScrollOffset - leadingScrollOffset) / (lastIndex - firstIndex + 1);
   }
 
   @override
@@ -96,7 +99,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 

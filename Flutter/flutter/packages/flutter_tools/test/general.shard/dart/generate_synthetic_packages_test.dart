@@ -33,12 +33,12 @@ void main() {
 
     final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
-    final Artifacts artifacts = Artifacts.test();
+    final Artifacts mockArtifacts = Artifacts.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: mockBufferLogger,
-      artifacts: artifacts,
+      artifacts: mockArtifacts,
       processManager: mockProcessManager,
     );
     final BuildSystem buildSystem = MockBuildSystem();
@@ -74,12 +74,12 @@ void main() {
 
     final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
-    final Artifacts artifacts = Artifacts.test();
+    final Artifacts mockArtifacts = Artifacts.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: mockBufferLogger,
-      artifacts: artifacts,
+      artifacts: mockArtifacts,
       processManager: mockProcessManager,
     );
     final BuildSystem buildSystem = MockBuildSystem();
@@ -115,11 +115,12 @@ void main() {
 
     final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
+    final Artifacts mockArtifacts = Artifacts.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: mockBufferLogger,
-      artifacts: Artifacts.test(),
+      artifacts: mockArtifacts,
       processManager: mockProcessManager,
     );
     final BuildSystem buildSystem = MockBuildSystem();
@@ -152,11 +153,12 @@ void main() {
 
     final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
+    final Artifacts mockArtifacts = Artifacts.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: mockBufferLogger,
-      artifacts: Artifacts.test(),
+      artifacts: mockArtifacts,
       processManager: mockProcessManager,
     );
     final BuildSystem buildSystem = MockBuildSystem();
@@ -189,11 +191,12 @@ void main() {
 
     final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
+    final Artifacts mockArtifacts = Artifacts.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: mockBufferLogger,
-      artifacts: Artifacts.test(),
+      artifacts: mockArtifacts,
       processManager: mockProcessManager,
     );
     final BuildSystem buildSystem = MockBuildSystem();
@@ -229,11 +232,12 @@ void main() {
 
     final FakeProcessManager mockProcessManager = FakeProcessManager.any();
     final BufferLogger mockBufferLogger = BufferLogger.test();
+    final Artifacts mockArtifacts = Artifacts.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       fileSystem: fileSystem,
       logger: mockBufferLogger,
-      artifacts: Artifacts.test(),
+      artifacts: mockArtifacts,
       processManager: mockProcessManager,
     );
     final BuildSystem buildSystem = MockBuildSystem();

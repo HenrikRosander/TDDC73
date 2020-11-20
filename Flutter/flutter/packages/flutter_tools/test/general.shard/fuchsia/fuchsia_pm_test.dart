@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/memory.dart';
+import 'dart:async';
+
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -17,12 +18,13 @@ import '../../src/mocks.dart';
 
 void main() {
   group('FuchsiaPM', () {
-    File pm;
+    MockFile pm;
     MockProcessManager mockProcessManager;
     MockFuchsiaArtifacts mockFuchsiaArtifacts;
 
     setUp(() {
-      pm = MemoryFileSystem.test().file('pm');
+      pm = MockFile();
+      when(pm.path).thenReturn('pm');
 
       mockFuchsiaArtifacts = MockFuchsiaArtifacts();
       when(mockFuchsiaArtifacts.pm).thenReturn(pm);
@@ -74,5 +76,6 @@ void main() {
 
 class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
 class MockProcessUtils extends Mock implements ProcessUtils {}
+class MockFile extends Mock implements File {}
 class MockProcess extends Mock implements Process {}
 class MockProcessManager extends Mock implements ProcessManager {}

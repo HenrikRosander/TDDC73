@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -37,7 +39,7 @@ class UpgradeCommand extends FlutterCommand {
       ..addOption(
         'working-directory',
         hide: true,
-        help: 'Override the upgrade working directory for integration testing.'
+        help: 'Override the upgrade working directoy for integration testing.'
       );
   }
 
@@ -107,7 +109,7 @@ class UpgradeCommandRunner {
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
       // If the commit is a recognized branch and not master,
       // explain that we are avoiding potential damage.
-      if (flutterVersion.channel != 'master' && kOfficialChannels.contains(flutterVersion.channel)) {
+      if (flutterVersion.channel != 'master' && FlutterVersion.officialChannels.contains(flutterVersion.channel)) {
         throwToolExit(
           'Unknown flutter tag. Abandoning upgrade to avoid destroying local '
           'changes. It is recommended to use git directly if not working on '
@@ -124,7 +126,7 @@ class UpgradeCommandRunner {
     }
     // If there are uncommitted changes we might be on the right commit but
     // we should still warn.
-    if (!force && await hasUncommittedChanges()) {
+    if (!force && await hasUncomittedChanges()) {
       throwToolExit(
         'Your flutter checkout has local changes that would be erased by '
         'upgrading. If you want to keep these changes, it is recommended that '
@@ -178,7 +180,7 @@ class UpgradeCommandRunner {
     globals.persistentToolState.redisplayWelcomeMessage = true;
   }
 
-  Future<bool> hasUncommittedChanges() async {
+  Future<bool> hasUncomittedChanges() async {
     try {
       final RunResult result = await processUtils.run(
         <String>['git', 'status', '-s'],

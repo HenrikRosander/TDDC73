@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,15 +13,15 @@ import '../rendering/mock_canvas.dart';
 
 class DependentWidget extends StatelessWidget {
   const DependentWidget({
-    Key? key,
-    required this.color,
+    Key key,
+    this.color,
   }) : super(key: key);
 
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final Color resolved = CupertinoDynamicColor.resolve(color, context, nullOk: false)!;
+    final Color resolved = CupertinoDynamicColor.resolve(color, context, nullOk: false);
     return DecoratedBox(
       decoration: BoxDecoration(color: resolved),
       child: const SizedBox.expand(),
@@ -165,7 +167,7 @@ void main() {
   });
 
   test('can resolve null color', () {
-    expect(CupertinoDynamicColor.resolve(null, _NullElement.instance), isNull);
+    expect(CupertinoDynamicColor.resolve(null, null), isNull);
   });
 
   test('withVibrancy constructor creates colors that may depend on vibrancy', () {
@@ -420,7 +422,7 @@ void main() {
   });
 
   testWidgets('CupertinoDynamicColor used in a CupertinoTheme', (WidgetTester tester) async {
-    late CupertinoDynamicColor color;
+    CupertinoDynamicColor color;
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(
@@ -501,11 +503,11 @@ void main() {
   });
 
   group('MaterialApp:', () {
-    Color? color;
+    Color color;
     setUp(() { color = null; });
 
     testWidgets('dynamic color works in cupertino override theme', (WidgetTester tester) async {
-      final CupertinoDynamicColor Function() typedColor = () => color! as CupertinoDynamicColor;
+      final CupertinoDynamicColor Function() typedColor = () => color as CupertinoDynamicColor;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -586,21 +588,4 @@ void main() {
       expect(color, isNot(dynamicColor.darkHighContrastElevatedColor));
     });
   });
-}
-
-class _NullElement extends Element {
-  _NullElement() : super(_NullWidget());
-
-  static _NullElement instance = _NullElement();
-
-  @override
-  bool get debugDoingBuild => throw UnimplementedError();
-
-  @override
-  void performRebuild() { }
-}
-
-class _NullWidget extends Widget {
-  @override
-  Element createElement() => throw UnimplementedError();
 }

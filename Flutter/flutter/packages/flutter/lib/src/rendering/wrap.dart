@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'box.dart';
-import 'layer.dart';
 import 'object.dart';
 
 /// How [Wrap] should align objects.
@@ -580,7 +579,7 @@ class RenderWrap extends RenderBox
       size = constraints.smallest;
       return;
     }
-    final BoxConstraints childConstraints;
+    BoxConstraints childConstraints;
     double mainAxisLimit = 0.0;
     bool flipMainAxis = false;
     bool flipCrossAxis = false;
@@ -631,7 +630,7 @@ class RenderWrap extends RenderBox
         runMainAxisExtent += spacing;
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       childCount += 1;
-      final WrapParentData childParentData = child.parentData! as WrapParentData;
+      final WrapParentData childParentData = child.parentData as WrapParentData;
       childParentData._runIndex = runMetrics.length;
       child = childParentData.nextSibling;
     }
@@ -732,7 +731,7 @@ class RenderWrap extends RenderBox
         crossAxisOffset -= runCrossAxisExtent;
 
       while (child != null) {
-        final WrapParentData childParentData = child.parentData! as WrapParentData;
+        final WrapParentData childParentData = child.parentData as WrapParentData;
         if (childParentData._runIndex != i)
           break;
         final double childMainAxisExtent = _getMainAxisExtent(child);
@@ -764,16 +763,11 @@ class RenderWrap extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     // TODO(ianh): move the debug flex overflow paint logic somewhere common so
     // it can be reused here
-    if (_hasVisualOverflow && clipBehavior != Clip.none) {
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint,
-          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
-    } else {
-      _clipRectLayer = null;
+    if (_hasVisualOverflow && clipBehavior != Clip.none)
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint, clipBehavior: clipBehavior);
+    else
       defaultPaint(context, offset);
-    }
   }
-
-  ClipRectLayer? _clipRectLayer;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

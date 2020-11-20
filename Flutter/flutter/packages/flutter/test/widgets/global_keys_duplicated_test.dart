@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
@@ -59,7 +61,7 @@ void main() {
   });
 
   testWidgets('GlobalKey children of two nodes', (WidgetTester tester) async {
-    late StateSetter nestedSetState;
+    StateSetter nestedSetState;
     bool flag = false;
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,

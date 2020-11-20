@@ -9,7 +9,6 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/doctor.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:path/path.dart' as path; // ignore: package_path_import
 
@@ -59,13 +58,13 @@ String getFlutterRoot() {
   Error invalidScript() => StateError('Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.');
 
   Uri scriptUri;
-  switch (platform.script.scheme) {
+  switch (globals.platform.script.scheme) {
     case 'file':
-      scriptUri = platform.script;
+      scriptUri = globals.platform.script;
       break;
     case 'data':
       final RegExp flutterTools = RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
-      final Match match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
+      final Match match = flutterTools.firstMatch(Uri.decodeFull(globals.platform.script.path));
       if (match == null) {
         throw invalidScript();
       }
@@ -90,18 +89,6 @@ CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
     runner.addCommand(command);
   }
   return runner;
-}
-
-/// Capture console print events into a string buffer.
-Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
-  final StringBuffer buffer = StringBuffer();
-  await runZoned<Future<void>>(() async {
-    // Service the event loop.
-    await body();
-  }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-    buffer.writeln(line);
-  }));
-  return buffer;
 }
 
 /// Matcher for functions that throw [AssertionError].
@@ -425,16 +412,4 @@ class ConfiguredFileSystem extends ForwardingFileSystem {
   Directory directory(dynamic path) {
     return (entities[path] as Directory) ?? super.directory(path);
   }
-}
-
-/// Matches a doctor validation result.
-Matcher matchDoctorValidation({
-  ValidationType validationType,
-  String statusInfo,
-  dynamic messages
-}) {
-  return const test_package.TypeMatcher<ValidationResult>()
-    .having((ValidationResult result) => result.type, 'type', validationType)
-    .having((ValidationResult result) => result.statusInfo, 'statusInfo', statusInfo)
-    .having((ValidationResult result) => result.messages, 'messages', messages);
 }

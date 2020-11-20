@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -17,15 +19,15 @@ void main() {
     final TapGestureRecognizer tap = TapGestureRecognizer();
 
     bool didStartScale = false;
-    Offset? updatedFocalPoint;
+    Offset updatedFocalPoint;
     scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
     };
 
-    double? updatedScale;
-    double? updatedHorizontalScale;
-    double? updatedVerticalScale;
+    double updatedScale;
+    double updatedHorizontalScale;
+    double updatedVerticalScale;
     scale.onUpdate = (ScaleUpdateDetails details) {
       updatedScale = details.scale;
       updatedHorizontalScale = details.horizontalScale;
@@ -228,7 +230,7 @@ void main() {
       didStartScale = true;
     };
 
-    double? updatedScale;
+    double updatedScale;
     scale.onUpdate = (ScaleUpdateDetails details) {
       updatedScale = details.scale;
     };
@@ -256,13 +258,13 @@ void main() {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer(kind: PointerDeviceKind.touch);
 
     bool didStartScale = false;
-    Offset? updatedFocalPoint;
+    Offset updatedFocalPoint;
     scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
     };
 
-    double? updatedScale;
+    double updatedScale;
     scale.onUpdate = (ScaleUpdateDetails details) {
       updatedScale = details.scale;
       updatedFocalPoint = details.focalPoint;
@@ -402,13 +404,13 @@ void main() {
     final TapGestureRecognizer tap = TapGestureRecognizer();
 
     bool didStartScale = false;
-    Offset? updatedFocalPoint;
+    Offset updatedFocalPoint;
     scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
     };
 
-    double? updatedRotation;
+    double updatedRotation;
     scale.onUpdate = (ScaleUpdateDetails details) {
       updatedRotation = details.rotation;
       updatedFocalPoint = details.focalPoint;

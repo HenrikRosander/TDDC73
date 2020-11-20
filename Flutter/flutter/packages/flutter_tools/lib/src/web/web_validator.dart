@@ -8,7 +8,7 @@ import '../base/platform.dart';
 import '../doctor.dart';
 import 'chrome.dart';
 
-/// A validator for Chromium-based browsers.
+/// A validator for Chromium-based brosers.
 abstract class ChromiumValidator extends DoctorValidator {
   const ChromiumValidator(String title) : super(title);
 
@@ -19,25 +19,25 @@ abstract class ChromiumValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final bool canRunChromium = _chromiumLauncher.canFindExecutable();
-    final String chromiumSearchLocation = _chromiumLauncher.findExecutable();
+    final String chromimSearchLocation = _chromiumLauncher.findExecutable();
     final List<ValidationMessage> messages = <ValidationMessage>[
       if (_platform.environment.containsKey(kChromeEnvironment))
         if (!canRunChromium)
-          ValidationMessage.hint('$chromiumSearchLocation is not executable.')
+          ValidationMessage.hint('$chromimSearchLocation is not executable.')
         else
-          ValidationMessage('$kChromeEnvironment = $chromiumSearchLocation')
+          ValidationMessage('$kChromeEnvironment = $chromimSearchLocation')
       else
         if (!canRunChromium)
           ValidationMessage.hint('Cannot find $_name. Try setting '
             '$kChromeEnvironment to a $_name executable.')
         else
-          ValidationMessage('$_name at $chromiumSearchLocation'),
+          ValidationMessage('$_name at $chromimSearchLocation'),
     ];
     if (!canRunChromium) {
       return ValidationResult(
         ValidationType.missing,
         messages,
-        statusInfo: 'Cannot find $_name executable at $chromiumSearchLocation',
+        statusInfo: 'Cannot find $_name executable at $chromimSearchLocation',
       );
     }
     return ValidationResult(
@@ -66,7 +66,7 @@ class ChromeValidator extends ChromiumValidator {
   String get _name => 'Chrome';
 }
 
-/// A validator that checks whether Edge is installed and can run.
+/// A validator that checks whethere Edge is installed and can run.
 class EdgeValidator extends ChromiumValidator {
   const EdgeValidator({
     @required Platform platform,

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -9,7 +11,7 @@ void main() {
   group('TimeOfDay.format', () {
     testWidgets('respects alwaysUse24HourFormat option', (WidgetTester tester) async {
       Future<String> pumpTest(bool alwaysUse24HourFormat) async {
-        late String formattedValue;
+        String formattedValue;
         await tester.pumpWidget(MaterialApp(
           home: MediaQuery(
             data: MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),

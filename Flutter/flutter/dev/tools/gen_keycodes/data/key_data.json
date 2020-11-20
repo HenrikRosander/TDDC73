@@ -2472,9 +2472,7 @@
       "gtk": [
         "quoteleft"
       ],
-      "windows": [
-        "OEM_3"
-      ]
+      "windows": null
     },
     "scanCodes": {
       "android": [
@@ -2496,9 +2494,7 @@
       "gtk": [
         96
       ],
-      "windows": [
-        192
-      ]
+      "windows": null
     }
   },
   "comma": {
@@ -6569,9 +6565,7 @@
       "windows": null
     },
     "scanCodes": {
-      "android": [
-        370
-      ],
+      "android": null,
       "usb": 786529,
       "linux": 370,
       "xkb": 378,
@@ -6828,9 +6822,7 @@
       "windows": null
     },
     "scanCodes": {
-      "android": [
-        405
-      ],
+      "android": null,
       "usb": 786563,
       "linux": 405,
       "xkb": 413,
@@ -7899,9 +7891,7 @@
       "windows": null
     },
     "scanCodes": {
-      "android": [
-        583
-      ],
+      "android": null,
       "usb": 786891,
       "linux": 583,
       "xkb": 591,

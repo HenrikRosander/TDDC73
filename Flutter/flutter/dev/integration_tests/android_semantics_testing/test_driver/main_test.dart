@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:android_semantics_testing/test_constants.dart';
@@ -613,8 +614,8 @@ void main() {
                   isEnabled: true,
                   isFocusable: true,
                   actions: <AndroidSemanticsAction>[
-                    if (item == 'Title') AndroidSemanticsAction.clearAccessibilityFocus,
-                    if (item != 'Title') AndroidSemanticsAction.accessibilityFocus,
+                    if (item == 'Body1') AndroidSemanticsAction.clearAccessibilityFocus,
+                    if (item != 'Body1') AndroidSemanticsAction.accessibilityFocus,
                   ],
                 ),
                 reason: "Alert $item button doesn't have the right semantics");

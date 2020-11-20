@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/gestures.dart';
 
 import '../flutter_test_alternative.dart';
@@ -32,12 +34,12 @@ class GestureTester {
   TestGestureArenaMember first = TestGestureArenaMember();
   TestGestureArenaMember second = TestGestureArenaMember();
 
-  late GestureArenaEntry firstEntry;
+  GestureArenaEntry firstEntry;
   void addFirst() {
     firstEntry = arena.add(primaryKey, first);
   }
 
-  late GestureArenaEntry secondEntry;
+  GestureArenaEntry secondEntry;
   void addSecond() {
     secondEntry = arena.add(primaryKey, second);
   }

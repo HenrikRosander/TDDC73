@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io' show ProcessResult;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -29,35 +30,42 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
 
+class MockitoProcessManager extends Mock implements ProcessManager {}
 class MockitoAndroidSdk extends Mock implements AndroidSdk {}
 class MockitoAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
 
 void main() {
   group('Apk with partial Android SDK works', () {
     AndroidSdk sdk;
-    FakeProcessManager fakeProcessManager;
+    ProcessManager mockProcessManager;
     MemoryFileSystem fs;
-    Cache cache;
+    Cache mockCache;
+    File gradle;
     final Map<Type, Generator> overrides = <Type, Generator>{
       AndroidSdk: () => sdk,
-      ProcessManager: () => fakeProcessManager,
+      ProcessManager: () => mockProcessManager,
       FileSystem: () => fs,
-      Cache: () => cache,
+      Cache: () => mockCache,
     };
 
     setUp(() async {
       sdk = MockitoAndroidSdk();
-      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
-      fs = MemoryFileSystem.test();
-      cache = Cache.test(
-        processManager: FakeProcessManager.any(),
-      );
+      mockProcessManager = MockitoProcessManager();
+      fs = MemoryFileSystem();
+      mockCache = MockCache();
       Cache.flutterRoot = '../..';
       when(sdk.licensesAvailable).thenReturn(true);
+      when(mockProcessManager.canRun(any)).thenReturn(true);
+      when(mockProcessManager.run(
+        any,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) async => ProcessResult(1, 0, 'stdout', 'stderr'));
+      when(mockProcessManager.runSync(any)).thenReturn(ProcessResult(1, 0, 'stdout', 'stderr'));
       final FlutterProject project = FlutterProject.current();
-      globals.fs.file(project.android.hostAppGradleRoot.childFile(
+      gradle = globals.fs.file(project.android.hostAppGradleRoot.childFile(
         globals.platform.isWindows ? 'gradlew.bat' : 'gradlew',
-      ).path).createSync(recursive: true);
+      ).path)..createSync(recursive: true);
     });
 
     testUsingContext('Licenses not available, platform and buildtools available, apk exists', () async {
@@ -68,19 +76,18 @@ void main() {
       when(sdk.latestVersion).thenReturn(sdkVersion);
       when(sdk.platformToolsAvailable).thenReturn(true);
       when(sdk.licensesAvailable).thenReturn(false);
-
-      fakeProcessManager.addCommand(
-        FakeCommand(
-          command: <String>[
+      when(mockProcessManager.runSync(
+          argThat(equals(<String>[
             aaptPath,
             'dump',
             'xmltree',
-             apkFile.path,
+            apkFile.path,
             'AndroidManifest.xml',
-          ],
-          stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity
-        )
-      );
+          ])),
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+        ),
+      ).thenReturn(ProcessResult(0, 0, _aaptDataWithDefaultEnabledAndMainLauncherActivity, ''));
 
       final ApplicationPackage applicationPackage = await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
@@ -88,7 +95,6 @@ void main() {
         applicationBinary: apkFile,
       );
       expect(applicationPackage.name, 'app.apk');
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: overrides);
 
     testUsingContext('Licenses available, build tools not, apk exists', () async {
@@ -102,21 +108,26 @@ void main() {
         .childFile('gradle.properties')
         .writeAsStringSync('irrelevant');
 
-      final Directory gradleWrapperDir = cache.getArtifactDirectory('gradle_wrapper');
+      final Directory gradleWrapperDir = globals.fs.systemTempDirectory.createTempSync('flutter_application_package_test_gradle_wrapper.');
+      when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
 
-      gradleWrapperDir.fileSystem.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))
+      globals.fs.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))
           .createSync(recursive: true);
-      gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
-      gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
-
-      fakeProcessManager.addCommand(FakeCommand(command: <String>[gradle.path, 'dependencies']));
+      globals.fs.file(globals.fs.path.join(gradleWrapperDir.path, 'gradlew')).writeAsStringSync('irrelevant');
+      globals.fs.file(globals.fs.path.join(gradleWrapperDir.path, 'gradlew.bat')).writeAsStringSync('irrelevant');
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
         buildInfo: null,
         applicationBinary: globals.fs.file('app.apk'),
       );
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      verify(
+        mockProcessManager.run(
+          argThat(equals(<String>[gradle.path, 'dependencies'])),
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+        ),
+      ).called(1);
     }, overrides: overrides);
 
     testUsingContext('Licenses available, build tools available, does not call gradle dependencies', () async {
@@ -127,15 +138,22 @@ void main() {
         TargetPlatform.android_arm,
         buildInfo: null,
       );
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
+      verifyNever(
+        mockProcessManager.run(
+          argThat(equals(<String>[gradle.path, 'dependencies'])),
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+        ),
+      );
     }, overrides: overrides);
 
     testUsingContext('returns null when failed to extract manifest', () async {
       final AndroidSdkVersion sdkVersion = MockitoAndroidSdkVersion();
       when(sdk.latestVersion).thenReturn(sdkVersion);
+      when(mockProcessManager.runSync(argThat(contains('logcat'))))
+          .thenReturn(ProcessResult(0, 1, '', ''));
 
       expect(AndroidApk.fromApk(null), isNull);
-      expect(fakeProcessManager.hasRemainingExpectations, isFalse);
     }, overrides: overrides);
   });
 
@@ -199,7 +217,7 @@ void main() {
   group('PrebuiltIOSApp', () {
     MockOperatingSystemUtils os;
     final Map<Type, Generator> overrides = <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
       PlistParser: () => MockPlistUtils(),
       Platform: _kNoColorTerminalPlatform,
@@ -347,7 +365,7 @@ void main() {
 
   group('FuchsiaApp', () {
     final Map<Type, Generator> overrides = <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
       Platform: _kNoColorTerminalPlatform,
       OperatingSystemUtils: () => MockOperatingSystemUtils(),
@@ -673,4 +691,5 @@ const String plistData = '''
 {"CFBundleIdentifier": "fooBundleId"}
 ''';
 
+class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils { }

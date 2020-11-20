@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
@@ -10,21 +12,21 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class StateMarker extends StatefulWidget {
-  const StateMarker({ Key? key, this.child }) : super(key: key);
+  const StateMarker({ Key key, this.child }) : super(key: key);
 
-  final Widget? child;
+  final Widget child;
 
   @override
   StateMarkerState createState() => StateMarkerState();
 }
 
 class StateMarkerState extends State<StateMarker> {
-  late String marker;
+  String marker;
 
   @override
   Widget build(BuildContext context) {
     if (widget.child != null)
-      return widget.child!;
+      return widget.child;
     return Container();
   }
 }
@@ -100,7 +102,7 @@ void main() {
             return Material(
               child: ElevatedButton(
                 child: const Text('X'),
-                onPressed: () { Navigator.of(context)!.pushNamed('/next'); },
+                onPressed: () { Navigator.of(context).pushNamed('/next'); },
               ),
             );
           }
@@ -249,7 +251,7 @@ void main() {
   });
 
   testWidgets('Return value from pop is correct', (WidgetTester tester) async {
-    late Future<Object> result;
+    Future<Object> result;
     await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -258,7 +260,7 @@ void main() {
                   child: ElevatedButton(
                       child: const Text('X'),
                       onPressed: () async {
-                        result = Navigator.of(context)!.pushNamed('/a');
+                        result = Navigator.of(context).pushNamed('/a');
                       },
                   ),
                 );
@@ -270,7 +272,7 @@ void main() {
                 child: ElevatedButton(
                   child: const Text('Y'),
                   onPressed: () {
-                    Navigator.of(context)!.pop('all done');
+                    Navigator.of(context).pop('all done');
                   },
                 ),
               );
@@ -382,17 +384,13 @@ void main() {
     );
     expect(tester.takeException(), isFlutterError);
     expect(log, <String>['onGenerateRoute /', 'onUnknownRoute /']);
-
-    // Work-around for https://github.com/flutter/flutter/issues/65655.
-    await tester.pumpWidget(Container());
-    expect(tester.takeException(), isAssertionError);
   });
 
   testWidgets('MaterialApp with builder and no route information works.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/18904
     await tester.pumpWidget(
       MaterialApp(
-        builder: (BuildContext context, Widget? child) {
+        builder: (BuildContext context, Widget child) {
           return const SizedBox();
         },
       ),
@@ -461,10 +459,10 @@ void main() {
   });
 
   testWidgets('Can get text scale from media query', (WidgetTester tester) async {
-    double? textScaleFactor;
+    double textScaleFactor;
     await tester.pumpWidget(MaterialApp(
       home: Builder(builder:(BuildContext context) {
-        textScaleFactor = MediaQuery.of(context)!.textScaleFactor;
+        textScaleFactor = MediaQuery.of(context).textScaleFactor;
         return Container();
       }),
     ));
@@ -500,8 +498,8 @@ void main() {
           builder: (BuildContext context) {
             return Column(
               children: <Widget>[
-                Text(MaterialLocalizations.of(context)!.selectAllButtonLabel),
-                Text(CupertinoLocalizations.of(context)!.selectAllButtonLabel),
+                Text(MaterialLocalizations.of(context).selectAllButtonLabel),
+                Text(CupertinoLocalizations.of(context).selectAllButtonLabel),
               ],
             );
           },
@@ -519,7 +517,7 @@ void main() {
     // Mock the Window to explicitly report a light platformBrightness.
     tester.binding.window.platformBrightnessTestValue = Brightness.light;
 
-    late ThemeData appliedTheme;
+    ThemeData appliedTheme;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -531,7 +529,7 @@ void main() {
         themeMode: ThemeMode.light,
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -552,7 +550,7 @@ void main() {
         themeMode: ThemeMode.light,
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -565,7 +563,7 @@ void main() {
     // Mock the Window to explicitly report a light platformBrightness.
     tester.binding.window.platformBrightnessTestValue = Brightness.light;
 
-    late ThemeData appliedTheme;
+    ThemeData appliedTheme;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -577,7 +575,7 @@ void main() {
         themeMode: ThemeMode.dark,
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -598,7 +596,7 @@ void main() {
         themeMode: ThemeMode.dark,
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -612,7 +610,7 @@ void main() {
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.light;
 
-    late ThemeData appliedTheme;
+    ThemeData appliedTheme;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -625,7 +623,7 @@ void main() {
         themeMode: ThemeMode.system,
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -639,7 +637,7 @@ void main() {
     // Mock the Window to explicitly report a dark platformBrightness.
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
 
-    late ThemeData appliedTheme;
+    ThemeData appliedTheme;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -651,7 +649,7 @@ void main() {
         themeMode: ThemeMode.system,
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -665,7 +663,7 @@ void main() {
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.dark;
 
-    late ThemeData appliedTheme;
+    ThemeData appliedTheme;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -674,7 +672,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -689,13 +687,13 @@ void main() {
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.dark;
 
-    late ThemeData appliedTheme;
+    ThemeData appliedTheme;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -710,7 +708,7 @@ void main() {
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.light;
 
-    late ThemeData appliedTheme;
+    ThemeData appliedTheme;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -719,7 +717,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -734,7 +732,7 @@ void main() {
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.dark;
 
-    late ThemeData appliedTheme;
+    ThemeData appliedTheme;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -746,7 +744,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -760,7 +758,7 @@ void main() {
     tester.binding.window.platformBrightnessTestValue = Brightness.light;
     tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
 
-    late ThemeData appliedTheme;
+    ThemeData appliedTheme;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -772,7 +770,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -780,14 +778,14 @@ void main() {
     );
 
     expect(appliedTheme.primaryColor, Colors.blue);
-    tester.binding.window.clearAccessibilityFeaturesTestValue();
+    tester.binding.window.accessibilityFeaturesTestValue = null;
   });
 
   testWidgets('MaterialApp uses high contrast dark theme when appropriate', (WidgetTester tester) async {
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
     tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
 
-    late ThemeData appliedTheme;
+    ThemeData appliedTheme;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -805,7 +803,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -813,14 +811,14 @@ void main() {
     );
 
     expect(appliedTheme.primaryColor, Colors.green);
-    tester.binding.window.clearAccessibilityFeaturesTestValue();
+    tester.binding.window.accessibilityFeaturesTestValue = null;
   });
 
   testWidgets('MaterialApp uses dark theme when no high contrast dark theme is provided', (WidgetTester tester) async {
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
     tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
 
-    late ThemeData appliedTheme;
+    ThemeData appliedTheme;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -832,7 +830,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            appliedTheme = Theme.of(context)!;
+            appliedTheme = Theme.of(context);
             return const SizedBox();
           },
         ),
@@ -840,8 +838,8 @@ void main() {
     );
 
     expect(appliedTheme.primaryColor, Colors.lightGreen);
-    tester.binding.window.clearAccessibilityFeaturesTestValue();
-    tester.binding.window.clearPlatformBrightnessTestValue();
+    tester.binding.window.accessibilityFeaturesTestValue = null;
+    tester.binding.window.platformBrightnessTestValue = null;
   });
 
   testWidgets('MaterialApp switches themes when the Window platformBrightness changes.', (WidgetTester tester) async {
@@ -849,8 +847,8 @@ void main() {
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.light;
 
-    ThemeData? themeBeforeBrightnessChange;
-    ThemeData? themeAfterBrightnessChange;
+    ThemeData themeBeforeBrightnessChange;
+    ThemeData themeAfterBrightnessChange;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -878,8 +876,8 @@ void main() {
     binding.window.platformBrightnessTestValue = Brightness.dark;
     await tester.pumpAndSettle();
 
-    expect(themeBeforeBrightnessChange!.brightness, Brightness.light);
-    expect(themeAfterBrightnessChange!.brightness, Brightness.dark);
+    expect(themeBeforeBrightnessChange.brightness, Brightness.light);
+    expect(themeAfterBrightnessChange.brightness, Brightness.dark);
   });
 
   testWidgets('MaterialApp can customize initial routes', (WidgetTester tester) async {
@@ -919,7 +917,7 @@ void main() {
     expect(find.text('non-regular page one'), findsNothing);
     expect(find.text('regular page one'), findsNothing);
     expect(find.text('regular page two'), findsNothing);
-    navigatorKey.currentState!.pop();
+    navigatorKey.currentState.pop();
     await tester.pumpAndSettle();
     expect(find.text('non-regular page two'), findsNothing);
     expect(find.text('non-regular page one'), findsOneWidget);
@@ -929,7 +927,7 @@ void main() {
 
   testWidgets('MaterialApp does create HeroController with the MaterialRectArcTween', (WidgetTester tester) async {
     final HeroController controller = MaterialApp.createMaterialHeroController();
-    final Tween<Rect?> tween = controller.createRectTween!(
+    final Tween<Rect> tween = controller.createRectTween(
       const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
       const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)
     );
@@ -960,7 +958,7 @@ void main() {
     );
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.location);
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
         delegate.routeInformation = const RouteInformation(
@@ -978,20 +976,9 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  });
-
-  testWidgets('MaterialApp.builder can build app without a Navigator', (WidgetTester tester) async {
-    Widget? builderChild;
-    await tester.pumpWidget(MaterialApp(
-      builder: (BuildContext context, Widget? child) {
-        builderChild = child;
-        return Container();
-      },
-    ));
-    expect(builderChild, isNull);
   });
 }
 
@@ -1034,15 +1021,15 @@ class SimpleRouteInformationParser extends RouteInformationParser<RouteInformati
 
 class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> with PopNavigatorRouterDelegateMixin<RouteInformation>, ChangeNotifier {
   SimpleNavigatorRouterDelegate({
-    required this.builder,
-    required this.onPopPage,
+    @required this.builder,
+    this.onPopPage,
   });
 
   @override
   GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   RouteInformation get routeInformation => _routeInformation;
-  late RouteInformation _routeInformation;
+  RouteInformation _routeInformation;
   set routeInformation(RouteInformation newValue) {
     _routeInformation = newValue;
     notifyListeners();
@@ -1073,7 +1060,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
           child: Text('base'),
         ),
         MaterialPage<void>(
-          key: ValueKey<String>(routeInformation.location!),
+          key: ValueKey<String>(routeInformation?.location),
           child: builder(context, routeInformation),
         )
       ],

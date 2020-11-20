@@ -191,15 +191,22 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// * "&#x23EE;": [AnimationStatus.dismissed] ([value] == 0.0)
   String toStringDetails() {
     assert(status != null);
+    String icon;
     switch (status) {
       case AnimationStatus.forward:
-        return '\u25B6'; // >
+        icon = '\u25B6'; // >
+        break;
       case AnimationStatus.reverse:
-        return '\u25C0'; // <
+        icon = '\u25C0'; // <
+        break;
       case AnimationStatus.completed:
-        return '\u23ED'; // >>|
+        icon = '\u23ED'; // >>|
+        break;
       case AnimationStatus.dismissed:
-        return '\u23EE'; // |<<
+        icon = '\u23EE'; // |<<
+        break;
     }
+    assert(icon != null);
+    return icon;
   }
 }

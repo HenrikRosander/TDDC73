@@ -12,11 +12,10 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/track_widget_creation_enabled_task.dart';
 
-TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createComplexLayoutScrollPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
@@ -39,7 +38,6 @@ TaskFunction createUiKitViewScrollPerfTest() {
     'test_driver/uikit_view_scroll_perf.dart',
     'platform_views_scroll_perf',
     testDriver: 'test_driver/scroll_perf_test.dart',
-    needsFullTimeline: false,
   ).run;
 }
 
@@ -94,20 +92,6 @@ TaskFunction createCubicBezierPerfTest() {
   ).run;
 }
 
-TaskFunction createCubicBezierPerfE2ETest() {
-  return PerfTest.e2e(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test/cubic_bezier_perf_e2e.dart',
-  ).run;
-}
-
-TaskFunction createCubicBezierPerfSkSlWarmupE2ETest() {
-  return PerfTestWithSkSL.e2e(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test/cubic_bezier_perf_e2e.dart',
-  ).run;
-}
-
 TaskFunction createCubicBezierPerfSkSLWarmupTest() {
   return PerfTestWithSkSL(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -133,7 +117,7 @@ TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupE2ETest() {
   ).run;
 }
 
-TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -144,14 +128,7 @@ TaskFunction createBackdropFilterPerfTest({bool measureCpuGpu = true}) {
   ).run;
 }
 
-TaskFunction createBackdropFilterPerfE2ETest() {
-  return PerfTest.e2e(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test/backdrop_filter_perf_e2e.dart',
-  ).run;
-}
-
-TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -162,7 +139,7 @@ TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = true}) {
   ).run;
 }
 
-TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -173,20 +150,13 @@ TaskFunction createSimpleAnimationPerfTest({bool measureCpuGpu = true}) {
   ).run;
 }
 
-TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createAnimatedPlaceholderPerfTest({bool measureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'animated_placeholder_perf',
     measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/animated_placeholder_perf_test.dart',
-  ).run;
-}
-
-TaskFunction createAnimatedPlaceholderPerfE2ETest() {
-  return PerfTest.e2e(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test/animated_placeholder_perf_e2e.dart',
   ).run;
 }
 
@@ -282,13 +252,6 @@ TaskFunction createTextfieldPerfTest() {
   ).run;
 }
 
-TaskFunction createTextfieldPerfE2ETest() {
-  return PerfTest.e2e(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test/textfield_perf_e2e.dart',
-  ).run;
-}
-
 TaskFunction createColorFilterAndFadePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -296,13 +259,6 @@ TaskFunction createColorFilterAndFadePerfTest() {
     'color_filter_and_fade_perf',
     testDriver: 'test_driver/color_filter_and_fade_perf_test.dart',
     saveTraceFile: true,
-  ).run;
-}
-
-TaskFunction createColorFilterAndFadePerfE2ETest() {
-  return PerfTest.e2e(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test/color_filter_and_fade_perf_e2e.dart',
   ).run;
 }
 
@@ -340,54 +296,6 @@ TaskFunction createsMultiWidgetConstructPerfE2ETest() {
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/multi_widget_construction_perf_e2e.dart',
   ).run;
-}
-
-TaskFunction createsScrollSmoothnessPerfTest() {
-  final String testDirectory =
-      '${flutterDirectory.path}/dev/benchmarks/complex_layout';
-  const String testTarget = 'test/measure_scroll_smoothness.dart';
-  return () {
-    return inDirectory<TaskResult>(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
-      final String deviceId = device.deviceId;
-      await flutter('packages', options: <String>['get']);
-
-      await flutter('drive', options: <String>[
-        '-v',
-        '--verbose-system-logs',
-        '--profile',
-        '-t', testTarget,
-        '-d',
-        deviceId,
-      ]);
-      final Map<String, dynamic> data = json.decode(
-        file('$testDirectory/build/scroll_smoothness_test.json').readAsStringSync(),
-      ) as Map<String, dynamic>;
-
-      final Map<String, dynamic> result = <String, dynamic>{};
-      void addResult(dynamic data, String suffix) {
-        assert(data is Map<String, dynamic>);
-        const List<String> metricKeys = <String>[
-          'janky_count',
-          'average_abs_jerk',
-          'dropped_frame_count',
-        ];
-        for (final String key in metricKeys) {
-          result[key+suffix] = data[key];
-        }
-      }
-      addResult(data['resample on with 90Hz input'], '_with_resampler_90Hz');
-      addResult(data['resample on with 59Hz input'], '_with_resampler_59Hz');
-      addResult(data['resample off with 90Hz input'], '_without_resampler_90Hz');
-      addResult(data['resample off with 59Hz input'], '_without_resampler_59Hz');
-
-      return TaskResult.success(
-        result,
-        benchmarkScoreKeys: result.keys.toList(),
-      );
-    });
-  };
 }
 
 TaskFunction createFramePolicyIntegrationTest() {
@@ -462,7 +370,7 @@ class StartupTest {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
-      const int iterations = 15;
+      const int iterations = 3;
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
       for (int i = 0; i < iterations; ++i) {
         await flutter('run', options: <String>[
@@ -498,8 +406,7 @@ class PerfTest {
     this.testDirectory,
     this.testTarget,
     this.timelineFileName, {
-    this.measureCpuGpu = true,
-    this.measureMemory = true,
+    this.measureCpuGpu = false,
     this.saveTraceFile = false,
     this.testDriver,
     this.needsFullTimeline = true,
@@ -511,8 +418,7 @@ class PerfTest {
   const PerfTest.e2e(
     this.testDirectory,
     this.testTarget, {
-    this.measureCpuGpu = true,
-    this.measureMemory = true,
+    this.measureCpuGpu = false,
     this.testDriver =  'test_driver/e2e_test.dart',
     this.needsFullTimeline = false,
     this.benchmarkScoreKeys = _kCommonScoreKeys,
@@ -533,8 +439,6 @@ class PerfTest {
   final String testDriver;
   /// Whether to collect CPU and GPU metrics.
   final bool measureCpuGpu;
-  /// Whether to collect memory metrics.
-  final bool measureMemory;
   /// Whether to collect full timeline, meaning if `--trace-startup` flag is needed.
   final bool needsFullTimeline;
   /// Whether to save the trace timeline file `*.timeline.json`.
@@ -617,9 +521,6 @@ class PerfTest {
         );
       }
 
-      // TODO(liyuqian): Remove isAndroid restriction once
-      // https://github.com/flutter/flutter/issues/61567 is fixed.
-      final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
       return TaskResult.success(
         data,
         detailFiles: detailFiles.isNotEmpty ? detailFiles : null,
@@ -628,15 +529,8 @@ class PerfTest {
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
-          if (measureCpuGpu && !isAndroid) ...<String>[
-            'average_cpu_usage',
-            'average_gpu_usage',
-          ],
-          if (measureMemory && !isAndroid) ...<String>[
-            'average_memory_usage',
-            '90th_percentile_memory_usage',
-            '99th_percentile_memory_usage',
-          ],
+          if (measureCpuGpu) 'average_cpu_usage',
+          if (measureCpuGpu) 'average_gpu_usage',
         ],
       );
     });
@@ -746,7 +640,6 @@ class PerfTestWithSkSL extends PerfTest {
         'run',
         '--verbose',
         '--verbose-system-logs',
-        '--purge-persistent-cache',
         '--profile',
         if (cacheSkSL) '--cache-sksl',
         '-d', _device.deviceId,

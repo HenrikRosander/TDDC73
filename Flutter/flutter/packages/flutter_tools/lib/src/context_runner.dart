@@ -25,6 +25,7 @@ import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'compile.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -47,7 +48,6 @@ import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
 import 'run_hot.dart';
-import 'runner/local_engine.dart';
 import 'version.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio.dart';
@@ -145,14 +145,10 @@ Future<T> runInContext<T>(
         config: globals.config,
         fuchsiaWorkflow: fuchsiaWorkflow,
         xcDevice: globals.xcdevice,
-        userMessages: globals.userMessages,
-        windowsWorkflow: windowsWorkflow,
         macOSWorkflow: MacOSWorkflow(
           platform: globals.platform,
           featureFlags: featureFlags,
         ),
-        operatingSystemUtils: globals.os,
-        terminal: globals.terminal,
       ),
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
@@ -185,12 +181,11 @@ Future<T> runInContext<T>(
         xcode: globals.xcode,
         platform: globals.platform,
       ),
-      LocalEngineLocator: () => LocalEngineLocator(
-        userMessages: userMessages,
+      KernelCompilerFactory: () => KernelCompilerFactory(
         logger: globals.logger,
-        platform: globals.platform,
+        processManager: globals.processManager,
+        artifacts: globals.artifacts,
         fileSystem: globals.fs,
-        flutterRoot: Cache.flutterRoot,
       ),
       Logger: () => globals.platform.isWindows
         ? WindowsStdoutLogger(
@@ -237,8 +232,7 @@ Future<T> runInContext<T>(
         botDetector: globals.botDetector,
         platform: globals.platform,
         usage: globals.flutterUsage,
-        // Avoid a circular dependency by making this access lazy.
-        toolStampFile: () => globals.cache.getStampFileFor('flutter_tools'),
+        toolStampFile: globals.cache.getStampFileFor('flutter_tools'),
       ),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Stdio: () => Stdio(),
@@ -261,10 +255,7 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         platform: globals.platform,
       ),
-      WindowsWorkflow: () => WindowsWorkflow(
-        featureFlags: featureFlags,
-        platform: globals.platform,
-      ),
+      WindowsWorkflow: () => const WindowsWorkflow(),
       Xcode: () => Xcode(
         logger: globals.logger,
         processManager: globals.processManager,

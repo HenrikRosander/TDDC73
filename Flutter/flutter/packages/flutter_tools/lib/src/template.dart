@@ -166,7 +166,6 @@ class Template {
       final String projectName = context['projectName'] as String;
       final String androidIdentifier = context['androidIdentifier'] as String;
       final String pluginClass = context['pluginClass'] as String;
-      final String pluginClassSnakeCase = context['pluginClassSnakeCase'] as String;
       final String destinationDirPath = destination.absolute.path;
       final String pathSeparator = _fileSystem.path.separator;
       String finalDestinationPath = _fileSystem.path
@@ -181,10 +180,6 @@ class Template {
       }
       if (projectName != null) {
         finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
-      }
-      // This must be before the pluginClass replacement step.
-      if (pluginClassSnakeCase != null) {
-        finalDestinationPath = finalDestinationPath.replaceAll('pluginClassSnakeCase', pluginClassSnakeCase);
       }
       if (pluginClass != null) {
         finalDestinationPath = finalDestinationPath.replaceAll('pluginClass', pluginClass);
@@ -296,13 +291,36 @@ Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem, Lo
   final String toolPackagePath = fileSystem.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools');
   final String packageFilePath = fileSystem.path.join(toolPackagePath, kPackagesFileName);
-  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+  // Ensure that .packgaes is present.
+  if (!fileSystem.file(packageFilePath).existsSync()) {
+    await _ensurePackageDependencies(toolPackagePath, pub);
+  }
+  PackageConfig packageConfig = await loadPackageConfigWithLogging(
     fileSystem.file(packageFilePath),
     logger: logger,
   );
-  final Uri imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
+  Uri imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
+  // Ensure that the template image package is present.
+  if (imagePackageLibDir == null || !fileSystem.directory(imagePackageLibDir).existsSync()) {
+    await _ensurePackageDependencies(toolPackagePath, pub);
+    packageConfig = await loadPackageConfigWithLogging(
+      fileSystem.file(packageFilePath),
+      logger: logger,
+    );
+    imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
+  }
   return fileSystem.directory(imagePackageLibDir)
       .parent
       .childDirectory('templates')
       .childDirectory(name);
+}
+
+// Runs 'pub get' for the given path to ensure that .packages is created and
+// all dependencies are present.
+Future<void> _ensurePackageDependencies(String packagePath, Pub pub) async {
+  await pub.get(
+    context: PubContext.pubGet,
+    directory: packagePath,
+    generateSyntheticPackage: false,
+  );
 }

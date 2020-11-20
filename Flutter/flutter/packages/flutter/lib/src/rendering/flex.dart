@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'debug_overflow_indicator.dart';
-import 'layer.dart';
 import 'object.dart';
 
 /// How the child is inscribed into the available space.
@@ -529,7 +528,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         } else {
           inflexibleSpace += childSize(child, extent);
         }
-        final FlexParentData childParentData = child.parentData! as FlexParentData;
+        final FlexParentData childParentData = child.parentData as FlexParentData;
         child = childParentData.nextSibling;
       }
       return maxFlexFractionSoFar * totalFlex + inflexibleSpace;
@@ -564,7 +563,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           inflexibleSpace += mainSize;
           maxCrossSize = math.max(maxCrossSize, crossSize);
         }
-        final FlexParentData childParentData = child.parentData! as FlexParentData;
+        final FlexParentData childParentData = child.parentData as FlexParentData;
         child = childParentData.nextSibling;
       }
 
@@ -579,7 +578,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         final int flex = _getFlex(child);
         if (flex > 0)
           maxCrossSize = math.max(maxCrossSize, childSize(child, spacePerFlex * flex));
-        final FlexParentData childParentData = child.parentData! as FlexParentData;
+        final FlexParentData childParentData = child.parentData as FlexParentData;
         child = childParentData.nextSibling;
       }
 
@@ -631,12 +630,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   int _getFlex(RenderBox child) {
-    final FlexParentData childParentData = child.parentData! as FlexParentData;
+    final FlexParentData childParentData = child.parentData as FlexParentData;
     return childParentData.flex ?? 0;
   }
 
   FlexFit _getFit(RenderBox child) {
-    final FlexParentData childParentData = child.parentData! as FlexParentData;
+    final FlexParentData childParentData = child.parentData as FlexParentData;
     return childParentData.fit ?? FlexFit.tight;
   }
 
@@ -675,7 +674,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     RenderBox? child = firstChild;
     RenderBox? lastFlexChild;
     while (child != null) {
-      final FlexParentData childParentData = child.parentData! as FlexParentData;
+      final FlexParentData childParentData = child.parentData as FlexParentData;
       totalChildren++;
       final int flex = _getFlex(child);
       if (flex > 0) {
@@ -697,13 +696,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             switch (_direction) {
               case Axis.horizontal:
                 while (!node!.constraints.hasBoundedWidth && node.parent is RenderBox)
-                  node = node.parent! as RenderBox;
+                  node = node.parent as RenderBox;
                 if (!node.constraints.hasBoundedWidth)
                   node = null;
                 break;
               case Axis.vertical:
                 while (!node!.constraints.hasBoundedHeight && node.parent is RenderBox)
-                  node = node.parent! as RenderBox;
+                  node = node.parent as RenderBox;
                 if (!node.constraints.hasBoundedHeight)
                   node = null;
                 break;
@@ -746,7 +745,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         totalFlex += flex;
         lastFlexChild = child;
       } else {
-        final BoxConstraints innerConstraints;
+        BoxConstraints innerConstraints;
         if (crossAxisAlignment == CrossAxisAlignment.stretch) {
           switch (_direction) {
             case Axis.horizontal:
@@ -798,7 +797,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
               break;
           }
           assert(minChildExtent != null);
-          final BoxConstraints innerConstraints;
+          BoxConstraints innerConstraints;
           if (crossAxisAlignment == CrossAxisAlignment.stretch) {
             switch (_direction) {
               case Axis.horizontal:
@@ -855,14 +854,14 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             crossSize = math.max(maxSizeAboveBaseline + maxSizeBelowBaseline, crossSize);
           }
         }
-        final FlexParentData childParentData = child.parentData! as FlexParentData;
+        final FlexParentData childParentData = child.parentData as FlexParentData;
         child = childParentData.nextSibling;
       }
     }
 
     // Align items along the main axis.
     final double idealSize = canFlex && mainAxisSize == MainAxisSize.max ? maxMainSize : allocatedSize;
-    final double actualSize;
+    double actualSize;
     switch (_direction) {
       case Axis.horizontal:
         size = constraints.constrain(Size(idealSize, crossSize));
@@ -916,8 +915,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     double childMainPosition = flipMainAxis ? actualSize - leadingSpace : leadingSpace;
     child = firstChild;
     while (child != null) {
-      final FlexParentData childParentData = child.parentData! as FlexParentData;
-      final double childCrossPosition;
+      final FlexParentData childParentData = child.parentData as FlexParentData;
+      double childCrossPosition;
       switch (_crossAxisAlignment) {
         case CrossAxisAlignment.start:
         case CrossAxisAlignment.end:
@@ -933,15 +932,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           childCrossPosition = 0.0;
           break;
         case CrossAxisAlignment.baseline:
+          childCrossPosition = 0.0;
           if (_direction == Axis.horizontal) {
             assert(textBaseline != null);
             final double? distance = child.getDistanceToBaseline(textBaseline!, onlyReal: true);
             if (distance != null)
               childCrossPosition = maxBaselineDistance - distance;
-            else
-              childCrossPosition = 0.0;
-          } else {
-            childCrossPosition = 0.0;
           }
           break;
       }
@@ -981,12 +977,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       return;
 
     if (clipBehavior == Clip.none) {
-      _clipRectLayer = null;
       defaultPaint(context, offset);
     } else {
       // We have overflow and the clipBehavior isn't none. Clip it.
-      _clipRectLayer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint,
-          clipBehavior: clipBehavior, oldLayer: _clipRectLayer);
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint, clipBehavior: clipBehavior);
     }
 
     assert(() {
@@ -1018,7 +1012,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // Simulate a child rect that overflows by the right amount. This child
       // rect is never used for drawing, just for determining the overflow
       // location and amount.
-      final Rect overflowChildRect;
+      Rect overflowChildRect;
       switch (_direction) {
         case Axis.horizontal:
           overflowChildRect = Rect.fromLTWH(0.0, 0.0, size.width + _overflow!, 0.0);
@@ -1031,8 +1025,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       return true;
     }());
   }
-
-  ClipRectLayer? _clipRectLayer;
 
   @override
   Rect? describeApproximatePaintClip(RenderObject child) => _hasOverflow ? Offset.zero & size : null;

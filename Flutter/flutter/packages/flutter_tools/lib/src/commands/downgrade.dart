@@ -98,9 +98,9 @@ class DowngradeCommand extends FlutterCommand {
         'to switch to an official channel.',
       );
     }
-    final String lastFlutterVersion = _persistentToolState.lastActiveVersion(channel);
+    final String lastFlutterVesion = _persistentToolState.lastActiveVersion(channel);
     final String currentFlutterVersion = _flutterVersion.frameworkRevision;
-    if (lastFlutterVersion == null || currentFlutterVersion == lastFlutterVersion) {
+    if (lastFlutterVesion == null || currentFlutterVersion == lastFlutterVesion) {
       final String trailing = await _createErrorMessage(workingDirectory, channel);
       throwToolExit(
         'There is no previously recorded version for channel "$currentChannel".\n'
@@ -108,9 +108,9 @@ class DowngradeCommand extends FlutterCommand {
       );
     }
 
-    // Detect unknown versions.
+    // Detect unkown versions.
     final RunResult parseResult = await _processUtils.run(<String>[
-      'git', 'describe', '--tags', lastFlutterVersion,
+      'git', 'describe', '--tags', lastFlutterVesion,
     ], workingDirectory: workingDirectory);
     if (parseResult.exitCode != 0) {
       throwToolExit('Failed to parse version for downgrade:\n${parseResult.stderr}');
@@ -137,7 +137,7 @@ class DowngradeCommand extends FlutterCommand {
     // so this operation is safe.
     try {
       await _processUtils.run(
-        <String>['git', 'reset', '--hard', lastFlutterVersion],
+        <String>['git', 'reset', '--hard', lastFlutterVesion],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -237,7 +238,7 @@ abstract class EmulatorDiscovery {
   /// Whether this emulator discovery is capable of listing any emulators.
   bool get canListAnything;
 
-  /// Whether this emulator discovery is capable of launching new emulators.
+  /// Whether this emulator discovery is capabale of launching new emulators.
   bool get canLaunchAnything;
 
   Future<List<Emulator>> get emulators;

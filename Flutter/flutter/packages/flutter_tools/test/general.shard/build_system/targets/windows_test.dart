@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/windows.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -25,9 +26,23 @@ final Platform kWindowsPlatform = FakePlatform(
   environment: <String, String>{},
 );
 
+const List<String> kRequiredFiles = <String>[
+  r'C:\bin\cache\artifacts\engine\windows-x64\flutter_export.h',
+  r'C:\bin\cache\artifacts\engine\windows-x64\flutter_messenger.h',
+  r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll',
+  r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.exp',
+  r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.lib',
+  r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.pdb',
+  r'C:\bin\cache\artifacts\engine\windows-x64\flutter_plugin_registrar.h',
+  r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.h',
+  r'C:\bin\cache\artifacts\engine\windows-x64\icudtl.dat',
+  r'C:\bin\cache\artifacts\engine\windows-x64\cpp_client_wrapper\foo',
+  r'C:\packages\flutter_tools\lib\src\build_system\targets\windows.dart',
+];
+
 void main() {
   testWithoutContext('UnpackWindows copies files to the correct cache directory', () async {
-    final Artifacts artifacts = Artifacts.test();
+    final MockArtifacts artifacts = MockArtifacts();
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
@@ -45,24 +60,22 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
 
-    final String windowsDesktopPath = artifacts.getArtifactPath(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
-    final String windowsCppClientWrapper = artifacts.getArtifactPath(Artifact.windowsCppClientWrapper, platform: TargetPlatform.windows_x64, mode: BuildMode.debug);
-    final String icuData = artifacts.getArtifactPath(Artifact.icuData, platform: TargetPlatform.windows_x64);
-    final List<String> requiredFiles = <String>[
-      '$windowsDesktopPath\\flutter_export.h',
-      '$windowsDesktopPath\\flutter_messenger.h',
-      '$windowsDesktopPath\\flutter_windows.dll',
-      '$windowsDesktopPath\\flutter_windows.dll.exp',
-      '$windowsDesktopPath\\flutter_windows.dll.lib',
-      '$windowsDesktopPath\\flutter_windows.dll.pdb',
-      '$windowsDesktopPath\\flutter_plugin_registrar.h',
-      '$windowsDesktopPath\\flutter_windows.h',
-      icuData,
-      '$windowsCppClientWrapper\\foo',
-      r'C:\packages\flutter_tools\lib\src\build_system\targets\windows.dart',
-    ];
-
-    for (final String path in requiredFiles) {
+    when(artifacts.getArtifactPath(
+      Artifact.windowsDesktopPath,
+      mode: anyNamed('mode'),
+      platform: anyNamed('platform')
+    )).thenReturn(r'C:\bin\cache\artifacts\engine\windows-x64\');
+    when(artifacts.getArtifactPath(
+      Artifact.windowsCppClientWrapper,
+      mode: anyNamed('mode'),
+      platform: anyNamed('platform')
+    )).thenReturn(r'C:\bin\cache\artifacts\engine\windows-x64\cpp_client_wrapper\');
+    when(artifacts.getArtifactPath(
+      Artifact.icuData,
+      mode: anyNamed('mode'),
+      platform: anyNamed('platform')
+    )).thenReturn(r'C:\bin\cache\artifacts\engine\windows-x64\icudtl.dat');
+    for (final String path in kRequiredFiles) {
       fileSystem.file(path).createSync(recursive: true);
     }
     fileSystem.directory('windows').createSync();
@@ -80,8 +93,9 @@ void main() {
     expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_messenger.h'), exists);
     expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_plugin_registrar.h'), exists);
     expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_windows.h'), exists);
-    expect(fileSystem.file('C:\\windows\\flutter\\ephemeral\\$icuData'), exists);
-    expect(fileSystem.file('C:\\windows\\flutter\\ephemeral\\$windowsCppClientWrapper\\foo'), exists);
+    expect(fileSystem.file(r'C:\windows\flutter\ephemeral\icudtl.dat'), exists);
+    expect(fileSystem.file(r'C:\windows\flutter\ephemeral\cpp_client_wrapper\foo'), exists);
+
 
     final File outputDepfile = environment.buildDir
       .childFile('windows_engine_sources.d');
@@ -96,16 +110,16 @@ void main() {
 
     // Depfile has expected sources.
     expect(inputPaths, unorderedEquals(<String>[
-      '$windowsDesktopPath\\flutter_export.h',
-      '$windowsDesktopPath\\flutter_messenger.h',
-      '$windowsDesktopPath\\flutter_windows.dll',
-      '$windowsDesktopPath\\flutter_windows.dll.exp',
-      '$windowsDesktopPath\\flutter_windows.dll.lib',
-      '$windowsDesktopPath\\flutter_windows.dll.pdb',
-      '$windowsDesktopPath\\flutter_plugin_registrar.h',
-      '$windowsDesktopPath\\flutter_windows.h',
-      icuData,
-      '$windowsCppClientWrapper\\foo',
+      r'C:\bin\cache\artifacts\engine\windows-x64\flutter_export.h',
+      r'C:\bin\cache\artifacts\engine\windows-x64\flutter_messenger.h',
+      r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll',
+      r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.exp',
+      r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.lib',
+      r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.pdb',
+      r'C:\bin\cache\artifacts\engine\windows-x64\flutter_plugin_registrar.h',
+      r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.h',
+      r'C:\bin\cache\artifacts\engine\windows-x64\icudtl.dat',
+      r'C:\bin\cache\artifacts\engine\windows-x64\cpp_client_wrapper\foo',
     ]));
     expect(outputPaths, unorderedEquals(<String>[
       r'C:\windows\flutter\ephemeral\flutter_export.h',
@@ -116,8 +130,8 @@ void main() {
       r'C:\windows\flutter\ephemeral\flutter_windows.dll.pdb',
       r'C:\windows\flutter\ephemeral\flutter_plugin_registrar.h',
       r'C:\windows\flutter\ephemeral\flutter_windows.h',
-      'C:\\windows\\flutter\\ephemeral\\$icuData',
-      'C:\\windows\\flutter\\ephemeral\\$windowsCppClientWrapper\\foo',
+      r'C:\windows\flutter\ephemeral\icudtl.dat',
+      r'C:\windows\flutter\ephemeral\cpp_client_wrapper\foo',
     ]));
   });
 
@@ -131,7 +145,7 @@ void main() {
   testUsingContext('DebugBundleWindowsAssets creates correct bundle structure', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
-      artifacts: Artifacts.test(),
+      artifacts: MockArtifacts(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -172,7 +186,7 @@ void main() {
   testUsingContext('ProfileBundleWindowsAssets creates correct bundle structure', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
-      artifacts: Artifacts.test(),
+      artifacts: MockArtifacts(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -199,7 +213,7 @@ void main() {
   testUsingContext('ReleaseBundleWindowsAssets creates correct bundle structure', () async {
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
-      artifacts: Artifacts.test(),
+      artifacts: MockArtifacts(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -223,3 +237,5 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 }
+
+class MockArtifacts extends Mock implements Artifacts {}

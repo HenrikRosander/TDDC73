@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -33,7 +35,7 @@ void main() {
     setUp(() {
       processManager = mocks.MockProcessManager();
       platform = FakePlatform(operatingSystem: 'macos');
-      final FileSystem fileSystem = MemoryFileSystem.test();
+      final FileSystem fileSystem = MemoryFileSystem();
       fileSystem.file(xcodebuild).createSync(recursive: true);
       final AnsiTerminal terminal = MockAnsiTerminal();
       logger = BufferLogger.test(
@@ -85,7 +87,7 @@ void main() {
   setUp(() {
     fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
     platform = FakePlatform(operatingSystem: 'macos');
-    fileSystem = MemoryFileSystem.test();
+    fileSystem = MemoryFileSystem();
     fileSystem.file(xcodebuild).createSync(recursive: true);
     terminal = MockAnsiTerminal();
     logger = BufferLogger.test(
@@ -534,7 +536,7 @@ Information about project "Runner":
     FileSystem fs;
 
     setUp(() {
-      fs = MemoryFileSystem.test();
+      fs = MemoryFileSystem();
       mockArtifacts = MockLocalEngineArtifacts();
       macOS = FakePlatform(operatingSystem: 'macos');
       fs.file(xcodebuild).createSync(recursive: true);

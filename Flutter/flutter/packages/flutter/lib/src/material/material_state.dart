@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:ui' show Color;
 
 import 'package:flutter/foundation.dart';
@@ -21,7 +23,7 @@ import 'package:flutter/rendering.dart';
 ///  * [MaterialStateColor], a [Color] that implements `MaterialStateProperty`
 ///    which is used in APIs that need to accept either a [Color] or a
 ///    `MaterialStateProperty<Color>`.
-///  * [MaterialStateMouseCursor], a [MouseCursor] that implements `MaterialStateProperty`
+///  * [MaterialStateMouseCursor], a [MouseCursor] that implements `MaterialStateProperty`.
 ///    which is used in APIs that need to accept either a [MouseCursor] or a
 ///    [MaterialStateProperty<MouseCursor>].
 
@@ -120,7 +122,7 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// }
 /// ```
 /// {@end-tool}
-abstract class MaterialStateColor extends Color implements MaterialStateProperty<Color?> {
+abstract class MaterialStateColor extends Color implements MaterialStateProperty<Color> {
   /// Creates a [MaterialStateColor].
   const MaterialStateColor(int defaultValue) : super(defaultValue);
 
@@ -261,9 +263,9 @@ abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialS
 
 class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
   const _EnabledAndDisabledMouseCursor({
-    required this.enabledCursor,
-    required this.disabledCursor,
-    required this.name,
+    this.enabledCursor,
+    this.disabledCursor,
+    this.name,
   });
 
   final MouseCursor enabledCursor;
@@ -337,7 +339,7 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 ///  * [MaterialStateColor], a [Color] that implements `MaterialStateProperty`
 ///    which is used in APIs that need to accept either a [Color] or a
 ///    `MaterialStateProperty<Color>`.
-///  * [MaterialStateMouseCursor], a [MouseCursor] that implements `MaterialStateProperty`
+///  * [MaterialStateMouseCursor], a [MouseCursor] that implements `MaterialStateProperty`.
 ///    which is used in APIs that need to accept either a [MouseCursor] or a
 ///    [MaterialStateProperty<MouseCursor>].
 abstract class MaterialStateProperty<T> {

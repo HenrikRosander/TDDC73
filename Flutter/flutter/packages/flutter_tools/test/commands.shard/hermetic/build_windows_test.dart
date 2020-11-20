@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
@@ -43,7 +44,7 @@ void main() {
 
   ProcessManager processManager;
   MockVisualStudio mockVisualStudio;
-  Usage usage;
+  MockUsage usage;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -53,7 +54,7 @@ void main() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
     mockVisualStudio = MockVisualStudio();
-    usage = Usage.test();
+    usage = MockUsage();
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -67,6 +68,26 @@ void main() {
   void setUpMockProjectFilesForBuild({int templateVersion}) {
     fileSystem.file(buildFilePath).createSync(recursive: true);
     setUpMockCoreProjectFiles();
+
+    final String versionFileSubpath = fileSystem.path.join('flutter', '.template_version');
+    const int expectedTemplateVersion = 10;  // Arbitrary value for tests.
+    final File sourceTemplateVersionfile = fileSystem.file(fileSystem.path.join(
+      fileSystem.path.absolute(Cache.flutterRoot),
+      'packages',
+      'flutter_tools',
+      'templates',
+      'app',
+      'windows.tmpl',
+      versionFileSubpath,
+    ));
+    sourceTemplateVersionfile.createSync(recursive: true);
+    sourceTemplateVersionfile.writeAsStringSync(expectedTemplateVersion.toString());
+
+    final File projectTemplateVersionFile = fileSystem.file(
+      fileSystem.path.join('windows', versionFileSubpath));
+    templateVersion ??= expectedTemplateVersion;
+    projectTemplateVersionFile.createSync(recursive: true);
+    projectTemplateVersionFile.writeAsStringSync(templateVersion.toString());
   }
 
   // Returns the command matching the build_windows call to generate CMake
@@ -160,6 +181,38 @@ void main() {
     Platform: () => notWindowsPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('Windows build fails with instructions when template is too old', () async {
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = mockVisualStudio;
+    applyMocksToCommand(command);
+    setUpMockProjectFilesForBuild(templateVersion: 1);
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['windows', '--no-pub']
+    ), throwsToolExit(message: 'flutter create .'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => windowsPlatform,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('Windows build fails with instructions when template is too new', () async {
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = mockVisualStudio;
+    applyMocksToCommand(command);
+    setUpMockProjectFilesForBuild(templateVersion: 999);
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['windows', '--no-pub']
+    ), throwsToolExit(message: 'Upgrade Flutter'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => windowsPlatform,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
@@ -286,8 +339,6 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
     ]);
     fileSystem.file(fileSystem.path.join('lib', 'other.dart'))
       .createSync(recursive: true);
-    fileSystem.file(fileSystem.path.join('foo', 'bar.sksl.json'))
-      .createSync(recursive: true);
 
     await createTestCommandRunner(command).run(
       const <String>[
@@ -405,15 +456,12 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
       }),
     ]);
 
-    // Capture Usage.test() events.
-    final StringBuffer buffer = await capturedConsolePrint(() =>
-      createTestCommandRunner(command).run(
-        const <String>['windows', '--no-pub', '--analyze-size']
-      )
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--no-pub', '--analyze-size']
     );
 
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
-    expect(buffer.toString(), contains('event {category: code-size-analysis, action: windows, label: null, value: null, cd33:'));
+    verify(usage.sendEvent('code-size-analysis', 'windows')).called(1);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     FileSystem: () => fileSystem,
@@ -424,4 +472,7 @@ C:\foo\windows\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identifier 
   });
 }
 
+class MockProcessManager extends Mock implements ProcessManager {}
+class MockProcess extends Mock implements Process {}
 class MockVisualStudio extends Mock implements VisualStudio {}
+class MockUsage extends Mock implements Usage {}

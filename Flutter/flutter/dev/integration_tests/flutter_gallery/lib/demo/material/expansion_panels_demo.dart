@@ -119,7 +119,7 @@ class CollapsibleBody extends StatelessWidget {
             children: <Widget>[
               Container(
                 margin: const EdgeInsets.only(right: 8.0),
-                child: TextButton(
+                child: FlatButton(
                   onPressed: onCancel,
                   child: const Text('CANCEL', style: TextStyle(
                     color: Colors.black54,
@@ -130,8 +130,9 @@ class CollapsibleBody extends StatelessWidget {
               ),
               Container(
                 margin: const EdgeInsets.only(right: 8.0),
-                child: TextButton(
+                child: FlatButton(
                   onPressed: onSave,
+                  textTheme: ButtonTextTheme.accent,
                   child: const Text('SAVE'),
                 ),
               ),

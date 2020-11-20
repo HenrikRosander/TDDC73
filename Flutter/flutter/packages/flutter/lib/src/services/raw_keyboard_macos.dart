@@ -151,7 +151,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   @override
   bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
     final int independentModifier = modifiers & deviceIndependentMask;
-    final bool result;
+    bool result;
     switch (key) {
       case ModifierKey.controlModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierControl, modifierLeftControl, modifierRightControl);

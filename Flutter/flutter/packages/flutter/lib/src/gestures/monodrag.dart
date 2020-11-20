@@ -24,18 +24,15 @@ enum _DragState {
 /// The velocity at which the pointer was moving when it stopped contacting
 /// the screen is available in the `details`.
 ///
-/// Used by [DragGestureRecognizer.onEnd].
+/// See [DragGestureRecognizer.onEnd].
 typedef GestureDragEndCallback = void Function(DragEndDetails details);
 
 /// Signature for when the pointer that previously triggered a
 /// [GestureDragDownCallback] did not complete.
 ///
-/// Used by [DragGestureRecognizer.onCancel].
+/// See [DragGestureRecognizer.onCancel].
 typedef GestureDragCancelCallback = void Function();
 
-/// Signature for a function that builds a [VelocityTracker].
-///
-/// Used by [DragGestureRecognizer.velocityTrackerBuilder].
 typedef GestureVelocityTrackerBuilder = VelocityTracker Function(PointerEvent event);
 
 /// Recognizes movement.
@@ -323,7 +320,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       final OffsetPair delta = _pendingDragOffset;
       final Duration timestamp = _lastPendingEventTimestamp!;
       final Matrix4? transform = _lastTransform;
-      final Offset localUpdateDelta;
+      Offset localUpdateDelta;
       switch (dragStartBehavior) {
         case DragStartBehavior.start:
           _initialPosition = _initialPosition + delta;
@@ -442,8 +439,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     final VelocityTracker tracker = _velocityTrackers[pointer]!;
     assert(tracker != null);
 
-    final DragEndDetails details;
-    final String Function() debugReport;
+    DragEndDetails details;
+    String Function() debugReport;
 
     final VelocityEstimate? estimate = tracker.getVelocityEstimate();
     if (estimate != null && isFlingGesture(estimate, tracker.kind)) {

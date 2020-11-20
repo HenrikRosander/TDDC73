@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -29,10 +31,9 @@ class TestServiceExtensionsBinding extends BindingBase
   final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
 
   @override
-  @protected
   void registerServiceExtension({
-    required String name,
-    required ServiceExtensionCallback callback,
+    @required String name,
+    @required ServiceExtensionCallback callback,
   }) {
     expect(extensions.containsKey(name), isFalse);
     extensions[name] = callback;
@@ -54,7 +55,7 @@ class TestServiceExtensionsBinding extends BindingBase
 
   Future<Map<String, dynamic>> testExtension(String name, Map<String, String> arguments) {
     expect(extensions.containsKey(name), isTrue);
-    return extensions[name]!(arguments);
+    return extensions[name](arguments);
   }
 
   int reassembled = 0;
@@ -74,10 +75,13 @@ class TestServiceExtensionsBinding extends BindingBase
   }
   Future<void> doFrame() async {
     frameScheduled = false;
-    ui.window.onBeginFrame?.call(Duration.zero);
+    if (ui.window.onBeginFrame != null)
+      ui.window.onBeginFrame(Duration.zero);
     await flushMicrotasks();
-    ui.window.onDrawFrame?.call();
-    ui.window.onReportTimings?.call(<ui.FrameTiming>[]);
+    if (ui.window.onDrawFrame != null)
+      ui.window.onDrawFrame();
+    if (ui.window.onReportTimings != null)
+      ui.window.onReportTimings(<ui.FrameTiming>[]);
   }
 
   @override
@@ -98,7 +102,7 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 }
 
-late TestServiceExtensionsBinding binding;
+TestServiceExtensionsBinding binding;
 
 Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingResult) async {
   bool completed = false;
@@ -116,7 +120,7 @@ Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingR
 }
 
 void main() {
-  final List<String?> console = <String?>[];
+  final List<String> console = <String>[];
 
   setUpAll(() async {
     binding = TestServiceExtensionsBinding()..scheduleFrame();
@@ -146,7 +150,7 @@ void main() {
     expect(binding.frameScheduled, isFalse);
 
     expect(debugPrint, equals(debugPrintThrottled));
-    debugPrint = (String? message, { int? wrapWidth }) {
+    debugPrint = (String message, { int wrapWidth }) {
       console.add(message);
     };
   });
@@ -204,7 +208,7 @@ void main() {
 
     bool lastValue = false;
     Future<void> _updateAndCheck(bool newValue) async {
-      Map<String, dynamic>? result;
+      Map<String, dynamic> result;
       binding.testExtension(
         'debugCheckElevationsEnabled',
         <String, String>{'enabled': '$newValue'},
@@ -454,8 +458,8 @@ void main() {
     bool completed;
 
     completed = false;
-    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
-      expect(utf8.decode(message!.buffer.asUint8List()), 'test');
+    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) async {
+      expect(utf8.decode(message.buffer.asUint8List()), 'test');
       completed = true;
       return ByteData(5); // 0x0000000000
     });
@@ -468,7 +472,8 @@ void main() {
     expect(completed, isTrue);
     completed = false;
     data = await rootBundle.loadStructuredData('test', (String value) async {
-      throw Error();
+      expect(true, isFalse);
+      return null;
     });
     expect(data, isTrue);
     expect(completed, isFalse);
@@ -481,7 +486,7 @@ void main() {
     });
     expect(data, isFalse);
     expect(completed, isTrue);
-    ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
+    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
   });
 
   test('Service extensions - exit', () async {
@@ -734,5 +739,9 @@ void main() {
     final String brightnessValue = result['value'] as String;
 
     expect(brightnessValue, 'Brightness.light');
+  });
+
+  test('Service extensions - fastReassemble', () async {
+    expect(binding.testExtension('fastReassemble', <String, String>{}), throwsA(isA<FlutterError>()));
   });
 }

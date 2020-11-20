@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
@@ -142,17 +141,17 @@ void main() {
 
     group('run app', () {
       MemoryFileSystem fs;
-      Artifacts artifacts;
+      MockArtifacts mockArtifacts;
       MockCache mockCache;
       MockProcessManager mockProcessManager;
-      Usage usage;
+      MockUsage mockUsage;
       Directory tempDir;
 
       setUp(() {
-        artifacts = Artifacts.test();
+        mockArtifacts = MockArtifacts();
         mockCache = MockCache();
-        usage = Usage.test();
-        fs = MemoryFileSystem.test();
+        mockUsage = MockUsage();
+        fs = MemoryFileSystem();
         mockProcessManager = MockProcessManager();
 
         tempDir = fs.systemTempDirectory.createTempSync('flutter_run_test.');
@@ -359,6 +358,12 @@ void main() {
           userIdentifier: anyNamed('userIdentifier'),
         )).thenAnswer((Invocation invocation) => Future<LaunchResult>.value(LaunchResult.failed()));
 
+        when(mockArtifacts.getArtifactPath(
+          Artifact.flutterPatchedSdkPath,
+          platform: anyNamed('platform'),
+          mode: anyNamed('mode'),
+        )).thenReturn('/path/to/sdk');
+
         when(mockDeviceManager.getDevices()).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[mockDevice])
         );
@@ -376,27 +381,41 @@ void main() {
           ..writeAsStringSync('# Hello, World');
         globals.fs.currentDirectory = tempDir;
 
-        // Capture Usage.test() events.
-        final StringBuffer buffer = await capturedConsolePrint(() =>
-          expectToolExitLater(createTestCommandRunner(command).run(<String>[
+        try {
+          await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
             '--no-hot',
-          ]), isNull)
-        );
-        // Allow any CustomDimensions.localTime (cd33) timestamp.
-        final RegExp usageRegexp = RegExp(
-          'screenView {cd3: false, cd4: ios, cd22: iOS 13, cd23: debug, cd18: false, cd15: swift, cd31: false, cd47: false, cd33: .*, viewName: run'
-        );
-        expect(buffer.toString(), matches(usageRegexp));
+          ]);
+          fail('Exception expected');
+        } on ToolExit catch (e) {
+          // We expect a ToolExit because app does not start
+          expect(e.message, null);
+        } on Exception catch (e) {
+          fail('ToolExit expected, got $e');
+        }
+        final List<dynamic> captures = verify(mockUsage.sendCommand(
+          captureAny,
+          parameters: captureAnyNamed('parameters'),
+        )).captured;
+        expect(captures[0], 'run');
+        final Map<String, String> parameters = captures[1] as Map<String, String>;
+
+        expect(parameters[cdKey(CustomDimensions.commandRunIsEmulator)], 'false');
+        expect(parameters[cdKey(CustomDimensions.commandRunTargetName)], 'ios');
+        expect(parameters[cdKey(CustomDimensions.commandRunProjectHostLanguage)], 'swift');
+        expect(parameters[cdKey(CustomDimensions.commandRunTargetOsVersion)], 'iOS 13');
+        expect(parameters[cdKey(CustomDimensions.commandRunModeName)], 'debug');
+        expect(parameters[cdKey(CustomDimensions.commandRunProjectModule)], 'false');
+        expect(parameters.containsKey(cdKey(CustomDimensions.commandRunAndroidEmbeddingVersion)), false);
       }, overrides: <Type, Generator>{
         ApplicationPackageFactory: () => mockApplicationPackageFactory,
-        Artifacts: () => artifacts,
+        Artifacts: () => mockArtifacts,
         Cache: () => mockCache,
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => mockProcessManager,
-        Usage: () => usage,
+        Usage: () => mockUsage,
       });
     });
 
@@ -523,6 +542,7 @@ void main() {
   });
 }
 
+class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
 class MockUsage extends Mock implements Usage {}
 

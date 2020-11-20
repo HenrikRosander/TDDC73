@@ -82,6 +82,7 @@ ThemeData _buildShrineTheme() {
     buttonColor: kShrinePink100,
     scaffoldBackgroundColor: kShrineBackgroundWhite,
     cardColor: kShrineBackgroundWhite,
+    textSelectionColor: kShrinePink100,
     errorColor: kShrineErrorRed,
     buttonTheme: const ButtonThemeData(
       colorScheme: kShrineColorScheme,

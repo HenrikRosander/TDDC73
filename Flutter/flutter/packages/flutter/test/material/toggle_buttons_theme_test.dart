@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -9,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
-Widget boilerplate({required Widget child}) {
+Widget boilerplate({Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(child: child),
@@ -40,7 +42,7 @@ void main() {
     expect(themeData.borderRadius, null);
     expect(themeData.borderWidth, null);
 
-    const ToggleButtonsTheme theme = ToggleButtonsTheme(data: ToggleButtonsThemeData(), child: SizedBox());
+    const ToggleButtonsTheme theme = ToggleButtonsTheme(data: ToggleButtonsThemeData());
     expect(theme.data.textStyle, null);
     expect(theme.data.constraints, null);
     expect(theme.data.color, null);
@@ -427,7 +429,7 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: hoverColor));
-    await hoverGesture.moveTo(const Offset(0, 0));
+    await hoverGesture.removePointer();
 
     // focusColor
     focusNode.requestFocus();
@@ -436,8 +438,6 @@ void main() {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
     expect(inkFeatures, paints..rect(color: focusColor));
-
-    await hoverGesture.removePointer();
   });
 
 

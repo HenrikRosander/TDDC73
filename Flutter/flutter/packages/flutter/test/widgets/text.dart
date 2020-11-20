@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -12,7 +14,7 @@ RenderEditable findRenderEditable(WidgetTester tester) {
   final RenderObject root = tester.renderObject(find.byType(EditableText));
   expect(root, isNotNull);
 
-  late RenderEditable renderEditable;
+  RenderEditable renderEditable;
   void recursiveFinder(RenderObject child) {
     if (child is RenderEditable) {
       renderEditable = child;

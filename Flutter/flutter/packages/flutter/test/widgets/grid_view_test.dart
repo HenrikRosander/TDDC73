@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -576,7 +578,8 @@ void main() {
         itemCount: 1000,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
         itemBuilder: (BuildContext context, int index) {
-          counters[index] = (counters[index] ?? 0) + 1;
+          counters[index] ??= 0;
+          counters[index] += 1;
           return SizedBox(
             key: ValueKey<int>(index),
             width: 200,

@@ -3,38 +3,23 @@
 // found in the LICENSE file.
 
 import 'package:archive/archive.dart';
-import 'package:meta/meta.dart';
 
-import '../base/file_system.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
+import '../globals.dart' as globals;
 
-/// A parser for the Intellij and Android Studio plugin JAR files.
-///
-/// This searches on the provided plugin path for a JAR archive, then
-/// unzips it to parse the META-INF/plugin.xml for version information.
-///
-/// See also:
-///   * [IntellijValidator], the validator base class that uses this to check
-///     plugin versions.
 class IntelliJPlugins {
-  IntelliJPlugins(this.pluginsPath, {
-    @required FileSystem fileSystem
-  }) : _fileSystem = fileSystem;
+  IntelliJPlugins(this.pluginsPath);
 
-  final FileSystem _fileSystem;
   final String pluginsPath;
 
   static final Version kMinFlutterPluginVersion = Version(16, 0, 0);
-  static const String kIntellijDartPluginUrl = 'https://plugins.jetbrains.com/plugin/6351-dart';
-  static const String kIntellijFlutterPluginUrl = 'https://plugins.jetbrains.com/plugin/9212-flutter';
 
   void validatePackage(
     List<ValidationMessage> messages,
     List<String> packageNames,
-    String title,
-    String url, {
+    String title, {
     Version minVersion,
   }) {
     for (final String packageName in packageNames) {
@@ -46,46 +31,43 @@ class IntelliJPlugins {
       final Version version = Version.parse(versionText);
       if (version != null && minVersion != null && version < minVersion) {
         messages.add(ValidationMessage.error(
-          '$title plugin version $versionText - the recommended minimum version is $minVersion'),
-        );
+            '$title plugin version $versionText - the recommended minimum version is $minVersion'));
       } else {
         messages.add(ValidationMessage(
-          '$title plugin ${version != null ? "version $version" : "installed"}'),
-        );
+            '$title plugin ${version != null ? "version $version" : "installed"}'));
       }
+
       return;
     }
-    messages.add(ValidationMessage(
-      '$title plugin can be installed from:',
-      contextUrl: url,
-    ));
+
+    messages.add(ValidationMessage.error(
+        '$title plugin not installed; this adds $title specific functionality.'));
   }
 
   bool _hasPackage(String packageName) {
-    final String packagePath = _fileSystem.path.join(pluginsPath, packageName);
+    final String packagePath = globals.fs.path.join(pluginsPath, packageName);
     if (packageName.endsWith('.jar')) {
-      return _fileSystem.isFileSync(packagePath);
+      return globals.fs.isFileSync(packagePath);
     }
-    return _fileSystem.isDirectorySync(packagePath);
+    return globals.fs.isDirectorySync(packagePath);
   }
 
   String _readPackageVersion(String packageName) {
     final String jarPath = packageName.endsWith('.jar')
-        ? _fileSystem.path.join(pluginsPath, packageName)
-        : _fileSystem.path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
-    final File file = _fileSystem.file(jarPath);
-    if (!file.existsSync()) {
-      return null;
-    }
+        ? globals.fs.path.join(pluginsPath, packageName)
+        : globals.fs.path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
+    // TODO(danrubel): look for a better way to extract a single 2K file from the zip
+    // rather than reading the entire file into memory.
     try {
-      final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
-      final ArchiveFile archiveFile = archive.findFile('META-INF/plugin.xml');
-      final String content = utf8.decode(archiveFile.content as List<int>);
+      final Archive archive =
+          ZipDecoder().decodeBytes(globals.fs.file(jarPath).readAsBytesSync());
+      final ArchiveFile file = archive.findFile('META-INF/plugin.xml');
+      final String content = utf8.decode(file.content as List<int>);
       const String versionStartTag = '<version>';
       final int start = content.indexOf(versionStartTag);
       final int end = content.indexOf('</version>', start);
       return content.substring(start + versionStartTag.length, end);
-    } on ArchiveException {
+    } on Exception {
       return null;
     }
   }

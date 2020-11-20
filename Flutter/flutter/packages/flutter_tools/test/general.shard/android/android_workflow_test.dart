@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
@@ -35,7 +37,7 @@ void main() {
 
   setUp(() {
     sdk = MockAndroidSdk();
-    fs = MemoryFileSystem.test();
+    fs = MemoryFileSystem();
     fs.directory('/home/me').createSync(recursive: true);
     logger = BufferLogger(
       terminal: AnsiTerminal(
@@ -329,15 +331,9 @@ void main() {
       validationResult.messages.last.message,
       errorMessage,
     );
-    expect(
-      validationResult.messages.any(
-        (ValidationMessage message) => message.message.contains('Unable to locate Android SDK')
-      ),
-      false,
-    );
   });
 
-  testWithoutContext('Mentions `flutter config --android-sdk if user has no AndroidSdk`', () async {
+  testWithoutContext('Mentions `kAndroidSdkRoot if user has no AndroidSdk`', () async {
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: null,
       androidStudio: null,
@@ -349,7 +345,7 @@ void main() {
     ).validate();
     expect(
       validationResult.messages.any(
-        (ValidationMessage message) => message.message.contains('flutter config --android-sdk')
+        (ValidationMessage message) => message.message.contains(kAndroidSdkRoot)
       ),
       true,
     );

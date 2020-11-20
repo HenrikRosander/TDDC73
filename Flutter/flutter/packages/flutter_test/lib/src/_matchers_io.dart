@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
@@ -22,13 +23,13 @@ import 'goldens.dart';
 ///
 ///  * [OffsetLayer.toImage] which is the actual method being called.
 Future<ui.Image> captureImage(Element element) {
-  assert(element.renderObject != null);
-  RenderObject renderObject = element.renderObject!;
+  RenderObject renderObject = element.renderObject;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent! as RenderObject;
+    renderObject = renderObject.parent as RenderObject;
+    assert(renderObject != null);
   }
   assert(!renderObject.debugNeedsPaint);
-  final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
+  final OffsetLayer layer = renderObject.debugLayer as OffsetLayer;
   return layer.toImage(renderObject.paintBounds);
 }
 
@@ -45,10 +46,10 @@ class MatchesGoldenFile extends AsyncMatcher {
   final Uri key;
 
   /// The [version] of the golden image.
-  final int? version;
+  final int version;
 
   @override
-  Future<String?> matchAsync(dynamic item) async {
+  Future<String> matchAsync(dynamic item) async {
     Future<ui.Image> imageFuture;
     if (item is Future<ui.Image>) {
       imageFuture = item;
@@ -68,9 +69,9 @@ class MatchesGoldenFile extends AsyncMatcher {
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-    return binding.runAsync<String?>(() async {
+    return binding.runAsync<String>(() async {
       final ui.Image image = await imageFuture;
-      final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png);
       if (bytes == null)
         return 'could not encode screenshot.';
       if (autoUpdateGoldenFiles) {

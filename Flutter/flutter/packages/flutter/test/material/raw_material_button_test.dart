@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +34,7 @@ void main() {
     await tester.tap(find.text('BUTTON'));
     await tester.pump(const Duration(milliseconds: 10));
 
-    final RenderBox splash = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     expect(splash, paints..circle(color: splashColor));
 
     await tester.pumpAndSettle();
@@ -72,7 +74,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
 
     if (!kIsWeb) {
-      final RenderBox splash = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+      final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
       expect(splash, paints..circle(color: splashColor));
     }
 
@@ -90,7 +92,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump(const Duration(milliseconds: 10));
 
-    final RenderBox splash = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     expect(splash, paints..circle(color: splashColor));
 
     await tester.pumpAndSettle();
@@ -195,7 +197,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     // centered in material button.
     expect(box, paints..circle(x: 44.0, y: 18.0, color: splashColor));
     await gesture.up();
@@ -226,7 +228,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(top);
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     // paints above above material
     expect(box, paints..circle(x: 44.0, y: 0.0, color: splashColor));
     await gesture.up();
@@ -325,7 +327,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     expect(box, isNot(paints..rect(color: focusColor)));
 
     focusNode.requestFocus();
@@ -424,7 +426,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell)))! as RenderBox;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
@@ -441,7 +443,7 @@ void main() {
     bool wasPressed;
     Finder rawMaterialButton;
 
-    Widget buildFrame({ VoidCallback? onPressed, VoidCallback? onLongPress }) {
+    Widget buildFrame({ VoidCallback onPressed, VoidCallback onLongPress }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: RawMaterialButton(
@@ -591,7 +593,7 @@ void main() {
 
     await tester.pump();
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -606,7 +608,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -621,6 +623,6 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance!.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 }

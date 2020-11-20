@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/gestures.dart';
 
 import '../flutter_test_alternative.dart';
@@ -18,7 +20,7 @@ void main() {
     final List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 
     final LeastSquaresSolver solver = LeastSquaresSolver(x, y, w);
-    final PolynomialFit fit = solver.solve(1)!;
+    final PolynomialFit fit = solver.solve(1);
 
     expect(fit.coefficients.length, 2);
     expect(approx(fit.coefficients[0], 1.0), isTrue);
@@ -32,7 +34,7 @@ void main() {
     final List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 
     final LeastSquaresSolver solver = LeastSquaresSolver(x, y, w);
-    final PolynomialFit fit = solver.solve(1)!;
+    final PolynomialFit fit = solver.solve(1);
 
     expect(fit.coefficients.length, 2);
     expect(approx(fit.coefficients[0], 1.0), isTrue);
@@ -46,7 +48,7 @@ void main() {
     final List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 
     final LeastSquaresSolver solver = LeastSquaresSolver(x, y, w);
-    final PolynomialFit fit = solver.solve(2)!;
+    final PolynomialFit fit = solver.solve(2);
 
     expect(fit.coefficients.length, 3);
     expect(approx(fit.coefficients[0], 1.0), isTrue);
@@ -61,7 +63,7 @@ void main() {
     final List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 
     final LeastSquaresSolver solver = LeastSquaresSolver(x, y, w);
-    final PolynomialFit fit = solver.solve(2)!;
+    final PolynomialFit fit = solver.solve(2);
 
     expect(fit.coefficients.length, 3);
     expect(approx(fit.coefficients[0], 1.0), isTrue);

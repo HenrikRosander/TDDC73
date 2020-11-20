@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -390,13 +392,13 @@ void main() {
     List<Element> titles = tester.elementList(find.text('Title'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
-          return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
+          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
+          return aParagraph.text.style.fontSize.compareTo(bParagraph.text.style.fontSize);
         });
 
     Iterable<double> opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
       return renderOpacity.opacity.value;
     });
 
@@ -415,13 +417,13 @@ void main() {
     titles = tester.elementList(find.text('Title'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject! as RenderParagraph;
-          final RenderParagraph bParagraph = b.renderObject! as RenderParagraph;
-          return aParagraph.text.style!.fontSize!.compareTo(bParagraph.text.style!.fontSize!);
+          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
+          return aParagraph.text.style.fontSize.compareTo(bParagraph.text.style.fontSize);
         });
 
     opacities = titles.map<double>((Element element) {
-      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+      final RenderAnimatedOpacity renderOpacity = element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
       return renderOpacity.opacity.value;
     });
 
@@ -529,7 +531,7 @@ void main() {
     expect(find.text('Different title'), findsOneWidget);
 
     RenderAnimatedOpacity largeTitleOpacity =
-        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
     // Large title initially visible.
     expect(
       largeTitleOpacity.opacity.value,
@@ -548,7 +550,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     largeTitleOpacity =
-        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+        tester.element(find.text('Title')).findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
     // Large title no longer visible.
     expect(
       largeTitleOpacity.opacity.value,
@@ -678,7 +680,7 @@ void main() {
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
-    final BorderSide side = decoration.border!.bottom;
+    final BorderSide side = decoration.border.bottom;
     expect(side, isNotNull);
   });
 
@@ -706,7 +708,7 @@ void main() {
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
-    final BorderSide side = decoration.border!.bottom;
+    final BorderSide side = decoration.border.bottom;
     expect(side, isNotNull);
     expect(side.color, const Color(0xFFAABBCC));
   });
@@ -755,7 +757,7 @@ void main() {
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
-    final BorderSide bottom = decoration.border!.bottom;
+    final BorderSide bottom = decoration.border.bottom;
     expect(bottom, isNotNull);
   });
 
@@ -861,10 +863,10 @@ void main() {
     final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
-    final BorderSide top = decoration.border!.top;
+    final BorderSide top = decoration.border.top;
     expect(top, isNotNull);
     expect(top, BorderSide.none);
-    final BorderSide bottom = decoration.border!.bottom;
+    final BorderSide bottom = decoration.border.bottom;
     expect(bottom, isNotNull);
     expect(bottom.color, const Color(0xFFAABBCC));
   });
@@ -1106,7 +1108,7 @@ void main() {
       CupertinoApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context)!.copyWith(textScaleFactor: 99),
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
             child: CupertinoPageScaffold(
               child: CustomScrollView(
                 slivers: <Widget>[
@@ -1154,7 +1156,7 @@ void main() {
       title: 'title',
       builder: (BuildContext context) {
         return MediaQuery(
-          data: MediaQuery.of(context)!.copyWith(textScaleFactor: 99),
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
           child: Container(
             child: const CupertinoPageScaffold(
               child: CustomScrollView(
@@ -1188,10 +1190,7 @@ void main() {
 }
 
 class _ExpectStyles extends StatelessWidget {
-  const _ExpectStyles({
-    required this.color,
-    required this.index
-  });
+  const _ExpectStyles({ this.color, this.index });
 
   final Color color;
   final int index;

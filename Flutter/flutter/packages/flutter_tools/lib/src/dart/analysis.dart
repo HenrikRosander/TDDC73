@@ -190,7 +190,7 @@ class AnalysisServer {
   }
 }
 
-enum AnalysisSeverity {
+enum _AnalysisSeverity {
   error,
   warning,
   info,
@@ -217,12 +217,12 @@ class AnalysisError implements Comparable<AnalysisError> {
 
   String get colorSeverity {
     switch (writtenError.severityLevel) {
-      case AnalysisSeverity.error:
+      case _AnalysisSeverity.error:
         return _terminal.color(writtenError.severity, TerminalColor.red);
-      case AnalysisSeverity.warning:
+      case _AnalysisSeverity.warning:
         return _terminal.color(writtenError.severity, TerminalColor.yellow);
-      case AnalysisSeverity.info:
-      case AnalysisSeverity.none:
+      case _AnalysisSeverity.info:
+      case _AnalysisSeverity.none:
         return writtenError.severity;
     }
     return null;
@@ -316,14 +316,14 @@ class WrittenError {
   final int startColumn;
   final int offset;
 
-  static final Map<String, AnalysisSeverity> _severityMap = <String, AnalysisSeverity>{
-    'INFO': AnalysisSeverity.info,
-    'WARNING': AnalysisSeverity.warning,
-    'ERROR': AnalysisSeverity.error,
+  static final Map<String, _AnalysisSeverity> _severityMap = <String, _AnalysisSeverity>{
+    'INFO': _AnalysisSeverity.info,
+    'WARNING': _AnalysisSeverity.warning,
+    'ERROR': _AnalysisSeverity.error,
   };
 
-  AnalysisSeverity get severityLevel =>
-      _severityMap[severity] ?? AnalysisSeverity.none;
+  _AnalysisSeverity get severityLevel =>
+      _severityMap[severity] ?? _AnalysisSeverity.none;
 
   String get messageSentenceFragment {
     if (message.endsWith('.')) {

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -13,7 +15,7 @@ class TestDataSource extends DataTableSource {
     this.onSelectChanged,
   });
 
-  final void Function(bool?)? onSelectChanged;
+  final void Function(bool) onSelectChanged;
 
   int get generation => _generation;
   int _generation = 0;
@@ -66,7 +68,7 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int? rowsPerPage) {
+        onRowsPerPageChanged: (int rowsPerPage) {
           log.add('rows-per-page-changed: $rowsPerPage');
         },
         onPageChanged: (int rowIndex) {
@@ -216,7 +218,7 @@ void main() {
         availableRowsPerPage: const <int>[
           8, 9,
         ],
-        onRowsPerPageChanged: (int? rowsPerPage) { },
+        onRowsPerPageChanged: (int rowsPerPage) { },
         columns: const <DataColumn>[
           DataColumn(label: Text('COL1')),
           DataColumn(label: Text('COL2')),
@@ -241,7 +243,7 @@ void main() {
           source: source,
           rowsPerPage: 501,
           availableRowsPerPage: const <int>[ 501 ],
-          onRowsPerPageChanged: (int? rowsPerPage) { },
+          onRowsPerPageChanged: (int rowsPerPage) { },
           columns: const <DataColumn>[
             DataColumn(label: Text('COL1')),
             DataColumn(label: Text('COL2')),
@@ -278,7 +280,7 @@ void main() {
               rowsPerPage: 5,
               dragStartBehavior: DragStartBehavior.down,
               availableRowsPerPage: const <int>[ 5 ],
-              onRowsPerPageChanged: (int? rowsPerPage) { },
+              onRowsPerPageChanged: (int rowsPerPage) { },
               columns: const <DataColumn>[
                 DataColumn(label: Text('COL1')),
                 DataColumn(label: Text('COL2')),
@@ -313,7 +315,7 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int? rowsPerPage) {},
+        onRowsPerPageChanged: (int rowsPerPage) {},
         onPageChanged: (int rowIndex) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
@@ -334,7 +336,7 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int? rowsPerPage) {},
+        onRowsPerPageChanged: (int rowsPerPage) {},
         onPageChanged: (int rowIndex) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
@@ -396,7 +398,7 @@ void main() {
     await binding.setSurfaceSize(const Size(_width, _height));
 
     final TestDataSource source = TestDataSource(
-      onSelectChanged: (bool? value) {},
+      onSelectChanged: (bool value) {},
     );
     Finder cellContent;
     Finder checkbox;
@@ -410,9 +412,9 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4,
         ],
-        onRowsPerPageChanged: (int? rowsPerPage) {},
+        onRowsPerPageChanged: (int rowsPerPage) {},
         onPageChanged: (int rowIndex) {},
-        onSelectAll: (bool? value) {},
+        onSelectAll: (bool value) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Calories'), numeric: true),
@@ -479,9 +481,9 @@ void main() {
           availableRowsPerPage: const <int>[
             2, 4,
           ],
-          onRowsPerPageChanged: (int? rowsPerPage) {},
+          onRowsPerPageChanged: (int rowsPerPage) {},
           onPageChanged: (int rowIndex) {},
-          onSelectAll: (bool? value) {},
+          onSelectAll: (bool value) {},
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Calories'), numeric: true),
@@ -562,7 +564,7 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int? rowsPerPage) {},
+        onRowsPerPageChanged: (int rowsPerPage) {},
         onPageChanged: (int rowIndex) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
@@ -618,7 +620,7 @@ void main() {
           availableRowsPerPage: const <int>[
             2, 4, 8, 16,
           ],
-          onRowsPerPageChanged: (int? rowsPerPage) {},
+          onRowsPerPageChanged: (int rowsPerPage) {},
           onPageChanged: (int rowIndex) {},
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
@@ -689,7 +691,7 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int? rowsPerPage) {},
+        onRowsPerPageChanged: (int rowsPerPage) {},
         onPageChanged: (int rowIndex) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
@@ -733,7 +735,7 @@ void main() {
     Widget buildTable(bool checkbox) => MaterialApp(
       home: PaginatedDataTable(
         header: const Text('Test table'),
-        source: TestDataSource(onSelectChanged: (bool? value) {}),
+        source: TestDataSource(onSelectChanged: (bool value) {}),
         showCheckboxColumn: checkbox,
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),

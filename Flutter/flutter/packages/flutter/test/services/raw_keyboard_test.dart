@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -16,30 +17,6 @@ class _ModifierCheck {
 
 void main() {
   group('RawKeyboard', () {
-    testWidgets('The correct character is produced', (WidgetTester tester) async {
-      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
-        String character = '';
-        void handleKey(RawKeyEvent event) {
-          expect(event.character, equals(character), reason: 'on $platform');
-        }
-        RawKeyboard.instance.addListener(handleKey);
-        character = 'a';
-        await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: platform);
-        character = '`';
-        await simulateKeyDownEvent(LogicalKeyboardKey.backquote, platform: platform);
-        RawKeyboard.instance.removeListener(handleKey);
-      }
-    });
-    testWidgets('No character is produced for non-printables', (WidgetTester tester) async {
-      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
-        void handleKey(RawKeyEvent event) {
-          expect(event.character, isNull, reason: 'on $platform');
-        }
-        RawKeyboard.instance.addListener(handleKey);
-        await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
-        RawKeyboard.instance.removeListener(handleKey);
-      }
-    });
     testWidgets('keysPressed is maintained', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
         RawKeyboard.instance.clearKeysPressed();
@@ -208,10 +185,10 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] |= RawKeyEventDataMacOs.modifierLeftShift | RawKeyEventDataMacOs.modifierShift;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {},
+        (ByteData data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -233,10 +210,10 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] |= RawKeyEventDataWindows.modifierLeftShift | RawKeyEventDataWindows.modifierShift;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {},
+        (ByteData data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -258,10 +235,10 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['metaState'] |= RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {},
+        (ByteData data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -283,10 +260,10 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] |= RawKeyEventDataFuchsia.modifierLeftShift;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {},
+        (ByteData data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -308,10 +285,10 @@ void main() {
       // when this event is received, but it's not in keysPressed yet.
       data['modifiers'] |= GLFWKeyHelper.modifierShift;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {},
+        (ByteData data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -342,10 +319,10 @@ void main() {
         RawKeyEventDataAndroid.modifierControl |
         RawKeyEventDataAndroid.modifierMeta;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-            (ByteData? data) {},
+            (ByteData data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -380,10 +357,10 @@ void main() {
           RawKeyEventDataMacOs.modifierCommand |
           RawKeyEventDataMacOs.modifierControl;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-            (ByteData? data) {},
+            (ByteData data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -418,10 +395,10 @@ void main() {
           RawKeyEventDataWindows.modifierAlt |
           RawKeyEventDataWindows.modifierControl;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-            (ByteData? data) {},
+            (ByteData data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -455,10 +432,10 @@ void main() {
         GLFWKeyHelper.modifierControl |
         GLFWKeyHelper.modifierMeta;
       // dispatch the modified data.
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-            (ByteData? data) {},
+            (ByteData data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -479,13 +456,13 @@ void main() {
     });
 
     testWidgets('RawKeyboard asserts if no keys are in keysPressed after receiving a key down event', (WidgetTester tester) async {
-      FlutterErrorDetails? errorDetails;
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterErrorDetails errorDetails;
+      final FlutterExceptionHandler oldHandler = FlutterError.onError;
       FlutterError.onError = (FlutterErrorDetails details) {
         errorDetails = details;
       };
       try {
-        await ServicesBinding.instance!.defaultBinaryMessenger
+        await ServicesBinding.instance.defaultBinaryMessenger
             .handlePlatformMessage(
           SystemChannels.keyEvent.name,
           SystemChannels.keyEvent.codec.encodeMessage(const <String, dynamic>{
@@ -497,13 +474,13 @@ void main() {
             'source': 0x101,
             'deviceId': 1,
           }),
-              (ByteData? data) {},
+              (ByteData data) {},
         );
       } finally {
         FlutterError.onError = oldHandler;
       }
       expect(errorDetails, isNotNull);
-      expect(errorDetails!.stack, isNotNull);
+      expect(errorDetails.stack, isNotNull);
       final String fullErrorMessage = errorDetails.toString().replaceAll('\n', ' ');
       expect(fullErrorMessage, contains('Attempted to send a key down event when no keys are in keysPressed'));
     });
@@ -541,16 +518,16 @@ void main() {
         });
         final RawKeyEventDataAndroid data = event.data as RawKeyEventDataAndroid;
         for (final ModifierKey key in ModifierKey.values) {
-          if (modifierTests[modifier]!.key == key) {
+          if (modifierTests[modifier].key == key) {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isTrue,
               reason: "$key should be pressed with metaState $modifier, but isn't.",
             );
-            expect(data.getModifierSide(key), equals(modifierTests[modifier]!.side));
+            expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
           } else {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isFalse,
               reason: '$key should not be pressed with metaState $modifier.',
             );
@@ -577,21 +554,21 @@ void main() {
         });
         final RawKeyEventDataAndroid data = event.data as RawKeyEventDataAndroid;
         for (final ModifierKey key in ModifierKey.values) {
-          if (modifierTests[modifier]!.key == key || key == ModifierKey.functionModifier) {
+          if (modifierTests[modifier].key == key || key == ModifierKey.functionModifier) {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isTrue,
               reason: '$key should be pressed with metaState $modifier '
                   "and additional key ${RawKeyEventDataAndroid.modifierFunction}, but isn't.",
             );
             if (key != ModifierKey.functionModifier) {
-              expect(data.getModifierSide(key), equals(modifierTests[modifier]!.side));
+              expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
             } else {
               expect(data.getModifierSide(key), equals(KeyboardSide.all));
             }
           } else {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isFalse,
               reason: '$key should not be pressed with metaState $modifier '
                   'and additional key ${RawKeyEventDataAndroid.modifierFunction}.',
@@ -740,11 +717,11 @@ void main() {
         platform: 'android',
         isDown: true,
       );
-      Map<String, dynamic>? message;
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      Map<String, dynamic> message;
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {
+        (ByteData data) {
           message = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
         },
       );
@@ -764,15 +741,15 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
 
-      await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {
+        (ByteData data) {
           message = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, dynamic>;
         },
       );
       expect(message, equals(<String, dynamic>{ 'handled': true }));
-      ServicesBinding.instance!.defaultBinaryMessenger.setMockMessageHandler(SystemChannels.keyEvent.name, null);
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(SystemChannels.keyEvent.name, null);
     });
   });
   group('RawKeyEventDataFuchsia', () {
@@ -803,15 +780,15 @@ void main() {
         });
         final RawKeyEventDataFuchsia data = event.data as RawKeyEventDataFuchsia;
         for (final ModifierKey key in ModifierKey.values) {
-          if (modifierTests[modifier]!.key == key) {
+          if (modifierTests[modifier].key == key) {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isTrue,
               reason: "$key should be pressed with metaState $modifier, but isn't.",
             );
           } else {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isFalse,
               reason: '$key should not be pressed with metaState $modifier.',
             );
@@ -834,16 +811,16 @@ void main() {
         });
         final RawKeyEventDataFuchsia data = event.data as RawKeyEventDataFuchsia;
         for (final ModifierKey key in ModifierKey.values) {
-          if (modifierTests[modifier]!.key == key || key == ModifierKey.capsLockModifier) {
+          if (modifierTests[modifier].key == key || key == ModifierKey.capsLockModifier) {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isTrue,
               reason: '$key should be pressed with metaState $modifier '
                   "and additional key ${RawKeyEventDataFuchsia.modifierCapsLock}, but isn't.",
             );
           } else {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isFalse,
               reason: '$key should not be pressed with metaState $modifier '
                   'and additional key ${RawKeyEventDataFuchsia.modifierCapsLock}.',
@@ -919,16 +896,16 @@ void main() {
         });
         final RawKeyEventDataMacOs data = event.data as RawKeyEventDataMacOs;
         for (final ModifierKey key in ModifierKey.values) {
-          if (modifierTests[modifier]!.key == key) {
+          if (modifierTests[modifier].key == key) {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isTrue,
               reason: "$key should be pressed with metaState $modifier, but isn't.",
             );
-            expect(data.getModifierSide(key), equals(modifierTests[modifier]!.side));
+            expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
           } else {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isFalse,
               reason: '$key should not be pressed with metaState $modifier.',
             );
@@ -953,21 +930,21 @@ void main() {
         });
         final RawKeyEventDataMacOs data = event.data as RawKeyEventDataMacOs;
         for (final ModifierKey key in ModifierKey.values) {
-          if (modifierTests[modifier]!.key == key || key == ModifierKey.capsLockModifier) {
+          if (modifierTests[modifier].key == key || key == ModifierKey.capsLockModifier) {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isTrue,
               reason: '$key should be pressed with metaState $modifier '
                   "and additional key ${RawKeyEventDataMacOs.modifierCapsLock}, but isn't.",
             );
             if (key != ModifierKey.capsLockModifier) {
-              expect(data.getModifierSide(key), equals(modifierTests[modifier]!.side));
+              expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
             } else {
               expect(data.getModifierSide(key), equals(KeyboardSide.all));
             }
           } else {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isFalse,
               reason: '$key should not be pressed with metaState $modifier '
                   'and additional key ${RawKeyEventDataMacOs.modifierCapsLock}.',
@@ -1067,16 +1044,16 @@ void main() {
         });
         final RawKeyEventDataWindows data = event.data as RawKeyEventDataWindows;
         for (final ModifierKey key in ModifierKey.values) {
-          if (modifierTests[modifier]!.key == key) {
+          if (modifierTests[modifier].key == key) {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isTrue,
               reason: "$key should be pressed with modifier $modifier, but isn't.",
             );
-            expect(data.getModifierSide(key), equals(modifierTests[modifier]!.side));
+            expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
           } else {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isFalse,
               reason: '$key should not be pressed with metaState $modifier.',
             );
@@ -1100,21 +1077,21 @@ void main() {
         });
         final RawKeyEventDataWindows data = event.data as RawKeyEventDataWindows;
         for (final ModifierKey key in ModifierKey.values) {
-          if (modifierTests[modifier]!.key == key || key == ModifierKey.capsLockModifier) {
+          if (modifierTests[modifier].key == key || key == ModifierKey.capsLockModifier) {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isTrue,
               reason: '$key should be pressed with metaState $modifier '
                   "and additional key ${RawKeyEventDataWindows.modifierCaps}, but isn't.",
             );
             if (key != ModifierKey.capsLockModifier) {
-              expect(data.getModifierSide(key), equals(modifierTests[modifier]!.side));
+              expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
             } else {
               expect(data.getModifierSide(key), equals(KeyboardSide.all));
             }
           } else {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isFalse,
               reason: '$key should not be pressed with metaState $modifier '
                   'and additional key ${RawKeyEventDataWindows.modifierCaps}.',
@@ -1193,7 +1170,7 @@ void main() {
     };
 
     // How modifiers are interpreted depends upon the keyCode for GLFW.
-    int keyCodeForModifier(int modifier, {required bool isLeft}) {
+    int keyCodeForModifier(int modifier, {bool isLeft}) {
       switch (modifier) {
         case GLFWKeyHelper.modifierAlt:
           return isLeft ? 342 : 346;
@@ -1228,16 +1205,16 @@ void main() {
             });
             final RawKeyEventDataLinux data = event.data as RawKeyEventDataLinux;
             for (final ModifierKey key in ModifierKey.values) {
-              if (modifierTests[modifier]!.key == key) {
+              if (modifierTests[modifier].key == key) {
                 expect(
-                  data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+                  data.isModifierPressed(key, side: modifierTests[modifier].side),
                   isDown ? isTrue : isFalse,
                   reason: "${isLeft ? 'left' : 'right'} $key ${isDown ? 'should' : 'should not'} be pressed with metaState $modifier, when key is ${isDown ? 'down' : 'up'}, but isn't.",
                 );
-                expect(data.getModifierSide(key), equals(modifierTests[modifier]!.side));
+                expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
               } else {
                 expect(
-                  data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+                  data.isModifierPressed(key, side: modifierTests[modifier].side),
                   isFalse,
                   reason: "${isLeft ? 'left' : 'right'} $key should not be pressed with metaState $modifier, wwhen key is ${isDown ? 'down' : 'up'}, but is.",
                 );
@@ -1264,21 +1241,21 @@ void main() {
         });
         final RawKeyEventDataLinux data = event.data as RawKeyEventDataLinux;
         for (final ModifierKey key in ModifierKey.values) {
-          if (modifierTests[modifier]!.key == key || key == ModifierKey.controlModifier) {
+          if (modifierTests[modifier].key == key || key == ModifierKey.controlModifier) {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isTrue,
               reason: '$key should be pressed with metaState $modifier '
                   "and additional key ${GLFWKeyHelper.modifierControl}, but isn't.",
             );
             if (key != ModifierKey.controlModifier) {
-              expect(data.getModifierSide(key), equals(modifierTests[modifier]!.side));
+              expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
             } else {
               expect(data.getModifierSide(key), equals(KeyboardSide.all));
             }
           } else {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isFalse,
               reason: '$key should not be pressed with metaState $modifier '
                   'and additional key ${GLFWKeyHelper.modifierControl}.',
@@ -1377,7 +1354,7 @@ void main() {
     };
 
     // How modifiers are interpreted depends upon the keyCode for GTK.
-    int keyCodeForModifier(int modifier, {required bool isLeft}) {
+    int keyCodeForModifier(int modifier, {bool isLeft}) {
       switch (modifier) {
         case GtkKeyHelper.modifierMod1:
           return isLeft ? 65513 : 65513;
@@ -1412,16 +1389,16 @@ void main() {
             });
             final RawKeyEventDataLinux data = event.data as RawKeyEventDataLinux;
             for (final ModifierKey key in ModifierKey.values) {
-              if (modifierTests[modifier]!.key == key) {
+              if (modifierTests[modifier].key == key) {
                 expect(
-                  data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+                  data.isModifierPressed(key, side: modifierTests[modifier].side),
                   isDown ? isTrue : isFalse,
                   reason: "${isLeft ? 'left' : 'right'} $key ${isDown ? 'should' : 'should not'} be pressed with metaState $modifier, when key is ${isDown ? 'down' : 'up'}, but isn't.",
                 );
-                expect(data.getModifierSide(key), equals(modifierTests[modifier]!.side));
+                expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
               } else {
                 expect(
-                  data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+                  data.isModifierPressed(key, side: modifierTests[modifier].side),
                   isFalse,
                   reason: "${isLeft ? 'left' : 'right'} $key should not be pressed with metaState $modifier, wwhen key is ${isDown ? 'down' : 'up'}, but is.",
                 );
@@ -1448,21 +1425,21 @@ void main() {
         });
         final RawKeyEventDataLinux data = event.data as RawKeyEventDataLinux;
         for (final ModifierKey key in ModifierKey.values) {
-          if (modifierTests[modifier]!.key == key || key == ModifierKey.controlModifier) {
+          if (modifierTests[modifier].key == key || key == ModifierKey.controlModifier) {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isTrue,
               reason: '$key should be pressed with metaState $modifier '
                   "and additional key ${GtkKeyHelper.modifierControl}, but isn't.",
             );
             if (key != ModifierKey.controlModifier) {
-              expect(data.getModifierSide(key), equals(modifierTests[modifier]!.side));
+              expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
             } else {
               expect(data.getModifierSide(key), equals(KeyboardSide.all));
             }
           } else {
             expect(
-              data.isModifierPressed(key, side: modifierTests[modifier]!.side),
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
               isFalse,
               reason: '$key should not be pressed with metaState $modifier '
                   'and additional key ${GtkKeyHelper.modifierControl}.',

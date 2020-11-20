@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -108,8 +110,9 @@ void main() {
     final Text textWidget = actionTextBox.widget as Text;
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
 
-    final TextStyle effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
-    expect(effectiveStyle.color?.alpha, 128); // Which is alpha of .5
+    TextStyle effectiveStyle = textWidget.style;
+    effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
+    expect(effectiveStyle.color.alpha, 128); // Which is alpha of .5
 
     // We drag up to fully collapse the space bar.
     await tester.drag(find.byType(Container).first, const Offset(0, -400.0));
@@ -388,13 +391,13 @@ void main() {
   testWidgets('FlexibleSpaceBar sets width constraints for the title', (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
-    late double width;
+    double width;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
-              width = MediaQuery.of(context)!.size.width;
+              width = MediaQuery.of(context).size.width;
               return CustomScrollView(
                 slivers: <Widget>[
                   SliverAppBar(
@@ -436,7 +439,7 @@ void main() {
   });
 
   testWidgets('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
-    Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
+    Widget buildFrame(TargetPlatform platform, bool centerTitle) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
         home: Scaffold(
@@ -486,7 +489,7 @@ void main() {
   });
 
   testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
-    Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
+    Widget buildFrame(TargetPlatform platform, bool centerTitle) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
         home: Scaffold(
@@ -557,7 +560,7 @@ void main() {
 class TestDelegate extends SliverPersistentHeaderDelegate {
 
   const TestDelegate({
-    required this.settings,
+    this.settings,
   });
 
   final FlexibleSpaceBarSettings settings;

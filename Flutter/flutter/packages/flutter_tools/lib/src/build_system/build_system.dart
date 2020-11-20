@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:async/async.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
@@ -10,7 +12,6 @@ import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
-import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -161,7 +162,9 @@ abstract class Target {
   /// Invoke to remove the stamp file if the [buildAction] threw an exception.
   void clearStamp(Environment environment) {
     final File stamp = _findStampFile(environment);
-    ErrorHandlingFileSystem.deleteIfExists(stamp);
+    if (stamp.existsSync()) {
+      stamp.deleteSync();
+    }
   }
 
   void _writeStamp(
@@ -667,7 +670,6 @@ class FlutterBuildSystem extends BuildSystem {
     final String currentBuildId = fileSystem.path.basename(environment.buildDir.path);
     final File lastBuildIdFile = environment.outputDir.childFile('.last_build_id');
     if (!lastBuildIdFile.existsSync()) {
-      lastBuildIdFile.parent.createSync(recursive: true);
       lastBuildIdFile.writeAsStringSync(currentBuildId);
       // No config file, either output was cleaned or this is the first build.
       return;
@@ -696,11 +698,14 @@ class FlutterBuildSystem extends BuildSystem {
     for (final String lastOutput in lastOutputs) {
       if (!currentOutputs.containsKey(lastOutput)) {
         final File lastOutputFile = fileSystem.file(lastOutput);
-        ErrorHandlingFileSystem.deleteIfExists(lastOutputFile);
+        if (lastOutputFile.existsSync()) {
+          lastOutputFile.deleteSync();
+        }
       }
     }
   }
 }
+
 
 /// An active instance of a build.
 class _BuildInstance {
@@ -817,7 +822,9 @@ class _BuildInstance {
           continue;
         }
         final File previousFile = fileSystem.file(previousOutput);
-        ErrorHandlingFileSystem.deleteIfExists(previousFile);
+        if (previousFile.existsSync()) {
+          previousFile.deleteSync();
+        }
       }
     } on Exception catch (exception, stackTrace) {
       // TODO(jonahwilliams): throw specific exception for expected errors to mark
@@ -835,7 +842,7 @@ class _BuildInstance {
         elapsedMilliseconds: stopwatch.elapsedMilliseconds,
         skipped: skipped,
         succeeded: succeeded,
-        analyticsName: node.target.analyticsName,
+        analyicsName: node.target.analyticsName,
       );
     }
     return succeeded;
@@ -864,14 +871,14 @@ class PerformanceMeasurement {
     @required this.elapsedMilliseconds,
     @required this.skipped,
     @required this.succeeded,
-    @required this.analyticsName,
+    @required this.analyicsName,
   });
 
   final int elapsedMilliseconds;
   final String target;
   final bool skipped;
   final bool succeeded;
-  final String analyticsName;
+  final String analyicsName;
 }
 
 /// Check if there are any dependency cycles in the target.
@@ -1062,7 +1069,7 @@ class Node {
       }
     }
 
-    // If we depend on a file that doesn't exist on disk, mark the build as
+    // If we depend on a file that doesnt exist on disk, mark the build as
     // dirty. if the rule is not correctly specified, this will result in it
     // always being rerun.
     if (missingInputs.isNotEmpty) {

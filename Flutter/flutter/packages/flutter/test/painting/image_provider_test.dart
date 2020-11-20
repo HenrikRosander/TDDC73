@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -13,22 +15,22 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
+import 'image_data.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
   TestRenderingFlutterBinding();
 
-  FlutterExceptionHandler? oldError;
+  FlutterExceptionHandler oldError;
   setUp(() {
     oldError = FlutterError.onError;
   });
 
   tearDown(() {
     FlutterError.onError = oldError;
-    PaintingBinding.instance!.imageCache!.clear();
-    PaintingBinding.instance!.imageCache!.clearLiveImages();
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
   });
 
   test('obtainKey errors will be caught', () async {
@@ -40,7 +42,7 @@ void main() {
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
     stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
       caughtError.complete(false);
-    }, onError: (dynamic error, StackTrace? stackTrace) {
+    }, onError: (dynamic error, StackTrace stackTrace) {
       caughtError.complete(true);
     }));
     expect(await caughtError.future, true);
@@ -72,7 +74,7 @@ void main() {
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
       result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace? stackTrace) {
+      }, onError: (dynamic error, StackTrace stackTrace) {
         caughtError.complete(true);
       }));
       expect(await caughtError.future, true);
@@ -95,7 +97,7 @@ void main() {
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
       result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace? stackTrace) {
+      }, onError: (dynamic error, StackTrace stackTrace) {
         caughtError.complete(true);
       }));
       expect(await caughtError.future, true);
@@ -112,17 +114,17 @@ void main() {
     final File file = fs.file('/empty.png')..createSync(recursive: true);
     final FileImage provider = FileImage(file);
 
-    expect(imageCache!.statusForKey(provider).untracked, true);
-    expect(imageCache!.pendingImageCount, 0);
+    expect(imageCache.statusForKey(provider).untracked, true);
+    expect(imageCache.pendingImageCount, 0);
 
     provider.resolve(ImageConfiguration.empty);
 
-    expect(imageCache!.statusForKey(provider).pending, true);
-    expect(imageCache!.pendingImageCount, 1);
+    expect(imageCache.statusForKey(provider).pending, true);
+    expect(imageCache.pendingImageCount, 1);
 
     expect(await error.future, isStateError);
-    expect(imageCache!.statusForKey(provider).untracked, true);
-    expect(imageCache!.pendingImageCount, 0);
+    expect(imageCache.statusForKey(provider).untracked, true);
+    expect(imageCache.pendingImageCount, 0);
   });
 
   test('File image with empty file throws expected error (load)', () async {
@@ -134,20 +136,20 @@ void main() {
     final File file = fs.file('/empty.png')..createSync(recursive: true);
     final FileImage provider = FileImage(file);
 
-    expect(provider.load(provider, (Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+    expect(provider.load(provider, (Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) async {
       return Future<Codec>.value(FakeCodec());
     }), isA<MultiFrameImageStreamCompleter>());
 
     expect(await error.future, isStateError);
   });
 
-  Future<Codec> _decoder(Uint8List bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+  Future<Codec> _decoder(Uint8List bytes, {int cacheWidth, int cacheHeight, bool allowUpscaling}) async {
     return FakeCodec();
   }
 
   test('File image sets tag', () async {
     final MemoryFileSystem fs = MemoryFileSystem();
-    final File file = fs.file('/blue.png')..createSync(recursive: true)..writeAsBytesSync(kBlueSquarePng);
+    final File file = fs.file('/blue.png')..createSync(recursive: true)..writeAsBytesSync(kBlueRectPng);
     final FileImage provider = FileImage(file);
 
     final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
@@ -156,7 +158,7 @@ void main() {
   });
 
   test('Memory image sets tag', () async {
-    final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
+    final Uint8List bytes = Uint8List.fromList(kBlueRectPng);
     final MemoryImage provider = MemoryImage(bytes);
 
     final MultiFrameImageStreamCompleter completer = provider.load(provider, _decoder) as MultiFrameImageStreamCompleter;
@@ -174,7 +176,7 @@ void main() {
   });
 
   test('Resize image sets tag', () async {
-    final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
+    final Uint8List bytes = Uint8List.fromList(kBlueRectPng);
     final ResizeImage provider = ResizeImage(MemoryImage(bytes), width: 40, height: 40);
     final MultiFrameImageStreamCompleter completer = provider.load(
       await provider.obtainKey(ImageConfiguration.empty),
@@ -204,6 +206,6 @@ class FakeCodec implements Codec {
 class _TestAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
-    return Uint8List.fromList(kBlueSquarePng).buffer.asByteData();
+    return Uint8List.fromList(kBlueRectPng).buffer.asByteData();
   }
 }

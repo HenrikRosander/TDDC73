@@ -7,6 +7,7 @@ import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'globals.dart' as globals;
 
 /// Constant for 'pluginClass' key in plugin maps.
 const String kPluginClass = 'pluginClass';
@@ -14,7 +15,7 @@ const String kPluginClass = 'pluginClass';
 /// Constant for 'pluginClass' key in plugin maps.
 const String kDartPluginClass = 'dartPluginClass';
 
-/// Marker interface for all platform specific plugin config implementations.
+/// Marker interface for all platform specific plugin config impls.
 abstract class PluginPlatform {
   const PluginPlatform();
 
@@ -37,21 +38,17 @@ class AndroidPlugin extends PluginPlatform {
     @required this.package,
     @required this.pluginClass,
     @required this.pluginPath,
-    @required FileSystem fileSystem,
-  }) : _fileSystem = fileSystem;
+  });
 
-  factory AndroidPlugin.fromYaml(String name, YamlMap yaml, String pluginPath, FileSystem fileSystem) {
+  factory AndroidPlugin.fromYaml(String name, YamlMap yaml, String pluginPath) {
     assert(validate(yaml));
     return AndroidPlugin(
       name: name,
       package: yaml['package'] as String,
       pluginClass: yaml['pluginClass'] as String,
       pluginPath: pluginPath,
-      fileSystem: fileSystem,
     );
   }
-
-  final FileSystem _fileSystem;
 
   static bool validate(YamlMap yaml) {
     if (yaml == null) {
@@ -94,7 +91,7 @@ class AndroidPlugin extends PluginPlatform {
   Set<String> _getSupportedEmbeddings() {
     assert(pluginPath != null);
     final Set<String> supportedEmbeddings = <String>{};
-    final String baseMainPath = _fileSystem.path.join(
+    final String baseMainPath = globals.fs.path.join(
       pluginPath,
       'android',
       'src',
@@ -102,16 +99,16 @@ class AndroidPlugin extends PluginPlatform {
     );
 
     final List<String> mainClassCandidates = <String>[
-      _fileSystem.path.join(
+      globals.fs.path.join(
         baseMainPath,
         'java',
-        package.replaceAll('.', _fileSystem.path.separator),
+        package.replaceAll('.', globals.fs.path.separator),
         '$pluginClass.java',
       ),
-      _fileSystem.path.join(
+      globals.fs.path.join(
         baseMainPath,
         'kotlin',
-        package.replaceAll('.', _fileSystem.path.separator),
+        package.replaceAll('.', globals.fs.path.separator),
         '$pluginClass.kt',
       )
     ];
@@ -119,7 +116,7 @@ class AndroidPlugin extends PluginPlatform {
     File mainPluginClass;
     bool mainClassFound = false;
     for (final String mainClassCandidate in mainClassCandidates) {
-      mainPluginClass = _fileSystem.file(mainClassCandidate);
+      mainPluginClass = globals.fs.file(mainClassCandidate);
       if (mainPluginClass.existsSync()) {
         mainClassFound = true;
         break;
@@ -135,7 +132,15 @@ class AndroidPlugin extends PluginPlatform {
       );
     }
 
-    final String mainClassContent = mainPluginClass.readAsStringSync();
+    String mainClassContent;
+    try {
+      mainClassContent = mainPluginClass.readAsStringSync();
+    } on FileSystemException {
+      throwToolExit(
+        "Couldn't read file ${mainPluginClass.path} even though it exists. "
+        'Please verify that this file has read permission and try again.'
+      );
+    }
     if (mainClassContent
         .contains('io.flutter.embedding.engine.plugins.FlutterPlugin')) {
       supportedEmbeddings.add('2');
@@ -162,7 +167,7 @@ class IOSPlugin extends PluginPlatform {
   });
 
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml)); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/67241
+    assert(validate(yaml));
     return IOSPlugin(
       name: name,
       classPrefix: '',

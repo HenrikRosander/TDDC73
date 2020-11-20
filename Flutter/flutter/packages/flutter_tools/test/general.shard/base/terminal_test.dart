@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -141,6 +143,7 @@ void main() {
           bufferLogger.statusText,
           'Please choose something [a|b|c]: d\n'
           'Please choose something [a|b|c]: \n'
+          '\n'
           'Please choose something [a|b|c]: b\n');
     });
 
@@ -163,9 +166,9 @@ void main() {
 
       expect(choice, 'b');
       expect(
-        bufferLogger.statusText,
-        'Please choose something: \n'
-      );
+          bufferLogger.statusText,
+          'Please choose something: \n'
+          '\n');
     });
 
     testWithoutContext('Does not set single char mode when a terminal is not attached', () {

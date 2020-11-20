@@ -10,7 +10,6 @@ import 'package:path/path.dart' as path;
 
 import '../framework/adb.dart';
 import '../framework/framework.dart';
-import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 TaskFunction createRunWithoutLeakTest(dynamic dir) {

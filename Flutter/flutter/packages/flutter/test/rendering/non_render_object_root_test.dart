@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -11,33 +13,35 @@ import 'rendering_tester.dart';
 
 class RealRoot extends AbstractNode {
   RealRoot(this.child) {
-    adoptChild(child);
+    if (child != null)
+      adoptChild(child);
   }
 
   final RenderObject child;
 
   @override
   void redepthChildren() {
-    redepthChild(child);
+    if (child != null)
+      redepthChild(child);
   }
 
   @override
   void attach(Object owner) {
     super.attach(owner);
-    child.attach(owner as PipelineOwner);
+    child?.attach(owner as PipelineOwner);
   }
 
   @override
   void detach() {
     super.detach();
-    child.detach();
+    child?.detach();
   }
 
   @override
-  PipelineOwner? get owner => super.owner as PipelineOwner?;
+  PipelineOwner get owner => super.owner as PipelineOwner;
 
   void layout() {
-    child.layout(BoxConstraints.tight(const Size(500.0, 500.0)));
+    child?.layout(BoxConstraints.tight(const Size(500.0, 500.0)));
   }
 }
 

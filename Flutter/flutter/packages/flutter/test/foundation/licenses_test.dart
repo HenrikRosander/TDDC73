@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 
@@ -9,7 +11,7 @@ void main() {
   test('LicenseEntryWithLineBreaks - most cases', () {
     // There's some trailing spaces in this string.
     // To avoid IDEs stripping them, I've escaped them as \u0020.
-    final List<LicenseParagraph> paragraphs = const LicenseEntryWithLineBreaks(<String>[], '''
+    final List<LicenseParagraph> paragraphs = const LicenseEntryWithLineBreaks(null, '''
 A
 A
 A
@@ -157,17 +159,17 @@ S
   });
 
   test('LicenseEntryWithLineBreaks - leading and trailing whitespace', () {
-    expect(const LicenseEntryWithLineBreaks(<String>[], '    \n\n    ').paragraphs.toList(), isEmpty);
-    expect(const LicenseEntryWithLineBreaks(<String>[], '    \r\n\r\n    ').paragraphs.toList(), isEmpty);
+    expect(const LicenseEntryWithLineBreaks(null, '    \n\n    ').paragraphs.toList(), isEmpty);
+    expect(const LicenseEntryWithLineBreaks(null, '    \r\n\r\n    ').paragraphs.toList(), isEmpty);
 
     List<LicenseParagraph> paragraphs;
 
-    paragraphs = const LicenseEntryWithLineBreaks(<String>[], '    \nA\n    ').paragraphs.toList();
+    paragraphs = const LicenseEntryWithLineBreaks(null, '    \nA\n    ').paragraphs.toList();
     expect(paragraphs[0].text, 'A');
     expect(paragraphs[0].indent, 0);
     expect(paragraphs, hasLength(1));
 
-    paragraphs = const LicenseEntryWithLineBreaks(<String>[], '\n\n\nA\n\n\n').paragraphs.toList();
+    paragraphs = const LicenseEntryWithLineBreaks(null, '\n\n\nA\n\n\n').paragraphs.toList();
     expect(paragraphs[0].text, 'A');
     expect(paragraphs[0].indent, 0);
     expect(paragraphs, hasLength(1));
@@ -176,12 +178,12 @@ S
   test('LicenseRegistry', () async {
     expect(await LicenseRegistry.licenses.toList(), isEmpty);
     LicenseRegistry.addLicense(() async* {
-      yield const LicenseEntryWithLineBreaks(<String>[], 'A');
-      yield const LicenseEntryWithLineBreaks(<String>[], 'B');
+      yield const LicenseEntryWithLineBreaks(null, 'A');
+      yield const LicenseEntryWithLineBreaks(null, 'B');
     });
     LicenseRegistry.addLicense(() async* {
-      yield const LicenseEntryWithLineBreaks(<String>[], 'C');
-      yield const LicenseEntryWithLineBreaks(<String>[], 'D');
+      yield const LicenseEntryWithLineBreaks(null, 'C');
+      yield const LicenseEntryWithLineBreaks(null, 'D');
     });
     expect(await LicenseRegistry.licenses.toList(), hasLength(4));
     final List<LicenseEntry> licenses = await LicenseRegistry.licenses.toList();

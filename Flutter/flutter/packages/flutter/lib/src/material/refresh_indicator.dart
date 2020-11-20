@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -97,10 +99,10 @@ class RefreshIndicator extends StatefulWidget {
   /// An empty string may be passed to avoid having anything read by screen reading software.
   /// The [semanticsValue] may be used to specify progress on the widget.
   const RefreshIndicator({
-    Key? key,
-    required this.child,
+    Key key,
+    @required this.child,
     this.displacement = 40.0,
-    required this.onRefresh,
+    @required this.onRefresh,
     this.color,
     this.backgroundColor,
     this.notificationPredicate = defaultScrollNotificationPredicate,
@@ -133,11 +135,11 @@ class RefreshIndicator extends StatefulWidget {
 
   /// The progress indicator's foreground color. The current theme's
   /// [ThemeData.accentColor] by default.
-  final Color? color;
+  final Color color;
 
   /// The progress indicator's background color. The current theme's
   /// [ThemeData.canvasColor] by default.
-  final Color? backgroundColor;
+  final Color backgroundColor;
 
   /// A check that specifies whether a [ScrollNotification] should be
   /// handled by this widget.
@@ -150,10 +152,10 @@ class RefreshIndicator extends StatefulWidget {
   ///
   /// This will be defaulted to [MaterialLocalizations.refreshIndicatorSemanticLabel]
   /// if it is null.
-  final String? semanticsLabel;
+  final String semanticsLabel;
 
   /// {@macro flutter.material.progressIndicator.semanticsValue}
-  final String? semanticsValue;
+  final String semanticsValue;
 
   /// Defines `strokeWidth` for `RefreshIndicator`.
   ///
@@ -167,17 +169,17 @@ class RefreshIndicator extends StatefulWidget {
 /// Contains the state for a [RefreshIndicator]. This class can be used to
 /// programmatically show the refresh indicator, see the [show] method.
 class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderStateMixin<RefreshIndicator> {
-  late AnimationController _positionController;
-  late AnimationController _scaleController;
-  late Animation<double> _positionFactor;
-  late Animation<double> _scaleFactor;
-  late Animation<double> _value;
-  late Animation<Color?> _valueColor;
+  AnimationController _positionController;
+  AnimationController _scaleController;
+  Animation<double> _positionFactor;
+  Animation<double> _scaleFactor;
+  Animation<double> _value;
+  Animation<Color> _valueColor;
 
-  _RefreshIndicatorMode? _mode;
-  late Future<void> _pendingRefreshFuture;
-  bool? _isIndicatorAtTop;
-  double? _dragOffset;
+  _RefreshIndicatorMode _mode;
+  Future<void> _pendingRefreshFuture;
+  bool _isIndicatorAtTop;
+  double _dragOffset;
 
   static final Animatable<double> _threeQuarterTween = Tween<double>(begin: 0.0, end: 0.75);
   static final Animatable<double> _kDragSizeFactorLimitTween = Tween<double>(begin: 0.0, end: _kDragSizeFactorLimit);
@@ -196,11 +198,11 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 
   @override
   void didChangeDependencies() {
-    final ThemeData? theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     _valueColor = _positionController.drive(
       ColorTween(
-        begin: (widget.color ?? theme!.accentColor).withOpacity(0.0),
-        end: (widget.color ?? theme!.accentColor).withOpacity(1.0),
+        begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
+        end: (widget.color ?? theme.accentColor).withOpacity(1.0),
       ).chain(CurveTween(
         curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
       )),
@@ -225,7 +227,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       });
       return false;
     }
-    bool? indicatorAtTopNow;
+    bool indicatorAtTopNow;
     switch (notification.metrics.axisDirection) {
       case AxisDirection.down:
         indicatorAtTopNow = true;
@@ -246,7 +248,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
         if (notification.metrics.extentBefore > 0.0) {
           _dismiss(_RefreshIndicatorMode.canceled);
         } else {
-          _dragOffset = _dragOffset! - notification.scrollDelta!;
+          _dragOffset -= notification.scrollDelta;
           _checkDragOffset(notification.metrics.viewportDimension);
         }
       }
@@ -258,7 +260,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       }
     } else if (notification is OverscrollNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
-        _dragOffset = _dragOffset! - notification.overscroll / 2.0;
+        _dragOffset -= notification.overscroll / 2.0;
         _checkDragOffset(notification.metrics.viewportDimension);
       }
     } else if (notification is ScrollEndNotification) {
@@ -312,11 +314,11 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 
   void _checkDragOffset(double containerExtent) {
     assert(_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed);
-    double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
+    double newValue = _dragOffset / (containerExtent * _kDragContainerExtentPercentage);
     if (_mode == _RefreshIndicatorMode.armed)
       newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
-    _positionController.value = newValue.clamp(0.0, 1.0); // this triggers various rebuilds
-    if (_mode == _RefreshIndicatorMode.drag && _valueColor.value!.alpha == 0xFF)
+    _positionController.value = newValue.clamp(0.0, 1.0) as double; // this triggers various rebuilds
+    if (_mode == _RefreshIndicatorMode.drag && _valueColor.value.alpha == 0xFF)
       _mode = _RefreshIndicatorMode.armed;
   }
 
@@ -378,10 +380,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
               ));
             return true;
           }());
-          // `refreshResult` has a non-nullable type, but might be null when
-          // running with weak checking, so we need to null check it anyway (and
-          // ignore the warning that the null-handling logic is dead code).
-          if (refreshResult == null) // ignore: dead_code
+          if (refreshResult == null)
             return;
           refreshResult.whenComplete(() {
             if (mounted && _mode == _RefreshIndicatorMode.refresh) {
@@ -447,27 +446,27 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       children: <Widget>[
         child,
         if (_mode != null) Positioned(
-          top: _isIndicatorAtTop! ? 0.0 : null,
-          bottom: !_isIndicatorAtTop! ? 0.0 : null,
+          top: _isIndicatorAtTop ? 0.0 : null,
+          bottom: !_isIndicatorAtTop ? 0.0 : null,
           left: 0.0,
           right: 0.0,
           child: SizeTransition(
-            axisAlignment: _isIndicatorAtTop! ? 1.0 : -1.0,
+            axisAlignment: _isIndicatorAtTop ? 1.0 : -1.0,
             sizeFactor: _positionFactor, // this is what brings it down
             child: Container(
-              padding: _isIndicatorAtTop!
+              padding: _isIndicatorAtTop
                 ? EdgeInsets.only(top: widget.displacement)
                 : EdgeInsets.only(bottom: widget.displacement),
-              alignment: _isIndicatorAtTop!
+              alignment: _isIndicatorAtTop
                 ? Alignment.topCenter
                 : Alignment.bottomCenter,
               child: ScaleTransition(
                 scale: _scaleFactor,
                 child: AnimatedBuilder(
                   animation: _positionController,
-                  builder: (BuildContext context, Widget? child) {
+                  builder: (BuildContext context, Widget child) {
                     return RefreshProgressIndicator(
-                      semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context)!.refreshIndicatorSemanticLabel,
+                      semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
                       semanticsValue: widget.semanticsValue,
                       value: showIndeterminateIndicator ? null : _value.value,
                       valueColor: _valueColor,

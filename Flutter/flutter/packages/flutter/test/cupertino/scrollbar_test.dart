@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -60,7 +62,7 @@ void main() {
 
   testWidgets('Scrollbar dark mode', (WidgetTester tester) async {
     Brightness brightness = Brightness.light;
-    late StateSetter setState;
+    StateSetter setState;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

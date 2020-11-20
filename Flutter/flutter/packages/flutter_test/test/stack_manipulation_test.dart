@@ -20,7 +20,7 @@ void main() {
     }
 
     try {
-      throw Object();
+      throw null;
     } catch (e, stack) {
       final List<DiagnosticsNode> information = <DiagnosticsNode>[];
       expect(reportExpectCall(stack, information), 0);

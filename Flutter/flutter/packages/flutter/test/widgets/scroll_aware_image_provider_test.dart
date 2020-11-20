@@ -4,21 +4,13 @@
 
 // @dart = 2.8
 
-import 'dart:ui' as ui show Image;
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 import '../painting/image_test_utils.dart';
+import '../painting/mocks_for_image_cache.dart' show TestImage;
 
 void main() {
-
-  ui.Image testImage;
-
-  setUpAll(() async {
-    testImage = await createTestImage(width: 10, height: 10);
-  });
-
   tearDown(() {
     imageCache.clear();
   });
@@ -36,6 +28,7 @@ void main() {
     await tester.pumpWidget(TestWidget(key));
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState);
+    const TestImage testImage = TestImage(width: 10, height: 10);
     final TestImageProvider testImageProvider = TestImageProvider(testImage);
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
@@ -71,6 +64,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState);
+    const TestImage testImage = TestImage(width: 10, height: 10);
     final TestImageProvider testImageProvider = TestImageProvider(testImage);
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
@@ -111,6 +105,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState);
+    const TestImage testImage = TestImage(width: 10, height: 10);
     final TestImageProvider testImageProvider = TestImageProvider(testImage);
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
@@ -168,6 +163,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState);
+    const TestImage testImage = TestImage(width: 10, height: 10);
     final TestImageProvider testImageProvider = TestImageProvider(testImage);
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
@@ -235,6 +231,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState);
+    const TestImage testImage = TestImage(width: 10, height: 10);
     final TestImageProvider testImageProvider = TestImageProvider(testImage);
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
@@ -300,6 +297,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState);
+    const TestImage testImage = TestImage(width: 10, height: 10);
     final TestImageProvider testImageProvider = TestImageProvider(testImage);
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
@@ -351,6 +349,7 @@ void main() {
     ));
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState);
+    const TestImage testImage = TestImage(width: 10, height: 10);
     final TestImageProvider testImageProvider = TestImageProvider(testImage);
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
@@ -370,7 +369,7 @@ void main() {
     expect(imageCache.currentSize, 0);
 
     // Occupy the only slot in the cache with another image.
-    final TestImageProvider testImageProvider2 = TestImageProvider(testImage);
+    final TestImageProvider testImageProvider2 = TestImageProvider(const TestImage());
     testImageProvider2.complete();
     await precacheImage(testImageProvider2, context.context);
     expect(imageCache.containsKey(testImageProvider), false);

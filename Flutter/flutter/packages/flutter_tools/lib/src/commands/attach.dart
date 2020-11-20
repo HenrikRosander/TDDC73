@@ -15,6 +15,7 @@ import '../base/io.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../device.dart';
+import '../features.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
@@ -26,6 +27,7 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../widget_cache.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -77,7 +79,7 @@ class AttachCommand extends FlutterCommand {
         help: 'The URI at which the observatory is listening.',
       )..addOption(
         'app-id',
-        help: 'The package name (Android) or bundle identifier (iOS) for the app. '
+        help: 'The package name (Android) or bundle identifier (iOS) for the application. '
               'This can be specified to avoid being prompted if multiple observatory ports '
               'are advertised.\n'
               'If you have multiple devices or emulators running, you should include the '
@@ -110,7 +112,7 @@ class AttachCommand extends FlutterCommand {
   final String name = 'attach';
 
   @override
-  final String description = '''Attach to a running app.
+  final String description = '''Attach to a running application.
 
   For attaching to Android or iOS devices, simply using `flutter attach` is
   usually sufficient. The tool will search for a running Flutter app or module,
@@ -141,10 +143,7 @@ class AttachCommand extends FlutterCommand {
     if (argResults['debug-uri'] == null) {
       return null;
     }
-    final Uri uri = Uri.tryParse(stringArg('debug-uri'));
-    if (uri == null) {
-      throwToolExit('Invalid `--debug-uri`: ${stringArg('debug-uri')}');
-    }
+    final Uri uri = Uri.parse(stringArg('debug-uri'));
     if (!uri.hasPort) {
       throwToolExit('Port not specified for `--debug-uri`: $uri');
     }
@@ -340,12 +339,7 @@ class AttachCommand extends FlutterCommand {
         final Completer<void> onAppStart = Completer<void>.sync();
         TerminalHandler terminalHandler;
         unawaited(onAppStart.future.whenComplete(() {
-          terminalHandler = TerminalHandler(
-            runner,
-            logger: globals.logger,
-            terminal: globals.terminal,
-            signals: globals.signals,
-          )
+          terminalHandler = TerminalHandler(runner)
             ..setupTerminal()
             ..registerSignalHandlers();
         }));
@@ -390,7 +384,7 @@ class AttachCommand extends FlutterCommand {
       targetModel: TargetModel(stringArg('target-model')),
       buildInfo: getBuildInfo(),
       userIdentifier: userIdentifier,
-      platform: globals.platform,
+      widgetCache: WidgetCache(featureFlags: featureFlags),
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];

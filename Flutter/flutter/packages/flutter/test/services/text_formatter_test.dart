@@ -2,25 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  TextEditingValue testOldValue = TextEditingValue.empty;
-  TextEditingValue testNewValue = TextEditingValue.empty;
+  TextEditingValue testOldValue;
+  TextEditingValue testNewValue;
 
   test('withFunction wraps formatting function', () {
     testOldValue = const TextEditingValue();
     testNewValue = const TextEditingValue();
 
-    late TextEditingValue calledOldValue;
-    late TextEditingValue calledNewValue;
+    TextEditingValue calledOldValue;
+    TextEditingValue calledNewValue;
 
     final TextInputFormatter formatterUnderTest = TextInputFormatter.withFunction(
       (TextEditingValue oldValue, TextEditingValue newValue) {
         calledOldValue = oldValue;
         calledNewValue = newValue;
-        return TextEditingValue.empty;
+        return null;
       }
     );
 

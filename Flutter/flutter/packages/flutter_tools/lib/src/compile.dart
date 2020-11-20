@@ -11,12 +11,42 @@ import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
 import 'base/common.dart';
+import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
-import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
+import 'globals.dart' as globals;
+import 'project.dart';
+
+KernelCompilerFactory get kernelCompilerFactory => context.get<KernelCompilerFactory>();
+
+class KernelCompilerFactory {
+  const KernelCompilerFactory({
+    @required FileSystem fileSystem,
+    @required Artifacts artifacts,
+    @required ProcessManager processManager,
+    @required Logger logger,
+  }) : _fileSystem = fileSystem,
+       _artifacts = artifacts,
+       _processManager = processManager,
+       _logger = logger;
+
+  final Logger _logger;
+  final Artifacts _artifacts;
+  final ProcessManager _processManager;
+  final FileSystem _fileSystem;
+
+  Future<KernelCompiler> create(FlutterProject flutterProject) async {
+    return KernelCompiler(
+      logger: _logger,
+      artifacts: _artifacts,
+      fileSystem: _fileSystem,
+      processManager: _processManager,
+    );
+  }
+}
 
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
@@ -152,17 +182,20 @@ List<String> buildModeOptions(BuildMode mode) {
       return <String>[
         '-Ddart.vm.profile=false',
         '-Ddart.vm.product=false',
+        '--bytecode-options=source-positions,local-var-info,debugger-stops,instance-field-initializers,keep-unreachable-code,avoid-closure-call-instructions',
         '--enable-asserts',
       ];
     case BuildMode.profile:
       return <String>[
         '-Ddart.vm.profile=true',
         '-Ddart.vm.product=false',
+        '--bytecode-options=source-positions',
       ];
     case BuildMode.release:
       return <String>[
         '-Ddart.vm.profile=false',
         '-Ddart.vm.product=true',
+        '--bytecode-options=source-positions',
       ];
   }
   throw Exception('Unknown BuildMode: $mode');
@@ -171,25 +204,19 @@ List<String> buildModeOptions(BuildMode mode) {
 /// A compiler interface for producing single (non-incremental) kernel files.
 class KernelCompiler {
   KernelCompiler({
-    @required FileSystem fileSystem,
-    @required Logger logger,
-    @required ProcessManager processManager,
-    @required Artifacts artifacts,
-    @required List<String> fileSystemRoots,
-    @required String fileSystemScheme,
-  }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _processManager = processManager,
-       _fileSystemScheme = fileSystemScheme,
-       _fileSystemRoots = fileSystemRoots;
+    FileSystem fileSystem, // TODO(jonahwilliams): migrate to @required after google3
+    Logger logger, // TODO(jonahwilliams): migrate to @required after google3
+    ProcessManager processManager, // TODO(jonahwilliams): migrate to @required after google3
+    Artifacts artifacts, // TODO(jonahwilliams): migrate to @required after google3
+  }) : _logger = logger ?? globals.logger,
+       _fileSystem = fileSystem ?? globals.fs,
+       _artifacts = artifacts ?? globals.artifacts,
+       _processManager = processManager ?? globals.processManager;
 
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
   final ProcessManager _processManager;
   final Logger _logger;
-  final String _fileSystemScheme;
-  final List<String> _fileSystemRoots;
 
   Future<CompilerOutput> compile({
     String sdkRoot,
@@ -221,12 +248,10 @@ class KernelCompiler {
     if (!_processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
-    String mainUri;
-    final Uri mainFileUri = _fileSystem.file(mainPath).uri;
+    Uri mainUri;
     if (packagesPath != null) {
-      mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
+      mainUri = packageConfig.toPackageUri(_fileSystem.file(mainPath).uri);
     }
-    mainUri ??= toMultiRootPath(mainFileUri, _fileSystemScheme, _fileSystemRoots, _fileSystem.path.separator == r'\');
     if (outputFilePath != null && !_fileSystem.isFileSync(outputFilePath)) {
       _fileSystem.file(outputFilePath).createSync(recursive: true);
     }
@@ -277,7 +302,7 @@ class KernelCompiler {
         platformDill,
       ],
       ...?extraFrontEndOptions,
-      mainUri ?? mainPath,
+      mainUri?.toString() ?? mainPath,
     ];
 
     _logger.printTrace(command.join(' '));
@@ -411,7 +436,8 @@ abstract class ResidentCompiler {
     String platformDill,
     List<String> dartDefines,
     String librariesSpec,
-    @required Platform platform,
+    // Deprecated
+    List<String> experimentalFlags,
   }) = DefaultResidentCompiler;
 
   // TODO(jonahwilliams): find a better way to configure additional file system
@@ -496,7 +522,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   DefaultResidentCompiler(
     String sdkRoot, {
     @required this.buildMode,
-    @required Platform platform,
     Logger logger, // TODO(jonahwilliams): migrate to @required after google3
     ProcessManager processManager, // TODO(jonahwilliams): migrate to @required after google3
     Artifacts artifacts, // TODO(jonahwilliams): migrate to @required after google3
@@ -511,12 +536,13 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.platformDill,
     List<String> dartDefines,
     this.librariesSpec,
+    // Deprecated
+    List<String> experimentalFlags, // ignore: avoid_unused_constructor_parameters
   }) : assert(sdkRoot != null),
-       _logger = logger,
-       _processManager = processManager,
-       _artifacts = artifacts,
+       _logger = logger ?? globals.logger,
+       _processManager = processManager ?? globals.processManager,
+       _artifacts = artifacts ?? globals.artifacts,
        _stdoutHandler = StdoutHandler(logger: logger),
-       _platform = platform,
        dartDefines = dartDefines ?? const <String>[],
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/';
@@ -524,7 +550,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final Logger _logger;
   final ProcessManager _processManager;
   final Artifacts _artifacts;
-  final Platform _platform;
 
   final BuildMode buildMode;
   final bool trackWidgetCreation;
@@ -591,9 +616,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
       );
     }
     final String inputKey = Uuid().generateV4();
-    final String mainUri = request.packageConfig.toPackageUri(request.mainUri)?.toString() ??
-      toMultiRootPath(request.mainUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
-
+    final String mainUri = request.packageConfig.toPackageUri(request.mainUri)?.toString()
+      ?? request.mainUri.toString();
     _server.stdin.writeln('recompile $mainUri $inputKey');
     _logger.printTrace('<- recompile $mainUri $inputKey');
     for (final Uri fileUri in request.invalidatedFiles) {
@@ -601,11 +625,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
       if (fileUri.scheme == 'package') {
         message = fileUri.toString();
       } else {
-        message = request.packageConfig.toPackageUri(fileUri)?.toString() ??
-          toMultiRootPath(request.mainUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
+        message = request.packageConfig.toPackageUri(fileUri)?.toString()
+          ?? fileUri.toString();
       }
       _server.stdin.writeln(message);
-      _logger.printTrace(message.toString());
+      _logger.printTrace(message);
     }
     _server.stdin.writeln(inputKey);
     _logger.printTrace('<- $inputKey');
@@ -864,20 +888,4 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _server.kill();
     return _server.exitCode;
   }
-}
-
-/// Convert a file URI into a multi-root scheme URI if provided, otherwise
-/// return unmodified.
-@visibleForTesting
-String toMultiRootPath(Uri fileUri, String scheme, List<String> fileSystemRoots, bool windows) {
-  if (scheme == null || fileSystemRoots.isEmpty || fileUri.scheme != 'file') {
-    return fileUri.toString();
-  }
-  final String filePath = fileUri.toFilePath(windows: windows);
-  for (final String fileSystemRoot in fileSystemRoots) {
-    if (filePath.startsWith(fileSystemRoot)) {
-      return scheme + '://' + filePath.substring(fileSystemRoot.length);
-    }
-  }
-  return fileUri.toString();
 }

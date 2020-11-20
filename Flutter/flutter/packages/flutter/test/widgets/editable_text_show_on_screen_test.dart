@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +12,9 @@ import 'package:flutter/services.dart';
 
 class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TestSliverPersistentHeaderDelegate({
-    required this.minExtent,
-    required this.maxExtent,
-    required this.child,
+    this.minExtent,
+    this.maxExtent,
+    this.child,
     this.vsync = const TestVSync(),
     this.showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(),
   });
@@ -26,7 +28,7 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
   final double minExtent;
 
   @override
-  final TickerProvider? vsync;
+  final TickerProvider vsync;
 
   @override
   final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
@@ -494,13 +496,13 @@ void main() {
 }
 
 class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
-  const NoImplicitScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  const NoImplicitScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
 
   @override
   bool get allowImplicitScrolling => false;
 
   @override
-  NoImplicitScrollPhysics applyTo(ScrollPhysics? ancestor) {
+  NoImplicitScrollPhysics applyTo(ScrollPhysics ancestor) {
     return NoImplicitScrollPhysics(parent: buildParent(ancestor));
   }
 }

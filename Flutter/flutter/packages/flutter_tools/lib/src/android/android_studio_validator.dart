@@ -2,33 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
+import 'dart:async';
 
-import '../base/config.dart';
-import '../base/file_system.dart';
-import '../base/platform.dart';
 import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../doctor.dart';
+import '../globals.dart' as globals;
 import '../intellij/intellij.dart';
 import 'android_studio.dart';
 
 class AndroidStudioValidator extends DoctorValidator {
-  AndroidStudioValidator(this._studio, { @required FileSystem fileSystem })
-    : _fileSystem = fileSystem,
-      super('Android Studio');
+  AndroidStudioValidator(this._studio) : super('Android Studio');
 
   final AndroidStudio _studio;
-  final FileSystem _fileSystem;
 
-  static List<DoctorValidator> allValidators(Config config, Platform platform, FileSystem fileSystem, UserMessages userMessages) {
+  static List<DoctorValidator> get allValidators {
     final List<AndroidStudio> studios = AndroidStudio.allInstalled();
     return <DoctorValidator>[
       if (studios.isEmpty)
-        NoAndroidStudioValidator(config: config, platform: platform, userMessages: userMessages)
+        NoAndroidStudioValidator()
       else
         ...studios.map<DoctorValidator>(
-          (AndroidStudio studio) => AndroidStudioValidator(studio, fileSystem: fileSystem)
+          (AndroidStudio studio) => AndroidStudioValidator(studio)
         ),
     ];
   }
@@ -45,20 +40,14 @@ class AndroidStudioValidator extends DoctorValidator {
       userMessages.androidStudioLocation(_studio.directory),
     ));
 
-    final IntelliJPlugins plugins = IntelliJPlugins(_studio.pluginsPath, fileSystem: _fileSystem);
+    final IntelliJPlugins plugins = IntelliJPlugins(_studio.pluginsPath);
     plugins.validatePackage(
       messages,
       <String>['flutter-intellij', 'flutter-intellij.jar'],
       'Flutter',
-      IntelliJPlugins.kIntellijFlutterPluginUrl,
       minVersion: IntelliJPlugins.kMinFlutterPluginVersion,
     );
-    plugins.validatePackage(
-      messages,
-      <String>['Dart'],
-      'Dart',
-      IntelliJPlugins.kIntellijDartPluginUrl,
-    );
+    plugins.validatePackage(messages, <String>['Dart'], 'Dart');
 
     if (_studio.isValid) {
       type = _hasIssues(messages)
@@ -87,32 +76,21 @@ class AndroidStudioValidator extends DoctorValidator {
 }
 
 class NoAndroidStudioValidator extends DoctorValidator {
-  NoAndroidStudioValidator({
-    @required Config config,
-    @required Platform platform,
-    @required UserMessages userMessages,
-  }) : _config = config,
-       _platform = platform,
-       _userMessages = userMessages,
-       super('Android Studio');
-
-  final Config _config;
-  final Platform _platform;
-  final UserMessages _userMessages;
+  NoAndroidStudioValidator() : super('Android Studio');
 
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
-    final String cfgAndroidStudio = _config.getValue(
+    final String cfgAndroidStudio = globals.config.getValue(
       'android-studio-dir',
     ) as String;
     if (cfgAndroidStudio != null) {
       messages.add(ValidationMessage.error(
-        _userMessages.androidStudioMissing(cfgAndroidStudio),
+        userMessages.androidStudioMissing(cfgAndroidStudio),
       ));
     }
-    messages.add(ValidationMessage(_userMessages.androidStudioInstallation(_platform)));
+    messages.add(ValidationMessage(userMessages.androidStudioInstallation(globals.platform)));
 
     return ValidationResult(
       ValidationType.notAvailable,

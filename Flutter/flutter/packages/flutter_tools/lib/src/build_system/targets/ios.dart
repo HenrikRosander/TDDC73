@@ -187,8 +187,8 @@ class AotAssemblyProfile extends AotAssemblyBase {
 }
 
 /// Create a trivial App.framework file for debug iOS builds.
-class DebugUniversalFramework extends Target {
-  const DebugUniversalFramework();
+class DebugUniveralFramework extends Target {
+  const DebugUniveralFramework();
 
   @override
   String get name => 'debug_universal_framework';
@@ -375,7 +375,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
 
   @override
   List<Target> get dependencies => <Target>[
-    const DebugUniversalFramework(),
+    const DebugUniveralFramework(),
     ...super.dependencies,
   ];
 }

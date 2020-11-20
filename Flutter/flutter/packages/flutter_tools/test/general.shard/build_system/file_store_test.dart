@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/file_store.dart';
@@ -201,3 +202,4 @@ void main() {
 }
 
 class MockFile extends Mock implements File {}
+class MockArtifacts extends Mock implements Artifacts {}

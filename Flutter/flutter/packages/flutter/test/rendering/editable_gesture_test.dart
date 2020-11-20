@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.8
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -40,7 +42,7 @@ void main() {
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
 
     final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () { });
-    final _PointerRouterSpy spy = GestureBinding.instance!.pointerRouter as _PointerRouterSpy;
+    final _PointerRouterSpy spy = GestureBinding.instance.pointerRouter as _PointerRouterSpy;
     editable.attach(owner);
     // This should register pointer into GestureBinding.instance.pointerRouter.
     editable.handleEvent(const PointerDownEvent(), BoxHitTestEntry(editable, const Offset(10,10)));
@@ -62,7 +64,7 @@ class FakeEditableTextState extends TextSelectionDelegate with Fake { }
 class _PointerRouterSpy extends PointerRouter {
   int routeCount = 0;
   @override
-  void addRoute(int pointer, PointerRoute route, [Matrix4? transform]) {
+  void addRoute(int pointer, PointerRoute route, [Matrix4 transform]) {
     super.addRoute(pointer, route, transform);
     routeCount++;
   }

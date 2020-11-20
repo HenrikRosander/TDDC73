@@ -31,7 +31,7 @@ void main() {
       FlutterProject projectUnderTest;
 
       setUp(() {
-        fs = MemoryFileSystem.test();
+        fs = MemoryFileSystem();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
 
         final Directory currentDirectory = fs.currentDirectory;
