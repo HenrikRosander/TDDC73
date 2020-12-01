@@ -188,7 +188,7 @@ class TextFormField extends FormField<String> {
     ScrollPhysics scrollPhysics,
     Iterable<String> autofillHints,
     AutovalidateMode autovalidateMode,
-  }) : assert(initialValue == null || controller == null),
+  }) :
        assert(textAlign != null),
        assert(autofocus != null),
        assert(readOnly != null),
