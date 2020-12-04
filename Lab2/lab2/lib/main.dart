@@ -1,8 +1,11 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_credit_card/flutter_credit_card.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_credit_card/credit_card_form.dart';
-import 'package:flutter_credit_card/credit_card_model.dart';
+import 'package:flutter/rendering.dart';
+
+import './credit_card_form.dart';
+import './credit_card_model.dart';
+import './flutter_credit_card.dart';
 
 void main() {
   runApp(MyHomePage());
@@ -20,12 +23,12 @@ class MySampleState extends State<MyHomePage> {
   String expiryDate = '';
   String cardHolderName = '';
   String cvvCode = '';
+  String expiryMonth = '';
   bool isCvvFocused = false;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Credit Card View Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.brown,
@@ -41,6 +44,7 @@ class MySampleState extends State<MyHomePage> {
                 expiryDate: expiryDate,
                 cardHolderName: cardHolderName,
                 cvvCode: cvvCode,
+                expiryMonth: expiryMonth,
                 showBackView: isCvvFocused,
               ),
               Expanded(
@@ -52,15 +56,14 @@ class MySampleState extends State<MyHomePage> {
               ),
               Row(
                 children: <Widget>[
-                  Expanded(
-                    flex: 1,
+                  Container(
+                    alignment: Alignment.center,
                     child: SingleChildScrollView(
-                      primary: false,
                       child: Transform.translate(
-                        offset: const Offset(0, 0),
+                        offset: const Offset(70, 0),
                         child: RaisedButton(
                           padding: EdgeInsets.only(
-                              left: 165, right: 165, top: 15, bottom: 15),
+                              left: 120, right: 120, top: 15, bottom: 15),
                           textColor: Colors.white,
                           color: Colors.blueAccent,
                           onPressed: () {},
@@ -85,6 +88,7 @@ class MySampleState extends State<MyHomePage> {
       cardHolderName = creditCardModel.cardHolderName;
       cvvCode = creditCardModel.cvvCode;
       isCvvFocused = creditCardModel.isCvvFocused;
+      expiryMonth = creditCardModel.expiryMonth;
     });
   }
 }

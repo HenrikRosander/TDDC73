@@ -8,5 +8,8 @@ To see the 'main' open respectivly:
 - TDDC73\Lab1\React\App.js : React Native
 - TDDC73\Lab1\lab1flutter\lib\main.dart : Flutter
 
+# Lab 2
+In TDDC73/Lab1/ all the files for the first lab may be found. The lab is a front-end based credentials for a credit card made in Flutter.
+
 
 # Flutter/Flutter is only the SDK of Flutter
