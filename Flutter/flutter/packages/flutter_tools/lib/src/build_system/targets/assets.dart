@@ -44,7 +44,10 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
 
   final File pubspecFile =  environment.projectDir.childFile('pubspec.yaml');
   // Only the default asset bundle style is supported in assemble.
-  final AssetBundle assetBundle = AssetBundleFactory.defaultInstance.createBundle();
+  final AssetBundle assetBundle = AssetBundleFactory.defaultInstance(
+    logger: environment.logger,
+    fileSystem: environment.fileSystem,
+  ).createBundle();
   final int resultCode = await assetBundle.build(
     manifestPath: pubspecFile.path,
     packagesPath: environment.projectDir.childFile('.packages').path,
@@ -176,7 +179,7 @@ DevFSContent processSkSLBundle(String bundlePath, {
     bundle['platform'] as String);
   if (bundleTargetPlatform != targetPlatform) {
     logger.printError(
-      'The SkSL bundle was created for $bundleTargetPlatform, but the curent '
+      'The SkSL bundle was created for $bundleTargetPlatform, but the current '
       'platform is $targetPlatform. This may lead to less efficient shader '
       'caching.'
     );

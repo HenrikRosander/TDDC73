@@ -4,7 +4,6 @@
 
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -18,6 +17,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+      ...getLocalEngineArguments(),
       'build',
       'apk',
       '--analyze-size',
@@ -42,6 +42,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+       ...getLocalEngineArguments(),
       'build',
       'ios',
       '--analyze-size',
@@ -59,12 +60,13 @@ void main() {
     final String outputFilePath = line.split(iosDebugMessage).last.trim();
     expect(fileSystem.file(fileSystem.path.join(woringDirectory, outputFilePath)), exists);
     expect(result.exitCode, 0);
-  }, skip: !const LocalPlatform().isMacOS); // Only supported on macOS
+  }, skip: true); // Extremely flaky due to https://github.com/flutter/flutter/issues/68144
 
   testWithoutContext('--analyze-size is only supported in release mode', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
+       ...getLocalEngineArguments(),
       'build',
       'apk',
       '--analyze-size',
@@ -81,15 +83,9 @@ void main() {
 
   testWithoutContext('--analyze-size is not supported in combination with --split-debug-info', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final List<String> localEngineArguments = <String>[
-      if (platform.environment.containsKey('FLUTTER_LOCAL_ENGINE'))
-        '--local-engine=${platform.environment['FLUTTER_LOCAL_ENGINE']}',
-      if (platform.environment.containsKey('FLUTTER_LOCAL_ENGINE_SRC_PATH'))
-        '--local-engine-src-path=${platform.environment['FLUTTER_LOCAL_ENGINE_SRC_PATH']}',
-    ];
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
-       ...localEngineArguments,
+       ...getLocalEngineArguments(),
       'build',
       'apk',
       '--analyze-size',

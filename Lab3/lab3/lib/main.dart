@@ -1,137 +1,357 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-void main() {
-  final HttpLink httpLink = HttpLink(
-    uri: 'https://api.github.com/graphql',
-  );
+void main() => runApp(MaterialApp(
+    title: "Github GraphQL", debugShowCheckedModeBanner: false, home: MyApp()));
 
-  final AuthLink authLink = AuthLink(
-    getToken: () async => 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
-    // OR
-    // getToken: () => 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
-  );
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
 
-  final Link link = authLink.concat(httpLink);
-
-  ValueNotifier<GraphQLClient> client = ValueNotifier(
-    GraphQLClient(
-      cache: InMemoryCache(),
-      link: link,
-    ),
-  );
-
-  runApp(MyApp());
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      title: "Title",
+      home: MyHomePage(),
+    );
+  }
 }
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class _MyAppState extends State<MyApp> {
+  String personal_access_tokens = "7be0bfc7f7c11878c20d879b1efe141b4f7b4a46";
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-        // This makes the visual density adapt to the platform that you run
-        // the app on. For desktop platforms, the controls will be smaller and
-        // closer together (more dense) than on mobile platforms.
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+    final HttpLink httpLink = HttpLink(
+        uri: 'https://api.github.com/graphql',
+        headers: {"authorization": "Bearer $personal_access_tokens"});
+
+    ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
+        GraphQLClient(
+            link: httpLink,
+            cache:
+                OptimisticCache(dataIdFromObject: typenameDataIdFromObject)));
+    return GraphQLProvider(
+      client: client,
+      child: Container(
+        child: MyHomePage(),
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
   @override
   _MyHomePageState createState() => _MyHomePageState();
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return new Container();
+  }
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    //Please note that Dart uses a notation with three quotes to make the queries.
+
+    String readRepositories = """
+    query Flutter_Github_GraphQL{
+            user(login: "HenrikRosander") {
+                avatarUrl(size: 200)
+                location
+                name
+                url
+                email
+                login
+                repositories {
+                  totalCount
+                }
+                followers {
+                  totalCount
+                }
+                following {
+                  totalCount
+                }
+              }
+      viewer {
+              starredRepositories(last: 12) {
+                edges {
+                  node {
+                    id
+                    name
+                    nameWithOwner
+                  }
+                }
+              }
+            }
+          }
+      """;
+
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text("Github with GraphQL"),
+        backgroundColor: Colors.black,
+        centerTitle: true,
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+      body: Query(
+        options: QueryOptions(
+          documentNode: gql(readRepositories),
+          variables: {
+            'nRepositories': 20,
+            // 'query': 'language:' + '',
+          },
+          pollInterval: 10,
         ),
+        builder: (QueryResult result,
+            {VoidCallback refetch, FetchMore fetchMore}) {
+          if (result.exception != null) {
+            return Center(
+                child: Text(
+              result.exception.toString(),
+              style: TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ));
+          }
+
+          if (result.loading) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          // it can be either Map or List
+          final userDetails = result.data['user'];
+          List starredRepositories =
+              result.data['viewer']['starredRepositories']['edges'];
+
+          return Stack(
+            children: <Widget>[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    color: Colors.black,
+                    alignment: Alignment.center,
+                    child: Column(
+                      children: <Widget>[
+                        SizedBox(
+                          height: 2,
+                        ),
+                        ClipOval(
+                          child: Image.network(
+                            userDetails["avatarUrl"],
+                            filterQuality: FilterQuality.high,
+                            fit: BoxFit.cover,
+                            height: 100.0,
+                            width: 100.0,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        // Text(
+                        //   userDetails['name'],
+                        //   style: TextStyle(
+                        //       fontSize: 18,
+                        //       fontWeight: FontWeight.w800,
+                        //       color: Colors.white),
+                        // ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          userDetails['login'],
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              Icons.location_on,
+                              color: Colors.grey,
+                              size: 16,
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            // Text(
+                            //   userDetails['location'],
+                            //   style: TextStyle(
+                            //       fontSize: 15,
+                            //       fontWeight: FontWeight.w500,
+                            //       color: Colors.grey),
+                            // )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              Icons.link,
+                              color: Colors.grey,
+                              size: 16,
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              userDetails['url'],
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              Icons.email,
+                              color: Colors.grey,
+                              size: 16,
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              userDetails['email'],
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0, right: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Column(
+                                children: <Widget>[
+                                  Text(
+                                    userDetails["repositories"]['totalCount']
+                                        .toString(),
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    "Repositories",
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.grey),
+                                  )
+                                ],
+                              ),
+                              Column(
+                                children: <Widget>[
+                                  Text(
+                                    userDetails["followers"]['totalCount']
+                                        .toString(),
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    "Followers",
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.grey),
+                                  )
+                                ],
+                              ),
+                              Column(
+                                children: <Widget>[
+                                  Text(
+                                    userDetails["following"]['totalCount']
+                                        .toString(),
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    "Following",
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.grey),
+                                  )
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(top: 10.0, bottom: 2, left: 10),
+                    child: Text(
+                      "Starred Repositories",
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Divider(),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 330.0),
+                child: ListView.builder(
+                  itemCount: starredRepositories.length,
+                  itemBuilder: (context, index) {
+                    final repository = starredRepositories[index];
+                    return Padding(
+                      padding:
+                          const EdgeInsets.only(left: 10.0, top: 8, bottom: 8),
+                      child: Card(
+                        elevation: 0,
+                        child: Row(
+                          children: <Widget>[
+                            Icon(Icons.collections_bookmark),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              repository['node']['nameWithOwner'],
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              )
+            ],
+          );
+        },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
