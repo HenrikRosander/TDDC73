@@ -138,7 +138,7 @@ class _CreditCardFormState extends State<CreditCardForm> {
               margin: const EdgeInsets.only(left: 16, top: 16, right: 16),
               child: TextFormField(
                 controller: _cardNumberController,
-                initialValue: 'Input text',
+                // initialValue: 'Input text',
                 cursorColor: widget.cursorColor ?? themeColor,
                 style: TextStyle(
                   color: widget.textColor,
