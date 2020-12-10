@@ -11,14 +11,12 @@ class CreditCardWidget extends StatefulWidget {
     @required this.cvvCode,
     @required this.showBackView,
     @required this.expiryMonth,
-
     this.animationDuration = const Duration(milliseconds: 500),
     this.height,
     this.width,
     this.textStyle,
     this.cardBgColor = const Color(0xff000000),
-  })
-      : assert(cardNumber != null),
+  })  : assert(cardNumber != null),
         assert(showBackView != null),
         super(key: key);
 
@@ -109,17 +107,9 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
 
   @override
   Widget build(BuildContext context) {
-    final double height = MediaQuery
-        .of(context)
-        .size
-        .height;
-    final double width = MediaQuery
-        .of(context)
-        .size
-        .width;
-    final Orientation orientation = MediaQuery
-        .of(context)
-        .orientation;
+    final double height = MediaQuery.of(context).size.height;
+    final double width = MediaQuery.of(context).size.width;
+    final Orientation orientation = MediaQuery.of(context).orientation;
 
     ///
     /// If uer adds CVV then toggle the card from front to back..
@@ -149,22 +139,20 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
   ///
   /// Builds a back container containing cvv
   ///
-  Container buildBackContainer(double width,
-      double height,
-      BuildContext context,
-      Orientation orientation,) {
-    final TextStyle defaultTextStyle = Theme
-        .of(context)
-        .textTheme
-        .title
-        .merge(
-      TextStyle(
-        color: Colors.black,
-        fontFamily: 'Arial', //Source Code Pro
-        fontSize: 12,
-        package: 'flutter_credit_card',
-      ),
-    );
+  Container buildBackContainer(
+    double width,
+    double height,
+    BuildContext context,
+    Orientation orientation,
+  ) {
+    final TextStyle defaultTextStyle = Theme.of(context).textTheme.title.merge(
+          TextStyle(
+            color: Colors.black,
+            fontFamily: 'Arial', //Source Code Pro
+            fontSize: 12,
+            package: 'flutter_credit_card',
+          ),
+        );
 
     return Container(
       decoration: BoxDecoration(
@@ -205,7 +193,9 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
                         padding: const EdgeInsets.all(5),
                         child: Text(
                           widget.cvvCode.isEmpty
-                              ? isAmex ? '****' : '***'
+                              ? isAmex
+                                  ? '****'
+                                  : '***'
                               : widget.cvvCode,
                           maxLines: 1,
                           style: widget.textStyle ?? defaultTextStyle,
@@ -237,23 +227,21 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
   /// Builds a front container containing
   /// Card number, Exp. year and Card holder name
   ///
-  Container buildFrontContainer(double width,
-      double height,
-      BuildContext context,
-      Orientation orientation,) {
-    final TextStyle defaultTextStyle = Theme
-        .of(context)
-        .textTheme
-        .title
-        .merge(
-      TextStyle(
-        color: Colors.white,
-        fontFamily: 'SourceCodePro',
-        fontWeight: FontWeight.bold,
-        fontSize: 12,
-        // package: 'flutter_credit_card',
-      ),
-    );
+  Container buildFrontContainer(
+    double width,
+    double height,
+    BuildContext context,
+    Orientation orientation,
+  ) {
+    final TextStyle defaultTextStyle = Theme.of(context).textTheme.title.merge(
+          TextStyle(
+            color: Colors.white,
+            fontFamily: 'SourceCodePro',
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+            // package: 'flutter_credit_card',
+          ),
+        );
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -278,16 +266,17 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
             ),
           ),
           Expanded(
-            child: Transform.scale(scale: 1.6,
+            child: Transform.scale(
+              scale: 1.6,
               child: Transform.translate(
                 offset: const Offset(20.0, -20.0),
                 child: Image.asset('Images/chip2.png'),
               ),
-
             ),
           ),
           Expanded(
-           child: Transform.translate(offset: Offset(0, 20),
+            child: Transform.translate(
+              offset: Offset(0, 20),
               child: Padding(
                 padding: const EdgeInsets.only(left: 30),
                 child: Text(
@@ -301,12 +290,13 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
                     fontSize: 23,
                     // package: 'flutter_credit_card',
                   ),
-                  ),
                 ),
               ),
+            ),
           ),
           Expanded(
-            child: Transform.translate(offset: Offset(320, 60),
+            child: Transform.translate(
+              offset: Offset(320, 60),
               child: Text(
                 'Expires',
                 maxLines: 1,
@@ -322,28 +312,28 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           ),
           Expanded(
             flex: 1,
-            child: Transform.translate(offset: Offset(305, 55),
-
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16),
-              child: Text(
-                widget.expiryMonth.isEmpty || widget.expiryMonth == null
-                    ? 'MM'
-                    : widget.expiryMonth,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'SourceCodePro',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+            child: Transform.translate(
+              offset: Offset(305, 55),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16, right: 16),
+                child: Text(
+                  widget.expiryMonth.isEmpty || widget.expiryMonth == null
+                      ? 'MM'
+                      : widget.expiryMonth,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'SourceCodePro',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               ),
-            ),
             ),
           ),
           Expanded(
             flex: 1,
-            child: Transform.translate(offset: Offset(321, 34),
-
+            child: Transform.translate(
+              offset: Offset(321, 34),
               child: Padding(
                 padding: const EdgeInsets.only(left: 16, right: 16),
                 child: Text(
@@ -368,35 +358,35 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                color: Colors.white60,
-                fontFamily: 'SourceCodePro',
+                  color: Colors.white60,
+                  fontFamily: 'SourceCodePro',
                   fontWeight: FontWeight.bold,
-                fontSize: 11,
+                  fontSize: 11,
                 ),
               ),
             ),
           ),
           Expanded(
-            child: Transform.translate(offset: Offset(0, -7),
-
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16),
-              child: Text(
-                widget.cardHolderName.isEmpty || widget.cardHolderName == null
-                    ? 'FULL NAME'
-                    : widget.cardHolderName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'SourceCodePro',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+            child: Transform.translate(
+              offset: Offset(0, -7),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16, right: 16),
+                child: Text(
+                  widget.cardHolderName.isEmpty || widget.cardHolderName == null
+                      ? 'FULL NAME'
+                      : widget.cardHolderName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'SourceCodePro',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ),
           ),
-    ),
         ],
       ),
     );
@@ -406,7 +396,7 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
   /// A [List<String>] represents a range.
   /// i.e. ['51', '55'] represents the range of cards starting with '51' to those starting with '55'
   Map<CardType, Set<List<String>>> cardNumPatterns =
-  <CardType, Set<List<String>>>{
+      <CardType, Set<List<String>>>{
     CardType.visa: <List<String>>{
       <String>['4'],
     },
@@ -454,11 +444,11 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
     }
 
     cardNumPatterns.forEach(
-          (CardType type, Set<List<String>> patterns) {
+      (CardType type, Set<List<String>> patterns) {
         for (List<String> patternRange in patterns) {
           // Remove any spaces
           String ccPatternStr =
-          cardNumber.replaceAll(RegExp(r'\s+\b|\b\s'), '');
+              cardNumber.replaceAll(RegExp(r'\s+\b|\b\s'), '');
           final int rangeLen = patternRange[0].length;
           // Trim the Credit Card number string to match the pattern prefix length
           if (rangeLen < cardNumber.length) {
@@ -503,7 +493,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           'Images/visa.png',
           height: 48,
           width: 48,
-
         );
         isAmex = false;
         break;
@@ -542,10 +531,9 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
 
       case CardType.americanExpress:
         icon = Image.asset(
-          'icons/amex.png',
+          'Images/amex.png',
           height: 48,
           width: 48,
-
         );
         isAmex = true;
         break;
@@ -555,7 +543,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           'Images/mastercard.png',
           height: 48,
           width: 48,
-
         );
         isAmex = false;
         break;
@@ -565,7 +552,6 @@ class _CreditCardWidgetState extends State<CreditCardWidget>
           'Images/discover.png',
           height: 48,
           width: 48,
-
         );
         isAmex = false;
         break;

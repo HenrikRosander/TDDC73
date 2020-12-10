@@ -45,13 +45,14 @@ class _CreditCardFormState extends State<CreditCardForm> {
   CreditCardModel creditCardModel;
 
   final MaskedTextController _cardNumberController =
-  MaskedTextController(mask: '0000 0000 0000 0000');
+      MaskedTextController(mask: '0000 0000 0000 0000');
   final TextEditingController _cardHolderNameController =
-  TextEditingController();
+      TextEditingController();
   final TextEditingController _expiryDateController =
-  MaskedTextController(mask: '00/00');
+      MaskedTextController(mask: '00/00');
+
   final TextEditingController _cvvCodeController =
-  MaskedTextController(mask: '0000');
+      MaskedTextController(mask: '0000');
 
   FocusNode cvvFocusNode = FocusNode();
 
@@ -67,9 +68,8 @@ class _CreditCardFormState extends State<CreditCardForm> {
     cvvCode = widget.cvvCode ?? '';
     expiryMonth = widget.expiryMonth ?? '';
 
-    creditCardModel = CreditCardModel(
-        cardNumber, expiryDate, cardHolderName, cvvCode, isCvvFocused,
-        expiryMonth);
+    creditCardModel = CreditCardModel(cardNumber, expiryDate, cardHolderName,
+        cvvCode, isCvvFocused, expiryMonth);
   }
 
   @override
@@ -117,9 +117,7 @@ class _CreditCardFormState extends State<CreditCardForm> {
 
   @override
   void didChangeDependencies() {
-    themeColor = widget.themeColor ?? Theme
-        .of(context)
-        .primaryColor;
+    themeColor = widget.themeColor ?? Theme.of(context).primaryColor;
     super.didChangeDependencies();
   }
 
@@ -170,104 +168,114 @@ class _CreditCardFormState extends State<CreditCardForm> {
                 textInputAction: TextInputAction.next,
               ),
             ),
-
-       Container(
-         child: Row(
-           children: <Widget>[
-             Container(
-               padding: const EdgeInsets.only(left: 24, right: 26, top: 8),
-               // decoration: BoxDecoration(
-               //     borderRadius: BorderRadius.circular(2.0),
-               //     border: Border.all(color: Colors.black)),
-               child : SizedBox(
-                  width: 80,
-                 child: DropdownButton<String>(
-
-                   hint: Text('Month'),
-                   items: <int>[01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12]
-                       .map((int value) {
-                     return new DropdownMenuItem<String>(
-                       value: value.toString(),
-                       child: new Text(value.toString()),
-                     );
-                   }).toList(),
-                   onChanged: (value) {
-                     setState(() {
-                       if (int.parse(value) < 10) {
-                         value = '0' + value;
-                       }
-                       expiryMonth = value;
-                       creditCardModel.expiryMonth = expiryMonth;
-                       onCreditCardModelChange(creditCardModel);
-                     });
-                   },
-                 ),
-               ),
-             ),
-             Container(
-               padding:const EdgeInsets.only(left: 16, right: 26, top: 8),
-               // decoration: BoxDecoration(
-               //   borderRadius: BorderRadius.circular(8.0),
-               //   border: Border.all(
-               //       color: Colors.black, style: BorderStyle.solid, width: 0.60),
-               // ),
-               child: SizedBox(
-                width: 80,
-                 child: DropdownButton<String>(
-
-                   hint: Text('Year'),
-                   items: <int>[20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
-                       .map((int value) {
-                     return new DropdownMenuItem<String>(
-                       value: value.toString(),
-                       child: new Text(value.toString()),
-                     );
-                   }).toList(),
-                   onChanged: (value) {
-                     setState(() {
-                       expiryDate = value;
-                       creditCardModel.expiryDate = expiryDate;
-                       onCreditCardModelChange(creditCardModel);
-                     });
-
-                   },
-
-                 ),
-               ),
-             ),
-             Container(
-               padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
-               child : SizedBox(
-                 width: 126,
-                 child: TextField(
-                   focusNode: cvvFocusNode,
-                   controller: _cvvCodeController,
-                   cursorColor: widget.cursorColor ?? themeColor,
-                   style: TextStyle(
-                     color: widget.textColor,
-                   ),
-                   decoration: InputDecoration(
-                     border: OutlineInputBorder(),
-                     labelText: 'CVV',
-                     hintText: 'XXXX',
-                   ),
-                   keyboardType: TextInputType.number,
-                   textInputAction: TextInputAction.done,
-                   onChanged: (String text) {
-                     setState(() {
-                       cvvCode = text;
-                     });
-                   },
-                 ),
-               ),
-             ),
-           ],
-         ),
-       ),
-      ],
+            Container(
+              child: Row(
+                children: <Widget>[
+                  Container(
+                    padding: const EdgeInsets.only(left: 24, right: 26, top: 8),
+                    // decoration: BoxDecoration(
+                    //     borderRadius: BorderRadius.circular(2.0),
+                    //     border: Border.all(color: Colors.black)),
+                    child: SizedBox(
+                      width: 80,
+                      child: DropdownButton<String>(
+                        hint: Text('Month'),
+                        items: <int>[
+                          01,
+                          02,
+                          03,
+                          04,
+                          05,
+                          06,
+                          07,
+                          08,
+                          09,
+                          10,
+                          11,
+                          12
+                        ].map((int value) {
+                          return new DropdownMenuItem<String>(
+                            value: value.toString(),
+                            child: new Text(value.toString()),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            if (int.parse(value) < 10) {
+                              value = '0' + value;
+                            }
+                            expiryMonth = value;
+                            creditCardModel.expiryMonth = expiryMonth;
+                            onCreditCardModelChange(creditCardModel);
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.only(left: 16, right: 26, top: 8),
+                    // decoration: BoxDecoration(
+                    //   borderRadius: BorderRadius.circular(8.0),
+                    //   border: Border.all(
+                    //       color: Colors.black, style: BorderStyle.solid, width: 0.60),
+                    // ),
+                    child: SizedBox(
+                      width: 80,
+                      child: DropdownButton<String>(
+                        hint: Text('Year'),
+                        items: <int>[20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+                            .map((int value) {
+                          return new DropdownMenuItem<String>(
+                            value: value.toString(),
+                            child: new Text(value.toString()),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            expiryDate = value;
+                            creditCardModel.expiryDate = expiryDate;
+                            onCreditCardModelChange(creditCardModel);
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
+                    child: SizedBox(
+                      width: 126,
+                      child: TextField(
+                        maxLength: cardNumber.startsWith('34') ||
+                                cardNumber.startsWith('37')
+                            ? 4
+                            : 3,
+                        focusNode: cvvFocusNode,
+                        controller: _cvvCodeController,
+                        cursorColor: widget.cursorColor ?? themeColor,
+                        style: TextStyle(
+                          color: widget.textColor,
+                        ),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'CVV',
+                          hintText: 'XXX',
+                        ),
+                        keyboardType: TextInputType.number,
+                        textInputAction: TextInputAction.done,
+                        onChanged: (String text) {
+                          setState(() {
+                            cvvCode = text;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      ),
-      );
-
+    );
   }
 }

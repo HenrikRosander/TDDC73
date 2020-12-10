@@ -83,3 +83,4 @@ lint/tmp/
 # lint/reports/
 
 Lab3/lab3/Token/*
+Lab3/lab3/lib/Token.dart
