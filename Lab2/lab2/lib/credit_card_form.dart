@@ -258,7 +258,10 @@ class _CreditCardFormState extends State<CreditCardForm> {
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: 'CVV',
-                          hintText: 'XXX',
+                          hintText: cardNumber.startsWith('34') ||
+                                  cardNumber.startsWith('37')
+                              ? 'XXXX'
+                              : 'XXX',
                         ),
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.done,
