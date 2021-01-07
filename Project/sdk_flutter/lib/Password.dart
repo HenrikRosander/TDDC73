@@ -27,6 +27,9 @@ class MyApp extends StatelessWidget {
   }
 }
 
+@override
+Scaffold passwordWidget;
+
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
   final String title;
@@ -79,46 +82,47 @@ class _MyHomePageState extends State<MyHomePage> {
     widthStrength = (feedbackStrength * 3).toDouble();
   }
 
+  final passwordWidget = Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          SizedBox(
+            width: 300,
+            child: TextFormField(
+              // controller: passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 10),
+            child: Container(
+              child: LinearPercentIndicator(
+                width: 300,
+                animateFromLastPercent: true,
+                lineHeight: 20,
+                animation: true,
+                animationDuration: 500,
+                alignment: MainAxisAlignment.center,
+                percent: passwordStrength,
+                center: Text(
+                  feedbackStrength.toString() + '%',
+                ),
+                // progressColor: colorcheck(),
+                linearStrokeCap: LinearStrokeCap.roundAll,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(
-              width: 300,
-              child: TextFormField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 10),
-              child: Container(
-                child: LinearPercentIndicator(
-                  width: 300,
-                  animateFromLastPercent: true,
-                  lineHeight: 20,
-                  animation: true,
-                  animationDuration: 500,
-                  alignment: MainAxisAlignment.center,
-                  percent: passwordStrength,
-                  center: Text(
-                    feedbackStrength.toString() + '%',
-                  ),
-                  progressColor: colorcheck(),
-                  linearStrokeCap: LinearStrokeCap.roundAll,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return passwordWidget;
   }
 }

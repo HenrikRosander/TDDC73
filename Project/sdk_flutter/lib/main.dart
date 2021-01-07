@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
+
+import 'Password.dart';
 
 void main() {
   runApp(MyApp());
@@ -14,6 +17,7 @@ String dateText;
 String monthText;
 String yearText;
 String genderText;
+bool passwordchecker = false;
 
 bool checkMail() {
   if (emailText == null) {
@@ -55,10 +59,14 @@ bool checkUserName() {
   return false;
 }
 
-bool checkPassword() {
+bool checkPasswordText() {
   if (passwordText == null) return false;
   //@@TODO: This will be replaced by a "real" password checker.
-  if (passwordText.length > 7) return true;
+  if (passwordText.length > 7) {
+    if (passwordchecker) {
+      return true;
+    }
+  }
 
   return false;
 }
@@ -117,7 +125,7 @@ bool accept() {
   if (checkMail() &&
       checkName() &&
       checkUserName() &&
-      checkPassword() &&
+      checkPasswordText() &&
       checkDay() &&
       checkMonth() &&
       checkYear() &&
@@ -156,10 +164,49 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController fullNameController = TextEditingController();
   final TextEditingController userNameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
   final TextEditingController dayController = TextEditingController();
   final TextEditingController monthController = TextEditingController();
   final TextEditingController yearController = TextEditingController();
+
+  final passwordController = TextEditingController();
+
+  Color colorcheck() {
+    if (passwordStrength < .40) return Colors.red;
+    if (passwordStrength > .40 && passwordStrength < .70) return Colors.yellow;
+    if (passwordStrength > .70 && passwordText.length >= minLength)
+      return Colors.green;
+  }
+
+  void checkPassword() {
+    setState(() {
+      passwordStrength = 0.0;
+      textStrength = 0.0;
+      passwordText = passwordController.text;
+      //Amount of characters (1/24 per letter, maximum 12/24 = 50%)
+      if (passwordText.length <= maxLength) {
+        textStrength += (1 / (maxLength * 2)) * passwordText.length;
+        if (passwordText.length == maxLength) lengthdummy = true;
+      }
+      if (passwordText.length > maxLength && lengthdummy) textStrength = 0.5;
+
+      //If there is a special character, add 16% more to the strength.
+      if (passwordText.contains(new RegExp(r'[!@#$%^&*(),.?":{}|<>]')))
+        passwordStrength += .16;
+      //If there is a capital letter, add 17% more to the strength. (17% because of even rounding).
+      if (passwordText.contains(new RegExp(r'[A-Z]'))) passwordStrength += 0.17;
+      //If there is a number, add 16% more to the strength.
+      if (passwordText.contains(new RegExp(r'[0-9]'))) passwordStrength += 0.17;
+
+      passwordStrength += textStrength;
+      if (passwordStrength > 0.7) {
+        passwordchecker = true;
+      } else
+        passwordchecker = false;
+    });
+    double b = passwordStrength * 100;
+    feedbackStrength = b.round();
+    widthStrength = (feedbackStrength * 3).toDouble();
+  }
 
   void initState() {
     super.initState();
@@ -202,6 +249,7 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         passwordText = passwordController.text;
       });
+      checkPassword();
     });
   }
 
@@ -216,9 +264,9 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           children: <Widget>[
             Transform.translate(
-              offset: Offset(-65, 270),
+              offset: Offset(32, 270),
               child: Text(
-                'Join with your email address',
+                'Welcome to register your new account here! ',
                 style: TextStyle(fontSize: 30),
               ),
             ),
@@ -227,7 +275,7 @@ class _MyHomePageState extends State<MyHomePage> {
               children: <Widget>[
                 Image(
                   image: NetworkImage(
-                    'https://i.ytimg.com/vi/EMhh1KjiuqA/maxresdefault.jpg',
+                    'https://cdn0.iconfinder.com/data/icons/simpline-mix/64/simpline_27-512.png',
                   ),
                   width: 300,
                   height: 150,
@@ -239,7 +287,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     Container(
                       child: Padding(
                           padding: const EdgeInsets.only(
-                              left: 0, right: 0, top: 144),
+                              left: 0, right: 0, top: 175),
                           child: SizedBox(
                             width: 300,
                             child: TextFormField(
@@ -332,7 +380,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: 10, top: 303),
+                  padding: const EdgeInsets.only(left: 10, top: 330),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -366,13 +414,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       _dropDownValue,
                                       style: TextStyle(color: Colors.black),
                                     ),
-                              items: [
-                                'Male',
-                                'Female',
-                                'Attack Helicopter',
-                                'Degenerate fuckwit',
-                                'A total piece of shit'
-                              ].map(
+                              items: ['Male', 'Female', 'Other'].map(
                                 (val) {
                                   return DropdownMenuItem<String>(
                                     value: val,
@@ -394,33 +436,59 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       //Password
                       Container(
-                        child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 0, right: 0, top: 50),
-                            child: SizedBox(
-                              width: 300,
-                              child: TextFormField(
-                                controller: passwordController,
-                                obscureText: true,
-                                decoration: InputDecoration(
-                                  labelStyle: TextStyle(
-                                    color: Colors.grey,
+                        child: SizedBox(
+                          width: 300,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 0, right: 30, top: 0, bottom: 5),
+                                child: Text(
+                                    'The password must be at least 8 characters, contain a capital letter and a number.'),
+                              ),
+                              SizedBox(
+                                width: 300,
+                                child: TextFormField(
+                                  controller: passwordController,
+                                  obscureText: true,
+                                  decoration: InputDecoration(
+                                    labelText: 'Password',
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: checkPasswordText()
+                                                ? Colors.green
+                                                : Colors.lightBlue)),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: checkPasswordText()
+                                                ? Colors.green
+                                                : Colors.red)),
                                   ),
-                                  enabledBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                          color: checkPassword()
-                                              ? Colors.green
-                                              : Colors.lightBlue)),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: checkPassword()
-                                            ? Colors.green
-                                            : Colors.red),
-                                  ),
-                                  labelText: 'Password',
                                 ),
                               ),
-                            )),
+                              Padding(
+                                padding: EdgeInsets.only(top: 10),
+                                child: Container(
+                                  child: LinearPercentIndicator(
+                                    width: 300,
+                                    animateFromLastPercent: true,
+                                    lineHeight: 20,
+                                    animation: true,
+                                    animationDuration: 500,
+                                    alignment: MainAxisAlignment.center,
+                                    percent: passwordStrength,
+                                    center: Text(
+                                      feedbackStrength.toString() + '%',
+                                    ),
+                                    progressColor: colorcheck(),
+                                    linearStrokeCap: LinearStrokeCap.roundAll,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
 
                       Container(
@@ -428,7 +496,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.only(
-                                  left: 0, right: 220, top: 25),
+                                  left: 0, right: 220, top: 10),
                               child: Text('Date of birth'),
                             ),
                             Padding(
