@@ -261,6 +261,8 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text('Flutter SDK Account Registration'),
       ),
       body: Center(
+          child: Transform.translate(
+        offset: Offset(0, 0),
         child: Column(
           children: <Widget>[
             Transform.translate(
@@ -694,7 +696,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 }

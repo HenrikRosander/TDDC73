@@ -40,16 +40,17 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class MyWidget extends StatefulWidget {
-  // final String title;
-  // final String message;
-  //
-  // MyWidget({
-  //   @required this.title,
-  //   @required this.message,
-  // });
+class MyWidget extends StatelessWidget {
+  final String title;
+  final String message;
 
-  final passwordController = TextEditingController();
+  const MyWidget({
+    Key key,
+    @required this.title,
+    @required this.message,
+  }) : super(key: key);
+
+  get passwordController => TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -103,39 +104,6 @@ class MyWidget extends StatefulWidget {
       return Colors.green;
     return Colors.red;
   }
-
-  @override
-  State<StatefulWidget> createState() {
-    passwordController.addListener(() {
-      checkPassword();
-    });
-  }
-
-  void checkPassword() {
-    passwordStrength = 0.0;
-    textStrength = 0.0;
-    passwordText = passwordController.text;
-    //Amount of characters (1/24 per letter, maximum 12/24 = 50%)
-    if (passwordText.length <= maxLength) {
-      textStrength += (1 / (maxLength * 2)) * passwordText.length;
-      if (passwordText.length == maxLength) lengthdummy = true;
-    }
-    if (passwordText.length > maxLength && lengthdummy) textStrength = 0.5;
-
-    //If there is a special character, add 16% more to the strength.
-    if (passwordText.contains(new RegExp(r'[!@#$%^&*(),.?":{}|<>]')))
-      passwordStrength += .16;
-    //If there is a capital letter, add 17% more to the strength. (17% because of even rounding).
-    if (passwordText.contains(new RegExp(r'[A-Z]'))) passwordStrength += 0.17;
-    //If there is a number, add 16% more to the strength.
-    if (passwordText.contains(new RegExp(r'[0-9]'))) passwordStrength += 0.17;
-
-    passwordStrength += textStrength;
-
-    double b = passwordStrength * 100;
-    feedbackStrength = b.round();
-    widthStrength = (feedbackStrength * 3).toDouble();
-  }
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -184,44 +152,45 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(
-              width: 300,
-              child: TextFormField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 10),
-              child: Container(
-                child: LinearPercentIndicator(
-                  width: 300,
-                  animateFromLastPercent: true,
-                  lineHeight: 20,
-                  animation: true,
-                  animationDuration: 500,
-                  alignment: MainAxisAlignment.center,
-                  percent: passwordStrength,
-                  center: Text(
-                    feedbackStrength.toString() + '%',
-                  ),
-                  progressColor: colorcheck(),
-                  linearStrokeCap: LinearStrokeCap.roundAll,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return MyWidget(title: 'null', message: 'a');
+    // return Scaffold(
+    //   body: Center(
+    //     child: Column(
+    //       mainAxisAlignment: MainAxisAlignment.center,
+    //       children: <Widget>[
+    //         SizedBox(
+    //           width: 300,
+    //           child: TextFormField(
+    //             controller: passwordController,
+    //             obscureText: true,
+    //             decoration: InputDecoration(
+    //               labelText: 'Password',
+    //               border: OutlineInputBorder(),
+    //             ),
+    //           ),
+    //         ),
+    //         Padding(
+    //           padding: EdgeInsets.only(top: 10),
+    //           child: Container(
+    //             child: LinearPercentIndicator(
+    //               width: 300,
+    //               animateFromLastPercent: true,
+    //               lineHeight: 20,
+    //               animation: true,
+    //               animationDuration: 500,
+    //               alignment: MainAxisAlignment.center,
+    //               percent: passwordStrength,
+    //               center: Text(
+    //                 feedbackStrength.toString() + '%',
+    //               ),
+    //               progressColor: colorcheck(),
+    //               linearStrokeCap: LinearStrokeCap.roundAll,
+    //             ),
+    //           ),
+    //         ),
+    //       ],
+    //     ),
+    //   ),
+    // );
   }
 }

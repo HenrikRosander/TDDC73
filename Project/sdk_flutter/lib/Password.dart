@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
 String passwordText;
@@ -15,6 +16,9 @@ int feedbackStrength = 0;
 double widthStrength = 0;
 
 void main() {
+  testWidgets('MyWidget has a title and message', (WidgetTester tester) async {
+    // Test code goes here.
+  });
   runApp(MyApp());
 }
 
