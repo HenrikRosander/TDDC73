@@ -9,7 +9,10 @@ To see the 'main' open respectivly:
 - TDDC73\Lab1\lab1flutter\lib\main.dart : Flutter
 
 # Lab 2
-In TDDC73/Lab1/ all the files for the first lab may be found. The lab is a front-end based credentials for a credit card made in Flutter.
+In TDDC73/Lab2/ all the files for the second lab may be found. The lab is a front-end based credentials for a credit card made in Flutter.
 
+# Lab 3
+In TDDC73/Lab3/ all the files for the third lab may be found. The lab is a display of Github's top repositories, using GraphQL to fetch the data.
 
-# Flutter/Flutter is only the SDK of Flutter
+# Project
+In the project folder you will find two SDK's. The first one is a password Verifier that checks if the input password is strong based on length, special characters, etc. The second is a Account registration component that can be used to register to a website. In this folder you will also find a getting started guide for Flutter.
