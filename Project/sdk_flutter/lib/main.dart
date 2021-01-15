@@ -39,6 +39,7 @@ bool checkMail() {
     return false;
 }
 
+//To accept a valid name the name should contain at least a space and be 4 characters long in total.
 bool checkName() {
   if (fullNameText == null) return false;
   if (fullNameText.contains(" ")) {
@@ -50,6 +51,7 @@ bool checkName() {
     return false;
 }
 
+//To accept a valid username the user should have a name that is at least 3 characters long.
 bool checkUserName() {
   if (usernameText == null)
     return false;
@@ -61,18 +63,16 @@ bool checkUserName() {
 
 bool checkPasswordText() {
   if (passwordText == null) return false;
-  //@@TODO: This will be replaced by a "real" password checker.
-  if (passwordText.length > 7) {
+  if (passwordText.length > minLength) {
     if (passwordchecker) {
       return true;
     }
   }
-
   return false;
 }
 
+//Check if the string is between 01-31
 bool checkDay() {
-  //Check if the string is between 01-31
   if (dateText == null) return false;
   if (dateText.length > 0) {
     int dateinInts = int.parse(dateText);
@@ -86,8 +86,8 @@ bool checkDay() {
   return false;
 }
 
+//Check if the string is between 01-12
 bool checkMonth() {
-  //Check if the string is between 01-12
   if (monthText == null) return false;
   if (monthText.length > 0) {
     int monthinInts = int.parse(monthText);
@@ -101,8 +101,8 @@ bool checkMonth() {
   return false;
 }
 
+//Check if the string is between 1900-2020, which would be reasonable
 bool checkYear() {
-  //Check if the string is between 1900-2020
   if (yearText == null) return false;
   if (yearText.length > 0) {
     int yearinInts = int.parse(yearText);
@@ -110,7 +110,6 @@ bool checkYear() {
       return true;
     }
   }
-
   return false;
 }
 
@@ -161,6 +160,19 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return AccountRegistration();
+  }
+}
+
+class AccountRegistration extends StatefulWidget {
+  @override
+  _AccountRegistrationState createState() => _AccountRegistrationState();
+}
+
+class _AccountRegistrationState extends State<AccountRegistration> {
+  //Initialize the TextEditingControllers.
   final TextEditingController emailController = TextEditingController();
   final TextEditingController fullNameController = TextEditingController();
   final TextEditingController userNameController = TextEditingController();
@@ -170,13 +182,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final passwordController = TextEditingController();
 
+  //This function determines what color the progress bar should have based on the password strength.
   Color colorcheck() {
-    if (passwordStrength < .40) return Colors.red;
-    if (passwordStrength > .40 && passwordStrength < .70) return Colors.yellow;
+    if (passwordStrength < .50) return Colors.red;
+    if (passwordStrength > .50 && passwordStrength < .70) return Colors.yellow;
     if (passwordStrength > .70 && passwordText.length >= minLength)
       return Colors.green;
   }
 
+  //This function calculates the percentage strength of the password.
   void checkPassword() {
     setState(() {
       passwordStrength = 0.0;
@@ -194,9 +208,10 @@ class _MyHomePageState extends State<MyHomePage> {
         passwordStrength += .16;
       //If there is a capital letter, add 17% more to the strength. (17% because of even rounding).
       if (passwordText.contains(new RegExp(r'[A-Z]'))) passwordStrength += 0.17;
-      //If there is a number, add 16% more to the strength.
+      //If there is a number, add 17% more to the strength.
       if (passwordText.contains(new RegExp(r'[0-9]'))) passwordStrength += 0.17;
 
+      //If all cases are
       passwordStrength += textStrength;
       if (passwordStrength > 0.7) {
         passwordchecker = true;
@@ -282,10 +297,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   width: 300,
                   height: 150,
                 ),
+                //This is the left Column of the account registration.
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    //Full name
+                    //This container checks the full name text field.
                     Container(
                       child: Padding(
                           padding: const EdgeInsets.only(
@@ -321,7 +337,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                           )),
                     ),
-                    //Username
+                    //This container checks the username text field.
                     Container(
                       child: Padding(
                           padding:
@@ -350,7 +366,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                           )),
                     ),
-                    //Email
+                    //This container checks the email text field.
                     Container(
                       child: Padding(
                           padding: const EdgeInsets.only(
@@ -381,6 +397,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ],
                 ),
+                //This is the Right column of the account registration.
                 Padding(
                   padding: const EdgeInsets.only(left: 10, top: 330),
                   child: Column(
@@ -391,6 +408,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             left: 0, right: 215, top: 0, bottom: 5),
                         child: Text('Select Gender'),
                       ),
+                      //This is the gender selection dropdown menu.
                       Container(
                         child: Padding(
                           padding: const EdgeInsets.only(left: 0, right: 0),
@@ -436,7 +454,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                         ),
                       ),
-                      //Password
+                      //This container checks the password text field.
                       Container(
                         child: SizedBox(
                           width: 300,
@@ -449,23 +467,34 @@ class _MyHomePageState extends State<MyHomePage> {
                                 child: Text(
                                     'The password must be at least 8 characters, contain a capital letter and a number.'),
                               ),
-                              SizedBox(
-                                width: 300,
-                                child: TextFormField(
-                                  controller: passwordController,
-                                  obscureText: true,
-                                  decoration: InputDecoration(
-                                    labelText: 'Password',
-                                    enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: checkPasswordText()
-                                                ? Colors.green
-                                                : Colors.lightBlue)),
-                                    focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: checkPasswordText()
-                                                ? Colors.green
-                                                : Colors.red)),
+                              Tooltip(
+                                message:
+                                    "The password must be at least 8 characters, contain a capital letter and a number.",
+                                textStyle: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                ),
+                                child: SizedBox(
+                                  width: 300,
+                                  child: TextFormField(
+                                    controller: passwordController,
+                                    obscureText: true,
+                                    decoration: InputDecoration(
+                                      suffixIcon: Icon(
+                                        Icons.info_outline,
+                                      ),
+                                      labelText: 'Password',
+                                      enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: checkPasswordText()
+                                                  ? Colors.green
+                                                  : Colors.lightBlue)),
+                                      focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: checkPasswordText()
+                                                  ? Colors.green
+                                                  : Colors.red)),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -496,11 +525,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       Container(
                         child: Column(
                           children: <Widget>[
+                            //Date of birth text.
                             Padding(
                               padding: const EdgeInsets.only(
                                   left: 0, right: 220, top: 10),
                               child: Text('Date of birth'),
                             ),
+                            //This container contains the Date of birth text fields.
                             Padding(
                                 padding: const EdgeInsets.only(
                                     left: 0, right: 0, top: 5),
@@ -622,6 +653,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                         ),
                                       ],
                                     ))),
+                            //This Container is the terms of agreement and create account button.
                             SizedBox(
                               width: 500,
                               child: Column(
