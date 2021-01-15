@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 
 import 'Password.dart';
 
+//To use this in your code, import it and use the tag AccountRegistration().
+
 void main() {
   runApp(MyApp());
 }
@@ -179,48 +181,6 @@ class _AccountRegistrationState extends State<AccountRegistration> {
   final TextEditingController monthController = TextEditingController();
   final TextEditingController yearController = TextEditingController();
 
-  final passwordController = TextEditingController();
-
-  //This function determines what color the progress bar should have based on the password strength.
-  Color colorcheck() {
-    if (passwordStrength < .50) return Colors.red;
-    if (passwordStrength > .50 && passwordStrength < .70) return Colors.yellow;
-    if (passwordStrength > .70 && passwordText.length >= minLength)
-      return Colors.green;
-  }
-
-  //This function calculates the percentage strength of the password.
-  void checkPassword() {
-    setState(() {
-      passwordStrength = 0.0;
-      textStrength = 0.0;
-      passwordText = passwordController.text;
-      //Amount of characters (1/24 per letter, maximum 12/24 = 50%)
-      if (passwordText.length <= maxLength) {
-        textStrength += (1 / (maxLength * 2)) * passwordText.length;
-      }
-      if (passwordText.length > maxLength) textStrength = 0.5;
-
-      //If there is a special character, add 16% more to the strength.
-      if (passwordText.contains(new RegExp(r'[!@#$%^&*(),.?":{}|<>]')))
-        passwordStrength += .16;
-      //If there is a capital letter, add 17% more to the strength. (17% because of even rounding).
-      if (passwordText.contains(new RegExp(r'[A-Z]'))) passwordStrength += 0.17;
-      //If there is a number, add 17% more to the strength.
-      if (passwordText.contains(new RegExp(r'[0-9]'))) passwordStrength += 0.17;
-
-      //If all cases are
-      passwordStrength += textStrength;
-      if (passwordStrength > 0.7) {
-        passwordchecker = true;
-      } else
-        passwordchecker = false;
-    });
-    double b = passwordStrength * 100;
-    feedbackStrength = b.round();
-    widthStrength = (feedbackStrength * 3).toDouble();
-  }
-
   void initState() {
     super.initState();
 
@@ -257,12 +217,6 @@ class _AccountRegistrationState extends State<AccountRegistration> {
       setState(() {
         usernameText = userNameController.text;
       });
-    });
-    passwordController.addListener(() {
-      setState(() {
-        passwordText = passwordController.text;
-      });
-      checkPassword();
     });
   }
 
