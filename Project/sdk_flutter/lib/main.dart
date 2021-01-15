@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:percent_indicator/linear_percent_indicator.dart';
 
 import 'Password.dart';
 
@@ -199,9 +198,8 @@ class _AccountRegistrationState extends State<AccountRegistration> {
       //Amount of characters (1/24 per letter, maximum 12/24 = 50%)
       if (passwordText.length <= maxLength) {
         textStrength += (1 / (maxLength * 2)) * passwordText.length;
-        if (passwordText.length == maxLength) lengthdummy = true;
       }
-      if (passwordText.length > maxLength && lengthdummy) textStrength = 0.5;
+      if (passwordText.length > maxLength) textStrength = 0.5;
 
       //If there is a special character, add 16% more to the strength.
       if (passwordText.contains(new RegExp(r'[!@#$%^&*(),.?":{}|<>]')))
@@ -399,7 +397,7 @@ class _AccountRegistrationState extends State<AccountRegistration> {
                 ),
                 //This is the Right column of the account registration.
                 Padding(
-                  padding: const EdgeInsets.only(left: 10, top: 330),
+                  padding: const EdgeInsets.only(left: 10, top: 400),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -463,262 +461,225 @@ class _AccountRegistrationState extends State<AccountRegistration> {
                             children: <Widget>[
                               Padding(
                                 padding: const EdgeInsets.only(
-                                    left: 0, right: 30, top: 0, bottom: 5),
+                                    left: 0, right: 30, top: 0, bottom: 0),
                                 child: Text(
                                     'The password must be at least 8 characters, contain a capital letter and a number.'),
                               ),
-                              Tooltip(
-                                message:
-                                    "The password must be at least 8 characters, contain a capital letter and a number.",
-                                textStyle: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white,
-                                ),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 20),
                                 child: SizedBox(
                                   width: 300,
-                                  child: TextFormField(
-                                    controller: passwordController,
-                                    obscureText: true,
-                                    decoration: InputDecoration(
-                                      suffixIcon: Icon(
-                                        Icons.info_outline,
-                                      ),
-                                      labelText: 'Password',
-                                      enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                              color: checkPasswordText()
-                                                  ? Colors.green
-                                                  : Colors.lightBlue)),
-                                      focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                              color: checkPasswordText()
-                                                  ? Colors.green
-                                                  : Colors.red)),
-                                    ),
-                                  ),
+                                  height: 150,
+                                  child: PasswordStrengthMeter(),
                                 ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(top: 10),
-                                child: Container(
-                                  child: LinearPercentIndicator(
-                                    width: 300,
-                                    animateFromLastPercent: true,
-                                    lineHeight: 20,
-                                    animation: true,
-                                    animationDuration: 500,
-                                    alignment: MainAxisAlignment.center,
-                                    percent: passwordStrength,
-                                    center: Text(
-                                      feedbackStrength.toString() + '%',
-                                    ),
-                                    progressColor: colorcheck(),
-                                    linearStrokeCap: LinearStrokeCap.roundAll,
-                                  ),
-                                ),
-                              ),
+                              )
                             ],
                           ),
                         ),
                       ),
-
-                      Container(
-                        child: Column(
-                          children: <Widget>[
-                            //Date of birth text.
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 0, right: 220, top: 10),
-                              child: Text('Date of birth'),
-                            ),
-                            //This container contains the Date of birth text fields.
-                            Padding(
+                      Transform.translate(
+                        offset: Offset(0, -30),
+                        child: Container(
+                          child: Column(
+                            children: <Widget>[
+                              //Date of birth text.
+                              Padding(
                                 padding: const EdgeInsets.only(
-                                    left: 0, right: 0, top: 5),
-                                child: SizedBox(
-                                    width: 300,
-                                    child: Row(
+                                    left: 0, right: 220, top: 0),
+                                child: Text('Date of birth'),
+                              ),
+                              //This container contains the Date of birth text fields.
+                              Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 0, right: 0, top: 5),
+                                  child: SizedBox(
+                                      width: 300,
+                                      child: Row(
+                                        children: <Widget>[
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 16),
+                                            child: SizedBox(
+                                              width: 90,
+                                              child: TextFormField(
+                                                controller: dayController,
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                inputFormatters: <
+                                                    TextInputFormatter>[
+                                                  FilteringTextInputFormatter
+                                                      .digitsOnly
+                                                ],
+                                                textInputAction:
+                                                    TextInputAction.next,
+                                                maxLength: 2,
+                                                decoration: InputDecoration(
+                                                  labelStyle: TextStyle(
+                                                    color: Colors.grey,
+                                                  ),
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                    borderSide: BorderSide(
+                                                        color: checkDay()
+                                                            ? Colors.green
+                                                            : Colors.lightBlue),
+                                                  ),
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                          borderSide: BorderSide(
+                                                              color: checkDay()
+                                                                  ? Colors.green
+                                                                  : Colors
+                                                                      .red)),
+                                                  labelText: 'DD',
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 12),
+                                            child: SizedBox(
+                                              width: 90,
+                                              child: TextFormField(
+                                                controller: monthController,
+                                                inputFormatters: <
+                                                    TextInputFormatter>[
+                                                  FilteringTextInputFormatter
+                                                      .digitsOnly
+                                                ],
+                                                maxLength: 2,
+                                                decoration: InputDecoration(
+                                                  labelStyle: TextStyle(
+                                                    color: Colors.grey,
+                                                  ),
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                    borderSide: BorderSide(
+                                                        color: checkMonth()
+                                                            ? Colors.green
+                                                            : Colors.lightBlue),
+                                                  ),
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                    borderSide: BorderSide(
+                                                        color: checkMonth()
+                                                            ? Colors.green
+                                                            : Colors.red),
+                                                  ),
+                                                  hintText: 'MM',
+                                                  labelText: 'MM',
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(right: 0),
+                                            child: SizedBox(
+                                              width: 90,
+                                              child: TextFormField(
+                                                controller: yearController,
+                                                maxLength: 4,
+                                                inputFormatters: <
+                                                    TextInputFormatter>[
+                                                  FilteringTextInputFormatter
+                                                      .digitsOnly
+                                                ],
+                                                decoration: InputDecoration(
+                                                  labelStyle: TextStyle(
+                                                    color: Colors.grey,
+                                                  ),
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                    borderSide: BorderSide(
+                                                        color: checkYear()
+                                                            ? Colors.green
+                                                            : Colors.lightBlue),
+                                                  ),
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                          borderSide: BorderSide(
+                                                              color: checkYear()
+                                                                  ? Colors.green
+                                                                  : Colors
+                                                                      .red)),
+                                                  hintText: 'YYYY',
+                                                  labelText: 'YYYY',
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ))),
+                              //This Container is the terms of agreement and create account button.
+                              SizedBox(
+                                width: 500,
+                                child: Column(
+                                  children: <Widget>[
+                                    Row(
                                       children: <Widget>[
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 16),
-                                          child: SizedBox(
-                                            width: 90,
-                                            child: TextFormField(
-                                              controller: dayController,
-                                              keyboardType:
-                                                  TextInputType.number,
-                                              inputFormatters: <
-                                                  TextInputFormatter>[
-                                                FilteringTextInputFormatter
-                                                    .digitsOnly
-                                              ],
-                                              textInputAction:
-                                                  TextInputAction.next,
-                                              maxLength: 2,
-                                              decoration: InputDecoration(
-                                                labelStyle: TextStyle(
-                                                  color: Colors.grey,
-                                                ),
-                                                enabledBorder:
-                                                    OutlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                      color: checkDay()
-                                                          ? Colors.green
-                                                          : Colors.lightBlue),
-                                                ),
-                                                focusedBorder:
-                                                    OutlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                            color: checkDay()
-                                                                ? Colors.green
-                                                                : Colors.red)),
-                                                labelText: 'DD',
-                                              ),
+                                        Container(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 20,
+                                              left: 90,
+                                            ),
+                                            child: Checkbox(
+                                              value: checkedValue,
+                                              onChanged: (bool newValue) {
+                                                setState(
+                                                  () {
+                                                    checkedValue =
+                                                        !checkedValue;
+                                                  },
+                                                );
+                                              },
                                             ),
                                           ),
                                         ),
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 12),
-                                          child: SizedBox(
-                                            width: 90,
-                                            child: TextFormField(
-                                              controller: monthController,
-                                              inputFormatters: <
-                                                  TextInputFormatter>[
-                                                FilteringTextInputFormatter
-                                                    .digitsOnly
-                                              ],
-                                              maxLength: 2,
-                                              decoration: InputDecoration(
-                                                labelStyle: TextStyle(
-                                                  color: Colors.grey,
-                                                ),
-                                                enabledBorder:
-                                                    OutlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                      color: checkMonth()
-                                                          ? Colors.green
-                                                          : Colors.lightBlue),
-                                                ),
-                                                focusedBorder:
-                                                    OutlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                      color: checkMonth()
-                                                          ? Colors.green
-                                                          : Colors.red),
-                                                ),
-                                                hintText: 'MM',
-                                                labelText: 'MM',
-                                              ),
+                                        Container(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 20,
+                                              left: 10,
                                             ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 0),
-                                          child: SizedBox(
-                                            width: 90,
-                                            child: TextFormField(
-                                              controller: yearController,
-                                              maxLength: 4,
-                                              inputFormatters: <
-                                                  TextInputFormatter>[
-                                                FilteringTextInputFormatter
-                                                    .digitsOnly
-                                              ],
-                                              decoration: InputDecoration(
-                                                labelStyle: TextStyle(
-                                                  color: Colors.grey,
-                                                ),
-                                                enabledBorder:
-                                                    OutlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                      color: checkYear()
-                                                          ? Colors.green
-                                                          : Colors.lightBlue),
-                                                ),
-                                                focusedBorder:
-                                                    OutlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                            color: checkYear()
-                                                                ? Colors.green
-                                                                : Colors.red)),
-                                                hintText: 'YYYY',
-                                                labelText: 'YYYY',
-                                              ),
+                                            child: Text(
+                                              'I acknowledge that I have read and accept\nthe Terms of Use Agreement and consent\nto the Privacy Policy.',
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  color: Colors.blueGrey),
                                             ),
                                           ),
                                         ),
                                       ],
-                                    ))),
-                            //This Container is the terms of agreement and create account button.
-                            SizedBox(
-                              width: 500,
-                              child: Column(
-                                children: <Widget>[
-                                  Row(
-                                    children: <Widget>[
-                                      Container(
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 20,
-                                            left: 90,
-                                          ),
-                                          child: Checkbox(
-                                            value: checkedValue,
-                                            onChanged: (bool newValue) {
-                                              setState(
-                                                () {
-                                                  checkedValue = !checkedValue;
-                                                },
-                                              );
-                                            },
-                                          ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 40),
+                                      child: SizedBox(
+                                        width: 300,
+                                        height: 50,
+                                        child: RaisedButton(
+                                          disabledColor: Colors.grey,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0)),
+                                          onPressed: accept()
+                                              ? () => buttonPressed()
+                                              : null,
+                                          color: Colors.lightBlue,
+                                          child: const Text('Create Account',
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Colors.white)),
                                         ),
-                                      ),
-                                      Container(
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 20,
-                                            left: 10,
-                                          ),
-                                          child: Text(
-                                            'I acknowledge that I have read and accept\nthe Terms of Use Agreement and consent\nto the Privacy Policy.',
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                                color: Colors.blueGrey),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 40),
-                                    child: SizedBox(
-                                      width: 300,
-                                      height: 50,
-                                      child: RaisedButton(
-                                        disabledColor: Colors.grey,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0)),
-                                        onPressed: accept()
-                                            ? () => buttonPressed()
-                                            : null,
-                                        color: Colors.lightBlue,
-                                        child: const Text('Create Account',
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                color: Colors.white)),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ],
